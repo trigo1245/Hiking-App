@@ -50,3 +50,15 @@ $$;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute function public.handle_new_user();
+
+-- 이 마이그레이션 전에 가입한 사용자에게도 프로필을 만들어 준다.
+insert into public.profiles (id, nickname)
+select
+  id,
+  coalesce(
+    nullif(raw_user_meta_data ->> 'name', ''),
+    nullif(raw_user_meta_data ->> 'full_name', ''),
+    '등산객' || upper(substr(replace(id::text, '-', ''), 1, 4))
+  )
+from auth.users
+on conflict (id) do nothing;
