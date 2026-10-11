@@ -55,6 +55,17 @@ ThemeData buildLightTheme() {
       ),
       unselectedLabelStyle: AppTypography.caption,
     ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: AppColors.textPrimary,
+      contentTextStyle: AppTypography.body.copyWith(
+        color: AppColors.background,
+      ),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+      ),
+    ),
     dividerTheme: const DividerThemeData(
       color: AppColors.divider,
       thickness: 1,

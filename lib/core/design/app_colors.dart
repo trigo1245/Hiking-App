@@ -20,4 +20,8 @@ abstract final class AppColors {
 
   /// primary 위에 올라가는 글자색
   static const onPrimary = Color(0xFFFFFFFF);
+
+  /// 카카오 로그인 버튼 (카카오 로그인 디자인 가이드 지정 색)
+  static const kakaoContainer = Color(0xFFFEE500);
+  static const kakaoLabel = Color(0xD9000000);
 }
