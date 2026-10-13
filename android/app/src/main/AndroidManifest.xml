@@ -2,6 +2,15 @@
     <!-- Supabase 통신. (디버그 빌드에는 자동으로 들어가지만 릴리스 빌드에는 직접 선언해야 한다) -->
     <uses-permission android:name="android.permission.INTERNET"/>
 
+    <!-- 등산 기록: 정밀 위치 + 화면이 꺼져도 기록하는 포그라운드 서비스 + "기록 중" 알림.
+         1단계는 백그라운드 위치("항상 허용")를 요청하지 않는다. (CLAUDE.md 6장) -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
     <application
         android:label="hiking_app"
         android:name="${applicationName}"

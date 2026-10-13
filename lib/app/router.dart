@@ -7,15 +7,14 @@ import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/my_info_screen.dart';
 import '../features/home/presentation/home_screen.dart';
+import '../features/recording/data/location_service.dart';
+import '../features/recording/presentation/location_permission_screen.dart';
+import '../features/recording/presentation/recording_complete_screen.dart';
+import '../features/recording/presentation/recording_screen.dart';
 import 'app_shell.dart';
+import 'routes.dart';
 
-/// 화면 경로 이름. 문자열을 여기저기 직접 쓰지 않도록 모아 둔다.
-abstract final class AppRoutes {
-  static const login = '/login';
-  static const home = '/home';
-  static const activities = '/activities';
-  static const myInfo = '/me';
-}
+export 'routes.dart';
 
 /// 로그인 상태에 따라 이동할 경로. null이면 그대로 둔다.
 /// - 로그인 안 함 → 로그인 화면
@@ -49,6 +48,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
+      ),
+      // 기록 화면들은 하단 탭 없이 전체 화면으로 띄운다.
+      // 서로 겹쳐 쌓이지 않도록 하위 경로가 아닌 독립 경로로 둔다.
+      GoRoute(
+        path: AppRoutes.recording,
+        builder: (context, state) => const RecordingScreen(),
+      ),
+      GoRoute(
+        path: '/record-done/:id',
+        builder: (context, state) =>
+            RecordingCompleteScreen(activityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/location-permission/:access',
+        builder: (context, state) => LocationPermissionScreen(
+          access: LocationAccess.values.byName(state.pathParameters['access']!),
+        ),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

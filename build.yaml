@@ -1,0 +1,7 @@
+targets:
+  $default:
+    builders:
+      drift_dev:
+        options:
+          # 날짜를 ISO 문자열로 저장해 밀리초까지 보존한다. (기본값은 초 단위 정수)
+          store_date_time_values_as_text: true

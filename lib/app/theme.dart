@@ -71,5 +71,25 @@ ThemeData buildLightTheme() {
       thickness: 1,
       space: 1,
     ),
+    // 입력창: 테두리 없이 회색 배경으로 영역을 나눈다.
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: AppColors.backgroundGrouped,
+      contentPadding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.lg,
+        vertical: AppSpacing.lg,
+      ),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        borderSide: const BorderSide(color: AppColors.primary),
+      ),
+    ),
+    textSelectionTheme: const TextSelectionThemeData(
+      cursorColor: AppColors.primary,
+    ),
   );
 }
