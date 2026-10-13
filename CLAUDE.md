@@ -86,7 +86,7 @@ supabase/         # SQL 마이그레이션
 4. **기록 목록**: 날짜 역순 카드 목록, 업로드 상태 표시(업로드 대기 / 완료 / 실패)
 5. **기록 상세**: 수치 전체, GPX 내보내기(공유) 버튼, 재업로드 버튼
 6. **내 정보**: 닉네임, 로그아웃, 로그 파일 내보내기(테스트용)
-7. **로그인**: 카카오로 시작 / 구글로 시작 / 로그인 없이 시작(Supabase 익명 로그인). 익명 사용자는 내 정보에서 카카오·구글 계정을 연결(linkIdentity)해 기록을 유지한다.
+7. **로그인**: 카카오로 시작 / 구글로 시작. 익명 로그인과 계정 연동(linkIdentity)은 하지 않는다. 카카오 계정과 구글 계정은 각각 별개의 사용자다.
    - 딥링크 `com.hikingapp.hikingapp://login-callback`은 `lib/core/config/env.dart`, `AndroidManifest.xml`, Supabase Redirect URLs 세 곳이 같아야 한다.
 
 ---

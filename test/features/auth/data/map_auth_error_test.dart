@@ -20,27 +20,19 @@ void main() {
       expect(mapAuthError(error).type, AuthFailureType.notConfigured);
     });
 
-    test('API 응답의 identity_already_exists (code 필드)', () {
+    test('Supabase에서 로그인 방법이 꺼져 있으면 notConfigured (code 필드)', () {
       const error = AuthException(
-        'Identity is already linked to another user',
-        code: 'identity_already_exists',
+        'Provider is not enabled',
+        code: 'provider_disabled',
       );
-      expect(mapAuthError(error).type, AuthFailureType.identityAlreadyExists);
+      expect(mapAuthError(error).type, AuthFailureType.notConfigured);
     });
 
-    test('브라우저 로그인 딥링크의 identity_already_exists (statusCode 필드)', () {
+    test('브라우저 로그인 딥링크 오류는 statusCode 필드로 판단한다', () {
       const error = AuthException(
-        'Identity is already linked to another user',
-        statusCode: 'identity_already_exists',
+        'Provider is not enabled',
+        statusCode: 'provider_disabled',
         code: 'server_error',
-      );
-      expect(mapAuthError(error).type, AuthFailureType.identityAlreadyExists);
-    });
-
-    test('수동 연결이 꺼져 있으면 notConfigured', () {
-      const error = AuthException(
-        'Manual linking is disabled',
-        code: 'manual_linking_disabled',
       );
       expect(mapAuthError(error).type, AuthFailureType.notConfigured);
     });

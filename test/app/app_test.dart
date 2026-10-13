@@ -9,7 +9,7 @@ void main() {
     await pumpApp(
       tester,
       authRepository: FakeAuthRepository(
-        user: const AppUser(id: 'anon', isAnonymous: true),
+        user: const AppUser(id: 'u1', provider: SocialProvider.kakao),
       ),
     );
 
@@ -22,7 +22,7 @@ void main() {
 
     await tester.tap(find.text('내 정보').last);
     await tester.pumpAndSettle();
-    expect(find.text('계정을 연결해 주세요'), findsOneWidget);
+    expect(find.text('카카오 계정으로 로그인했어요'), findsOneWidget);
 
     await tester.tap(find.text('홈').last);
     await tester.pumpAndSettle();

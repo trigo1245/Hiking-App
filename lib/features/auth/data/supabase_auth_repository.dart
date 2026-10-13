@@ -42,9 +42,6 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signInAnonymously() => _guard(() => _auth.signInAnonymously());
-
-  @override
   Future<void> signInWithGoogle() => _guard(() async {
     final idToken = await _googleIdToken();
     await _auth.signInWithIdToken(
@@ -54,22 +51,8 @@ class SupabaseAuthRepository implements AuthRepository {
   });
 
   @override
-  Future<void> linkGoogle() => _guard(() async {
-    final idToken = await _googleIdToken();
-    await _auth.linkIdentityWithIdToken(
-      provider: OAuthProvider.google,
-      idToken: idToken,
-    );
-  });
-
-  @override
   Future<void> signInWithKakao() => _guard(
     () => _auth.signInWithOAuth(OAuthProvider.kakao, redirectTo: _redirectUrl),
-  );
-
-  @override
-  Future<void> linkKakao() => _guard(
-    () => _auth.linkIdentity(OAuthProvider.kakao, redirectTo: _redirectUrl),
   );
 
   @override
@@ -111,23 +94,18 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   static AppUser? _toAppUser(User? user) {
-    if (user == null) return null;
-    final providers = <SocialProvider>{
-      for (final identity in user.identities ?? const <UserIdentity>[])
-        ?_providerFromName(identity.provider),
-    };
+    // 익명 로그인은 지원하지 않는다. 예전 테스트에서 남은 익명 세션은 로그아웃 상태로 본다.
+    if (user == null || user.isAnonymous) return null;
     return AppUser(
       id: user.id,
-      isAnonymous: user.isAnonymous,
-      linkedProviders: providers,
+      // 가입할 때 사용한 로그인 방법
+      provider: switch (user.appMetadata['provider']) {
+        'kakao' => SocialProvider.kakao,
+        'google' => SocialProvider.google,
+        _ => null,
+      },
     );
   }
-
-  static SocialProvider? _providerFromName(String name) => switch (name) {
-    'kakao' => SocialProvider.kakao,
-    'google' => SocialProvider.google,
-    _ => null,
-  };
 }
 
 /// Supabase·Google 오류를 [AuthFailure]로 분류한다. 테스트를 위해 공개한다.
@@ -157,9 +135,6 @@ AuthFailure mapAuthError(Object error) {
   if (error is AuthException) {
     // 브라우저 로그인 오류는 error_code가 statusCode에 담겨 온다.
     final codes = {error.code, error.statusCode};
-    if (codes.contains('identity_already_exists')) {
-      return AuthFailure(AuthFailureType.identityAlreadyExists, error.message);
-    }
     if (codes.any(_configErrorCodes.contains)) {
       return AuthFailure(AuthFailureType.notConfigured, error.message);
     }
@@ -169,9 +144,4 @@ AuthFailure mapAuthError(Object error) {
   return AuthFailure(AuthFailureType.unknown, error.toString());
 }
 
-const _configErrorCodes = {
-  'manual_linking_disabled',
-  'provider_disabled',
-  'anonymous_provider_disabled',
-  'validation_failed',
-};
+const _configErrorCodes = {'provider_disabled', 'validation_failed'};

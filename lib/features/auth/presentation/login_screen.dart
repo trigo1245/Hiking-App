@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/design.dart';
 import '../../../core/widgets/app_button.dart';
-import '../../../core/widgets/pressable.dart';
 import '../data/auth_repository.dart';
 import '../domain/auth_failure.dart';
 import 'auth_feedback.dart';
@@ -75,20 +74,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 label: '구글로 시작하기',
                 variant: AppButtonVariant.secondary,
                 onPressed: action((repo) => repo.signInWithGoogle()),
-              ),
-              const SizedBox(height: AppSpacing.lg),
-              Pressable(
-                onPressed: action((repo) => repo.signInAnonymously()),
-                child: Padding(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  child: Text(
-                    '로그인 없이 시작하기',
-                    textAlign: TextAlign.center,
-                    style: AppTypography.body.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
-                  ),
-                ),
               ),
             ],
           ),

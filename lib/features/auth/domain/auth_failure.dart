@@ -2,10 +2,6 @@ enum AuthFailureType {
   /// 사용자가 로그인 창을 닫음. 안내 문구 없이 조용히 넘어간다.
   cancelled,
 
-  /// 연결하려는 소셜 계정이 이미 다른 사용자에 연결돼 있음.
-  /// (예: 앱을 다시 설치한 뒤 익명으로 시작하고, 예전 카카오 계정을 연결하려는 경우)
-  identityAlreadyExists,
-
   /// Supabase·Google·Kakao 콘솔 설정이 빠졌거나 틀림.
   notConfigured,
 

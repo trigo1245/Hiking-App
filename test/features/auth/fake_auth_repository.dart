@@ -12,9 +12,6 @@ class FakeAuthRepository implements AuthRepository {
   final _users = StreamController<AppUser?>.broadcast();
   final _failures = StreamController<AuthFailure>.broadcast();
 
-  /// 설정하면 다음 linkGoogle 호출이 이 오류를 던진다.
-  AuthFailure? nextLinkGoogleFailure;
-
   final calls = <String>[];
 
   void _emit(AppUser? user) {
@@ -22,7 +19,10 @@ class FakeAuthRepository implements AuthRepository {
     _users.add(user);
   }
 
-  /// 브라우저 로그인 오류가 나중에 도착하는 상황을 흉내 낸다.
+  /// 브라우저 로그인 결과가 나중에 도착하는 상황을 흉내 낸다.
+  void completeKakaoSignIn() =>
+      _emit(const AppUser(id: 'kakao-user', provider: SocialProvider.kakao));
+
   void emitFailure(AuthFailure failure) => _failures.add(failure);
 
   @override
@@ -35,45 +35,13 @@ class FakeAuthRepository implements AuthRepository {
   Stream<AuthFailure> watchFailures() => _failures.stream;
 
   @override
-  Future<void> signInAnonymously() async {
-    calls.add('signInAnonymously');
-    _emit(const AppUser(id: 'anon', isAnonymous: true));
-  }
-
-  @override
   Future<void> signInWithGoogle() async {
     calls.add('signInWithGoogle');
-    _emit(
-      const AppUser(
-        id: 'google-user',
-        isAnonymous: false,
-        linkedProviders: {SocialProvider.google},
-      ),
-    );
+    _emit(const AppUser(id: 'google-user', provider: SocialProvider.google));
   }
 
   @override
   Future<void> signInWithKakao() async => calls.add('signInWithKakao');
-
-  @override
-  Future<void> linkGoogle() async {
-    calls.add('linkGoogle');
-    final failure = nextLinkGoogleFailure;
-    if (failure != null) {
-      nextLinkGoogleFailure = null;
-      throw failure;
-    }
-    _emit(
-      AppUser(
-        id: _user!.id,
-        isAnonymous: false,
-        linkedProviders: {..._user!.linkedProviders, SocialProvider.google},
-      ),
-    );
-  }
-
-  @override
-  Future<void> linkKakao() async => calls.add('linkKakao');
 
   @override
   Future<void> signOut() async {
