@@ -38,6 +38,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   StreamSubscription<LocationSample>? _locationSub;
   LocationSample? _myLocation;
   bool _centerOnNextFix = false;
+  bool _fittedToCourses = false;
   String? _selectedId;
   bool _busy = false;
   RankingKind _conquerorKind = RankingKind.most;
@@ -157,9 +158,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  /// 코스를 처음 받으면 모든 코스가 잘 보이는 범위로 지도를 맞춘다. (한 번만)
+  void _fitAllCourses(List<Course> courses) {
+    if (_fittedToCourses || courses.isEmpty) return;
+    _fittedToCourses = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      _map.fitCamera(
+        CameraFit.coordinates(
+          coordinates: [
+            for (final c in courses)
+              for (final p in c.path) toLatLng(p),
+          ],
+          // 위쪽 검색창·보기 전환 탭에 가리지 않도록 여백을 둔다.
+          padding: const EdgeInsets.fromLTRB(40, 200, 40, 80),
+          maxZoom: 15,
+        ),
+      );
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final courses = ref.watch(coursesProvider).value ?? const <Course>[];
+    _fitAllCourses(courses);
     final results = searchCourses(courses, _search.text);
     final conquerors = {
       for (final c
