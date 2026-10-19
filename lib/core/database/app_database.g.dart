@@ -18,6 +18,15 @@ class $ActivitiesTable extends Activities
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _userIdMeta = const VerificationMeta('userId');
+  @override
+  late final GeneratedColumn<String> userId = GeneratedColumn<String>(
+    'user_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _titleMeta = const VerificationMeta('title');
   @override
   late final GeneratedColumn<String> title = GeneratedColumn<String>(
@@ -200,6 +209,7 @@ class $ActivitiesTable extends Activities
   @override
   List<GeneratedColumn> get $columns => [
     id,
+    userId,
     title,
     status,
     startedAt,
@@ -233,6 +243,12 @@ class $ActivitiesTable extends Activities
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     } else if (isInserting) {
       context.missing(_idMeta);
+    }
+    if (data.containsKey('user_id')) {
+      context.handle(
+        _userIdMeta,
+        userId.isAcceptableOrUnknown(data['user_id']!, _userIdMeta),
+      );
     }
     if (data.containsKey('title')) {
       context.handle(
@@ -361,6 +377,10 @@ class $ActivitiesTable extends Activities
         DriftSqlType.string,
         data['${effectivePrefix}id'],
       )!,
+      userId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}user_id'],
+      ),
       title: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}title'],
@@ -437,6 +457,10 @@ class $ActivitiesTable extends Activities
 class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   /// 기기에서 만든 UUID. 서버 업로드 때도 같은 ID를 써서 중복을 막는다.
   final String id;
+
+  /// 기록한 사용자의 Supabase ID. 한 기기에서 계정을 바꿔 써도 섞이지 않게 한다.
+  /// (스키마 1에서 만든 기록은 null)
+  final String? userId;
   final String? title;
 
   /// recording / paused / finished
@@ -465,6 +489,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   final DateTime createdAt;
   const ActivityRow({
     required this.id,
+    this.userId,
     this.title,
     required this.status,
     required this.startedAt,
@@ -486,6 +511,9 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
+    if (!nullToAbsent || userId != null) {
+      map['user_id'] = Variable<String>(userId);
+    }
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String>(title);
     }
@@ -526,6 +554,9 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   ActivitiesCompanion toCompanion(bool nullToAbsent) {
     return ActivitiesCompanion(
       id: Value(id),
+      userId: userId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(userId),
       title: title == null && nullToAbsent
           ? const Value.absent()
           : Value(title),
@@ -570,6 +601,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return ActivityRow(
       id: serializer.fromJson<String>(json['id']),
+      userId: serializer.fromJson<String?>(json['userId']),
       title: serializer.fromJson<String?>(json['title']),
       status: serializer.fromJson<String>(json['status']),
       startedAt: serializer.fromJson<DateTime>(json['startedAt']),
@@ -593,6 +625,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
+      'userId': serializer.toJson<String?>(userId),
       'title': serializer.toJson<String?>(title),
       'status': serializer.toJson<String>(status),
       'startedAt': serializer.toJson<DateTime>(startedAt),
@@ -614,6 +647,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
 
   ActivityRow copyWith({
     String? id,
+    Value<String?> userId = const Value.absent(),
     Value<String?> title = const Value.absent(),
     String? status,
     DateTime? startedAt,
@@ -632,6 +666,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
     DateTime? createdAt,
   }) => ActivityRow(
     id: id ?? this.id,
+    userId: userId.present ? userId.value : this.userId,
     title: title.present ? title.value : this.title,
     status: status ?? this.status,
     startedAt: startedAt ?? this.startedAt,
@@ -654,6 +689,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   ActivityRow copyWithCompanion(ActivitiesCompanion data) {
     return ActivityRow(
       id: data.id.present ? data.id.value : this.id,
+      userId: data.userId.present ? data.userId.value : this.userId,
       title: data.title.present ? data.title.value : this.title,
       status: data.status.present ? data.status.value : this.status,
       startedAt: data.startedAt.present ? data.startedAt.value : this.startedAt,
@@ -687,6 +723,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   String toString() {
     return (StringBuffer('ActivityRow(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('title: $title, ')
           ..write('status: $status, ')
           ..write('startedAt: $startedAt, ')
@@ -710,6 +747,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
   @override
   int get hashCode => Object.hash(
     id,
+    userId,
     title,
     status,
     startedAt,
@@ -732,6 +770,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
       identical(this, other) ||
       (other is ActivityRow &&
           other.id == this.id &&
+          other.userId == this.userId &&
           other.title == this.title &&
           other.status == this.status &&
           other.startedAt == this.startedAt &&
@@ -752,6 +791,7 @@ class ActivityRow extends DataClass implements Insertable<ActivityRow> {
 
 class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   final Value<String> id;
+  final Value<String?> userId;
   final Value<String?> title;
   final Value<String> status;
   final Value<DateTime> startedAt;
@@ -771,6 +811,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   final Value<int> rowid;
   const ActivitiesCompanion({
     this.id = const Value.absent(),
+    this.userId = const Value.absent(),
     this.title = const Value.absent(),
     this.status = const Value.absent(),
     this.startedAt = const Value.absent(),
@@ -791,6 +832,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   });
   ActivitiesCompanion.insert({
     required String id,
+    this.userId = const Value.absent(),
     this.title = const Value.absent(),
     required String status,
     required DateTime startedAt,
@@ -814,6 +856,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
        createdAt = Value(createdAt);
   static Insertable<ActivityRow> custom({
     Expression<String>? id,
+    Expression<String>? userId,
     Expression<String>? title,
     Expression<String>? status,
     Expression<DateTime>? startedAt,
@@ -834,6 +877,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
+      if (userId != null) 'user_id': userId,
       if (title != null) 'title': title,
       if (status != null) 'status': status,
       if (startedAt != null) 'started_at': startedAt,
@@ -856,6 +900,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
 
   ActivitiesCompanion copyWith({
     Value<String>? id,
+    Value<String?>? userId,
     Value<String?>? title,
     Value<String>? status,
     Value<DateTime>? startedAt,
@@ -876,6 +921,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   }) {
     return ActivitiesCompanion(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       title: title ?? this.title,
       status: status ?? this.status,
       startedAt: startedAt ?? this.startedAt,
@@ -901,6 +947,9 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
     final map = <String, Expression>{};
     if (id.present) {
       map['id'] = Variable<String>(id.value);
+    }
+    if (userId.present) {
+      map['user_id'] = Variable<String>(userId.value);
     }
     if (title.present) {
       map['title'] = Variable<String>(title.value);
@@ -960,6 +1009,7 @@ class ActivitiesCompanion extends UpdateCompanion<ActivityRow> {
   String toString() {
     return (StringBuffer('ActivitiesCompanion(')
           ..write('id: $id, ')
+          ..write('userId: $userId, ')
           ..write('title: $title, ')
           ..write('status: $status, ')
           ..write('startedAt: $startedAt, ')
@@ -1574,6 +1624,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
 
 typedef $$ActivitiesTableCreateCompanionBuilder = ActivitiesCompanion Function({
   required String id,
+  Value<String?> userId,
   Value<String?> title,
   required String status,
   required DateTime startedAt,
@@ -1594,6 +1645,7 @@ typedef $$ActivitiesTableCreateCompanionBuilder = ActivitiesCompanion Function({
 });
 typedef $$ActivitiesTableUpdateCompanionBuilder = ActivitiesCompanion Function({
   Value<String> id,
+  Value<String?> userId,
   Value<String?> title,
   Value<String> status,
   Value<DateTime> startedAt,
@@ -1647,6 +1699,11 @@ class $$ActivitiesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
     column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get userId => $composableBuilder(
+    column: $table.userId,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1770,6 +1827,11 @@ class $$ActivitiesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get userId => $composableBuilder(
+    column: $table.userId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get title => $composableBuilder(
     column: $table.title,
     builder: (column) => ColumnOrderings(column),
@@ -1862,6 +1924,9 @@ class $$ActivitiesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get userId =>
+      $composableBuilder(column: $table.userId, builder: (column) => column);
 
   GeneratedColumn<String> get title =>
       $composableBuilder(column: $table.title, builder: (column) => column);
@@ -1976,6 +2041,7 @@ class $$ActivitiesTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
+                Value<String?> userId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<DateTime> startedAt = const Value.absent(),
@@ -1995,6 +2061,7 @@ class $$ActivitiesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ActivitiesCompanion(
                 id: id,
+                userId: userId,
                 title: title,
                 status: status,
                 startedAt: startedAt,
@@ -2016,6 +2083,7 @@ class $$ActivitiesTableTableManager
           createCompanionCallback:
               ({
                 required String id,
+                Value<String?> userId = const Value.absent(),
                 Value<String?> title = const Value.absent(),
                 required String status,
                 required DateTime startedAt,
@@ -2035,6 +2103,7 @@ class $$ActivitiesTableTableManager
                 Value<int> rowid = const Value.absent(),
               }) => ActivitiesCompanion.insert(
                 id: id,
+                userId: userId,
                 title: title,
                 status: status,
                 startedAt: startedAt,

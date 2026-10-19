@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/design/design.dart';
+import '../features/activities/presentation/upload_syncer.dart';
 
 /// 하단 탭(홈 / 기록 / 내 정보)을 가진 바깥 틀.
 /// 각 탭의 화면 상태는 [StatefulNavigationShell]이 따로 보관한다.
@@ -23,7 +24,8 @@ class AppShell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: navigationShell,
+      // 하단 탭 화면이 떠 있는 동안 올리지 못한 기록을 다시 올린다.
+      body: UploadSyncer(child: navigationShell),
       bottomNavigationBar: DecoratedBox(
         decoration: const BoxDecoration(
           border: Border(top: BorderSide(color: AppColors.divider)),

@@ -1,0 +1,22 @@
+import 'package:hiking_app/features/activities/data/activity_remote.dart';
+
+/// 서버 대신 올라온 내용을 기억하는 가짜. [failWith]를 정하면 그 오류를 던진다.
+class FakeActivityRemote implements ActivityRemote {
+  final gpxFiles = <String, String>{};
+  final rows = <String, Map<String, Object?>>{};
+  Object? failWith;
+  int uploadCalls = 0;
+
+  @override
+  Future<void> uploadGpx({required String path, required String gpx}) async {
+    uploadCalls++;
+    if (failWith case final error?) throw error;
+    gpxFiles[path] = gpx;
+  }
+
+  @override
+  Future<void> upsertActivity(Map<String, Object?> row) async {
+    if (failWith case final error?) throw error;
+    rows[row['id']! as String] = row;
+  }
+}

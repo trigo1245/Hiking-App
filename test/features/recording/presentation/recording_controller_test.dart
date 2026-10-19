@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/core/database/app_database.dart';
 import 'package:hiking_app/core/utils/clock.dart';
+import 'package:hiking_app/features/auth/domain/app_user.dart';
+import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
 import 'package:hiking_app/features/recording/domain/recording_session.dart';
@@ -10,6 +12,7 @@ import 'package:hiking_app/features/recording/presentation/recording_controller.
 
 import '../../../helpers/gpx.dart';
 import '../../../helpers/pump_app.dart';
+import '../../auth/fake_auth_repository.dart';
 import '../fake_location_service.dart';
 
 void main() {
@@ -28,6 +31,11 @@ void main() {
     db = testDatabase();
     container = ProviderContainer(
       overrides: [
+        authRepositoryProvider.overrideWithValue(
+          FakeAuthRepository(
+            user: const AppUser(id: 'u1', provider: SocialProvider.kakao),
+          ),
+        ),
         appDatabaseProvider.overrideWithValue(db),
         locationServiceProvider.overrideWithValue(location),
         clockProvider.overrideWithValue(() => now),
@@ -122,6 +130,11 @@ void main() {
     // 앱이 강제 종료된 상황: 새 컨트롤러로 DB에서 다시 읽는다.
     final restarted = ProviderContainer(
       overrides: [
+        authRepositoryProvider.overrideWithValue(
+          FakeAuthRepository(
+            user: const AppUser(id: 'u1', provider: SocialProvider.kakao),
+          ),
+        ),
         appDatabaseProvider.overrideWithValue(db),
         locationServiceProvider.overrideWithValue(FakeLocationService()),
         clockProvider.overrideWithValue(() => now),

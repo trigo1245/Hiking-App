@@ -9,6 +9,10 @@ part 'app_database.g.dart';
 class Activities extends Table {
   /// 기기에서 만든 UUID. 서버 업로드 때도 같은 ID를 써서 중복을 막는다.
   TextColumn get id => text()();
+
+  /// 기록한 사용자의 Supabase ID. 한 기기에서 계정을 바꿔 써도 섞이지 않게 한다.
+  /// (스키마 1에서 만든 기록은 null)
+  TextColumn get userId => text().nullable()();
   TextColumn get title => text().nullable()();
 
   /// recording / paused / finished
@@ -68,11 +72,16 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor])
     : super(executor ?? driftDatabase(name: 'hiking_app'));
 
+  /// 테이블 구조를 바꾸면 1 올리고, 아래 onUpgrade에 바꾸는 방법을 적는다.
+  /// (이미 설치된 앱의 DB를 지우지 않고 고치기 위해)
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) await m.addColumn(activities, activities.userId);
+    },
     beforeOpen: (details) async {
       // 기록을 지우면 위치 점도 함께 지워지도록 외래 키를 켠다.
       await customStatement('PRAGMA foreign_keys = ON');

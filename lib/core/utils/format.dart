@@ -11,6 +11,13 @@ String formatKm(double meters) => (meters / 1000).toStringAsFixed(2);
 String formatMeters(double? meters) =>
     meters == null ? '-' : meters.round().toString();
 
+/// 긴 시간 합계. 예: 12시간 5분, 45분
+String formatHoursMinutes(Duration d) {
+  final hours = d.inHours;
+  final minutes = d.inMinutes % 60;
+  return hours == 0 ? '$minutes분' : '$hours시간 $minutes분';
+}
+
 /// 날짜와 시각. 예: 10월 13일 오전 9:05
 String formatDateTime(DateTime t) {
   final period = t.hour < 12 ? '오전' : '오후';

@@ -7,6 +7,7 @@ import 'package:hiking_app/features/recording/domain/track_point.dart';
 
 import '../../../helpers/gpx.dart';
 import '../../../helpers/pump_app.dart';
+import '../../activities/fake_activity_remote.dart';
 import '../../auth/fake_auth_repository.dart';
 import '../fake_location_service.dart';
 
@@ -17,12 +18,14 @@ void main() {
 
   testWidgets('기록 시작 → 위치 수신 → 일시정지 → 종료 → 제목 저장', (tester) async {
     final location = FakeLocationService();
+    final remote = FakeActivityRemote();
     var now = DateTime(2026, 10, 13, 9);
     await pumpApp(
       tester,
       authRepository: signedIn(),
       location: location,
       clock: () => now,
+      remote: remote,
     );
 
     await tester.tap(find.text('등산 기록 시작'));
@@ -66,6 +69,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('기록을 저장했어요'), findsOneWidget);
+
+    // 저장하면 바로 서버 업로드를 시도한다.
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    expect(remote.rows.values.single['title'], '관악산 연주대');
     expect(find.text('등산 기록 시작'), findsOneWidget);
   });
 

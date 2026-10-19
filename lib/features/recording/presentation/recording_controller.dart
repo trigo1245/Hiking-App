@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/clock.dart';
+import '../../auth/presentation/auth_providers.dart';
 import '../data/location_service.dart';
 import '../data/recording_repository.dart';
 import '../domain/recording_session.dart';
@@ -76,7 +77,10 @@ class RecordingController extends Notifier<RecordingState> {
     if (access != LocationAccess.granted) return access;
     await _location.requestNotificationPermission();
 
-    final session = await _repository.start(_now());
+    final session = await _repository.start(
+      _now(),
+      userId: ref.read(authRepositoryProvider).currentUser?.id,
+    );
     _calculator = TrackStatsCalculator();
     state = RecordingState(session: session);
     _listen();

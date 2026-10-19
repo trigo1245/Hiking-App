@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -10,6 +12,7 @@ import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/metric_text.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../activities/domain/activity_summary.dart';
+import '../../activities/presentation/activities_providers.dart';
 import '../data/recording_repository.dart';
 
 final activitySummaryProvider = FutureProvider.family<ActivitySummary, String>(
@@ -47,6 +50,9 @@ class _RecordingCompleteScreenState
     await ref
         .read(recordingRepositoryProvider)
         .updateTitle(summary.id, title.isEmpty ? summary.title : title);
+    // 저장하면 바로 서버 업로드를 시도한다. 기다리지 않고 홈으로 넘어간다.
+    // 실패하면 "업로드 대기"로 남고, 앱을 다시 열 때 자동으로 재시도한다.
+    unawaited(ref.read(uploadActionsProvider).upload(summary.id));
     if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('기록을 저장했어요')));

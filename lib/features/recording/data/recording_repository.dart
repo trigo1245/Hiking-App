@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/database/app_database.dart';
+import '../../activities/data/activities_repository.dart';
 import '../../activities/domain/activity_summary.dart';
 import '../domain/recording_session.dart';
 import '../domain/track_point.dart';
@@ -16,13 +17,14 @@ class RecordingRepository {
   final AppDatabase _db;
   final String Function() _newId;
 
-  Future<RecordingSession> start(DateTime now) async {
+  Future<RecordingSession> start(DateTime now, {String? userId}) async {
     final id = _newId();
     await _db
         .into(_db.activities)
         .insert(
           ActivitiesCompanion.insert(
             id: id,
+            userId: Value(userId),
             status: RecordingStatus.recording.name,
             startedAt: now,
             createdAt: now,
@@ -153,22 +155,8 @@ class RecordingRepository {
     ];
   }
 
-  Future<ActivitySummary> loadSummary(String activityId) async {
-    final r = await _activityRow(activityId);
-    return ActivitySummary(
-      id: r.id,
-      title: r.title ?? defaultActivityTitle(r.startedAt),
-      startedAt: r.startedAt,
-      endedAt: r.endedAt ?? r.startedAt,
-      elapsed: Duration(seconds: r.elapsedS ?? 0),
-      moving: Duration(seconds: r.movingS ?? 0),
-      distanceM: r.distanceM ?? 0,
-      elevationGainM: r.elevationGainM ?? 0,
-      maxAltitudeM: r.maxAltitudeM,
-      pointCount: r.pointCount ?? 0,
-      isFlagged: r.isFlagged,
-    );
-  }
+  Future<ActivitySummary> loadSummary(String activityId) async =>
+      activitySummaryFromRow(await _activityRow(activityId));
 
   Future<ActivityRow> _activityRow(String id) =>
       (_db.select(_db.activities)..where((a) => a.id.equals(id))).getSingle();
