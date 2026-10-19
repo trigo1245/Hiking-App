@@ -1,0 +1,59 @@
+{
+  "_설명": "코스 정의. 들머리와 정상 좌표를 적으면 tool/build_courses.dart가 그 사이 등산로를 이어 코스를 만든다. 좌표는 위도(lat), 경도(lon).",
+  "areas": [
+    {
+      "id": "seunghaksan",
+      "name": "승학산 일대",
+      "bbox": [128.95, 35.10, 129.02, 35.14]
+    },
+    {
+      "id": "geumjeongsan",
+      "name": "금정산 일대",
+      "bbox": [129.03, 35.24, 129.09, 35.30]
+    }
+  ],
+  "mountains": [
+    {
+      "id": "seunghaksan",
+      "name": "승학산",
+      "region": "부산 사하구",
+      "height_m": 497,
+      "summit": { "name": "승학산 정상", "lat": 35.11683, "lon": 128.97982 },
+      "area": "seunghaksan"
+    },
+    {
+      "id": "geumjeongsan",
+      "name": "금정산",
+      "region": "부산 금정구",
+      "height_m": 801.5,
+      "summit": { "name": "고당봉", "lat": 35.28015, "lon": 129.05062 },
+      "area": "geumjeongsan"
+    }
+  ],
+  "courses": [
+    {
+      "id": "seunghaksan-donga",
+      "mountain": "seunghaksan",
+      "name": "동아대 코스",
+      "start": { "name": "동아대학교 승학캠퍼스", "lat": 35.11906, "lon": 128.96918 }
+    },
+    {
+      "id": "seunghaksan-gudeok",
+      "mountain": "seunghaksan",
+      "name": "구덕문화공원 코스",
+      "start": { "name": "구덕문화공원 입구", "lat": 35.12640, "lon": 129.00579 }
+    },
+    {
+      "id": "geumjeongsan-beomeosa",
+      "mountain": "geumjeongsan",
+      "name": "범어사 코스",
+      "start": { "name": "범어사", "lat": 35.28354, "lon": 129.06901 }
+    },
+    {
+      "id": "geumjeongsan-sanseong",
+      "mountain": "geumjeongsan",
+      "name": "산성마을 코스",
+      "start": { "name": "금정산성마을", "lat": 35.25140, "lon": 129.05364 }
+    }
+  ]
+}
