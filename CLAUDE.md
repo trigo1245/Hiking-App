@@ -43,14 +43,14 @@
 | 기기 내부 DB | drift (SQLite) |
 | 백엔드 | Supabase (Auth, PostgreSQL, Storage) — supabase_flutter |
 | 로그인 | google_sign_in (구글 네이티브 로그인), 카카오는 Supabase OAuth(브라우저) |
-| 지도 | flutter_map + latlong2, 내 위치 표시는 flutter_map_location_marker |
+| 지도 | flutter_map + latlong2 (내 위치 점은 직접 그린다. flutter_map_location_marker는 권한 요청 흐름이 겹쳐 쓰지 않음) |
 | 지도 타일 | OpenStreetMap 기본 타일 (개발·시연용. 외부 배포 전 아웃도어 타일 제공처로 교체 검토) |
 | 기타 | uuid, path_provider, permission_handler (12.x 고정: 13.x는 compileSdk 37이 필요해 현재 빌드 도구와 맞지 않음) |
 | 폰트 | Pretendard (OFL 라이선스, assets에 포함) |
 
 - 지도 화면에는 타일 제공처의 출처 표시(예: "© OpenStreetMap contributors")를 항상 보여 준다.
 - OSM 타일 요청에는 앱 식별자(`userAgentPackageName: com.hikingapp.hiking_app`)를 넣는다. OSM 기본 타일은 이용 정책상 대량 사용·일괄 다운로드를 하지 않는다.
-- `flutter_map_tile_caching`은 GPL 라이선스라 사용하지 않는다.
+- `flutter_map_tile_caching`은 GPL 라이선스라 사용하지 않는다. 타일 캐시는 flutter_map 기본 캐시를 앱 전용 폴더·30일 유효로 설정해 쓴다(`lib/core/map/map_tiles.dart`).
 
 - 새 패키지를 추가할 때는 **이유와 대안을 먼저 설명**하고 진행한다.
 - 위 목록과 다른 패키지로 바꾸려면 이유를 설명하고 확인을 받는다.
