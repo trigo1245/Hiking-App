@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../../core/supabase/supabase_setup.dart';
+import '../../courses/domain/course_matching.dart';
 import '../domain/activity_summary.dart';
 
 /// 서버로 기록을 보내는 창구. 테스트에서는 가짜로 바꿔 끼운다.
@@ -13,6 +14,12 @@ abstract interface class ActivityRemote {
 
   /// activities 테이블에 요약을 넣는다. 같은 id가 있으면 덮어쓴다(upsert).
   Future<void> upsertActivity(Map<String, Object?> row);
+
+  /// 앱이 판정한 코스 완주 결과를 저장한다. 같은 기록의 이전 결과는 바뀐다.
+  Future<void> recordCompletions(
+    String activityId,
+    List<CourseCompletion> completions,
+  );
 }
 
 /// 서버가 요청을 받고 거절한 오류인지. (아니면 네트워크 문제로 본다)
@@ -41,6 +48,27 @@ class SupabaseActivityRemote implements ActivityRemote {
   @override
   Future<void> upsertActivity(Map<String, Object?> row) async {
     await _client.from('activities').upsert(row);
+  }
+
+  @override
+  Future<void> recordCompletions(
+    String activityId,
+    List<CourseCompletion> completions,
+  ) async {
+    await _client.rpc(
+      'record_course_completions',
+      params: {
+        'p_activity_id': activityId,
+        'p_completions': [
+          for (final c in completions)
+            {
+              'course_id': c.courseId,
+              'ascent_s': c.ascent.inSeconds,
+              'completed_at': c.reachedSummitAt.toUtc().toIso8601String(),
+            },
+        ],
+      },
+    );
   }
 }
 

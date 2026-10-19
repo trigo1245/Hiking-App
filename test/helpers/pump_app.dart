@@ -10,10 +10,12 @@ import 'package:hiking_app/features/activities/data/activity_remote.dart';
 import 'package:hiking_app/features/auth/data/auth_repository.dart';
 import 'package:hiking_app/features/auth/domain/profile.dart';
 import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
+import 'package:hiking_app/features/courses/data/competition_remote.dart';
 import 'package:hiking_app/features/courses/data/course_remote.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
 
 import '../features/activities/fake_activity_remote.dart';
+import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
 import '../features/recording/fake_location_service.dart';
 
@@ -40,6 +42,7 @@ Future<void> pumpApp(
   LocationService? location,
   ActivityRemote? remote,
   CourseRemote? courseRemote,
+  CompetitionRemote? competition,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -59,6 +62,9 @@ Future<void> pumpApp(
         ),
         courseRemoteProvider.overrideWithValue(
           courseRemote ?? FakeCourseRemote(),
+        ),
+        competitionRemoteProvider.overrideWithValue(
+          competition ?? FakeCompetitionRemote(),
         ),
         // 위젯 테스트에서는 지도 타일을 인터넷에서 받지 않는다.
         mapTilesEnabledProvider.overrideWithValue(false),

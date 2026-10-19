@@ -1,6 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../courses/data/course_repository.dart';
+import '../../courses/domain/course.dart';
+import '../../courses/domain/course_matching.dart';
 import '../../recording/data/recording_repository.dart';
 import '../domain/activity_summary.dart';
 import '../domain/gpx_writer.dart';
@@ -8,18 +11,21 @@ import 'activities_repository.dart';
 import 'activity_remote.dart';
 
 /// 끝난 기록을 서버에 올린다.
-/// 1) 경로를 GPX로 만들어 Storage에 올리고 2) 요약을 activities 테이블에 넣는다.
+/// 1) 경로를 GPX로 만들어 Storage에 올리고 2) 요약을 activities 테이블에 넣고
+/// 3) 기기에 저장된 코스와 비교해 완주한 코스를 판정해 보낸다(랭킹 재료).
 /// GPX를 먼저 올려서, 서버 행이 없는 파일을 가리키는 일이 없게 한다.
 class ActivityUploader {
   ActivityUploader({
     required this._activities,
     required this._recording,
     required this._remote,
+    required this._loadCourses,
   });
 
   final ActivitiesRepository _activities;
   final RecordingRepository _recording;
   final ActivityRemote _remote;
+  final Future<List<Course>> Function() _loadCourses;
 
   /// 작업을 한 줄로 세워, 같은 기록을 동시에 두 번 올리지 않게 한다.
   Future<void> _queue = Future.value();
@@ -56,6 +62,11 @@ class ActivityUploader {
       await _remote.upsertActivity(
         activityRow(summary, userId: userId, gpxPath: path),
       );
+      // 속도 이상 기록은 완주로 인정하지 않는다. (서버도 한 번 더 확인한다)
+      final completions = summary.isFlagged
+          ? const <CourseCompletion>[]
+          : CourseMatcher.matchAll(await _loadCourses(), points);
+      await _remote.recordCompletions(activityId, completions);
       await _activities.setUploadStatus(
         activityId,
         UploadStatus.done,
@@ -80,5 +91,6 @@ final activityUploaderProvider = Provider<ActivityUploader>((ref) {
     activities: ref.watch(activitiesRepositoryProvider),
     recording: ref.watch(recordingRepositoryProvider),
     remote: ref.watch(activityRemoteProvider),
+    loadCourses: () => ref.read(courseRepositoryProvider).watchAll().first,
   );
 });

@@ -5,11 +5,13 @@ import 'package:hiking_app/core/database/app_database.dart';
 import 'package:hiking_app/features/activities/data/activities_repository.dart';
 import 'package:hiking_app/features/activities/data/activity_uploader.dart';
 import 'package:hiking_app/features/activities/domain/activity_summary.dart';
+import 'package:hiking_app/features/courses/domain/course.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
 import 'package:hiking_app/features/recording/domain/track_stats.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import '../../../helpers/course_walk.dart';
 import '../../../helpers/gpx.dart';
 import '../../../helpers/pump_app.dart';
 import '../fake_activity_remote.dart';
@@ -20,6 +22,7 @@ void main() {
   late ActivitiesRepository activities;
   late FakeActivityRemote remote;
   late ActivityUploader uploader;
+  var courses = <Course>[];
   var nextId = 0;
   final t0 = DateTime(2026, 10, 13, 9);
 
@@ -49,11 +52,71 @@ void main() {
     recording = RecordingRepository(db, newId: () => 'activity-${nextId++}');
     activities = ActivitiesRepository(db);
     remote = FakeActivityRemote();
+    courses = [];
     uploader = ActivityUploader(
       activities: activities,
       recording: recording,
       remote: remote,
+      loadCourses: () async => courses,
     );
+  });
+
+  /// [points]로 끝난 기록을 만든다. (속도 이상 표시 여부 지정)
+  Future<String> finishedFromPoints(
+    List<TrackPoint> points, {
+    bool flagged = false,
+  }) async {
+    final session = await recording.start(
+      points.first.recordedAt,
+      userId: 'u1',
+    );
+    for (final p in points) {
+      await recording.addPoint(session.activityId, p);
+    }
+    final stats = (TrackStatsCalculator()..addAll(points)).stats;
+    await recording.finish(
+      session.activityId,
+      endedAt: points.last.recordedAt,
+      stats: TrackStats(
+        distanceM: stats.distanceM,
+        pointCount: stats.pointCount,
+        moving: stats.moving,
+        isFlagged: flagged,
+      ),
+      title: '금정산',
+    );
+    return session.activityId;
+  }
+
+  test('코스를 따라 오른 기록이면 완주 결과를 함께 보낸다', () async {
+    final beomeosa = loadCourse('geumjeongsan-beomeosa');
+    courses = [beomeosa, loadCourse('geumjeongsan-sanseong')];
+    final id = await finishedFromPoints(walk(beomeosa.path));
+
+    expect(await uploader.upload(id, userId: 'u1'), isTrue);
+
+    final sent = remote.completions[id]!;
+    expect(sent.map((c) => c.courseId), ['geumjeongsan-beomeosa']);
+    expect(sent.single.ascent.inMinutes, closeTo(44, 2));
+  });
+
+  test('코스와 관계없는 기록이면 빈 결과를 보낸다 (이전 결과를 지우기 위해)', () async {
+    courses = [loadCourse('geumjeongsan-beomeosa')];
+    final id = await finishedActivity();
+
+    await uploader.upload(id, userId: 'u1');
+
+    expect(remote.completions[id], isEmpty);
+  });
+
+  test('속도 이상 표시가 있는 기록은 완주로 보내지 않는다', () async {
+    final beomeosa = loadCourse('geumjeongsan-beomeosa');
+    courses = [beomeosa];
+    final id = await finishedFromPoints(walk(beomeosa.path), flagged: true);
+
+    await uploader.upload(id, userId: 'u1');
+
+    expect(remote.completions[id], isEmpty);
   });
 
   test('업로드하면 GPX는 {user_id}/{id}.gpx에, 요약은 activities에 올라간다', () async {

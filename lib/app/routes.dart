@@ -10,6 +10,9 @@ abstract final class AppRoutes {
   /// 기록 중 화면 (하단 탭 없이 전체 화면)
   static const recording = '/record';
   static String recordingDone(String activityId) => '/record-done/$activityId';
+
+  /// 코스 상세 (하단 탭 위에 쌓아서 뒤로 가기로 지도에 돌아온다)
+  static String course(String courseId) => '/course/$courseId';
   static String locationPermission(LocationAccess access) =>
       '/location-permission/${access.name}';
 }

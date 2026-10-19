@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
+import 'package:hiking_app/features/courses/domain/competition.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
 
 import '../../../helpers/pump_app.dart';
 import '../../auth/fake_auth_repository.dart';
+import '../../courses/fake_competition_remote.dart';
 import '../../courses/fake_course_remote.dart';
 import '../../recording/fake_location_service.dart';
 
@@ -39,7 +41,7 @@ void main() {
     expect(find.text('▲ 금정산'), findsOneWidget);
   });
 
-  testWidgets('검색해서 코스를 고르면 코스 카드가 뜬다', (tester) async {
+  testWidgets('검색해서 코스를 고르면 코스 상세가 열리고, 뒤로 가면 지도로 돌아온다', (tester) async {
     await pumpApp(tester, authRepository: signedIn(), courseRemote: courses);
     await settle(tester);
 
@@ -49,12 +51,51 @@ void main() {
     expect(find.text('승학산 동아대 코스'), findsNothing);
 
     await tester.tap(find.text('금정산 범어사 코스'));
-    await tester.pumpAndSettle();
+    await settle(tester);
 
-    // 검색창이 비워지고 카드가 뜬다.
-    expect(find.text('금정산 범어사 코스'), findsOneWidget);
-    expect(find.textContaining('1.04 km'), findsOneWidget);
-    expect(find.textContaining('오르막 약 18분'), findsOneWidget);
+    expect(find.text('금정산 범어사 코스'), findsOneWidget); // 상세 제목
+    expect(find.text('1.04 km'), findsOneWidget);
+    expect(find.text('이 코스 기록 시작'), findsOneWidget);
+
+    await tester.pageBack();
+    await tester.pumpAndSettle();
+    expect(find.text('산, 코스 이름으로 검색'), findsOneWidget);
+  });
+
+  testWidgets('지도에서 최다완등·최단시간 정복자 보기를 바꿀 수 있다', (tester) async {
+    final competition = FakeCompetitionRemote()
+      ..conquerors = const [
+        Conqueror(
+          courseId: 'a',
+          kind: RankingKind.most,
+          nickname: '고당봉지킴이',
+          nicknameTag: '0001',
+          value: 6,
+        ),
+        Conqueror(
+          courseId: 'a',
+          kind: RankingKind.fastest,
+          nickname: '새벽등산러',
+          nicknameTag: '0002',
+          value: 1500,
+        ),
+      ];
+    await pumpApp(
+      tester,
+      authRepository: signedIn(),
+      courseRemote: courses,
+      competition: competition,
+    );
+    await settle(tester);
+
+    // 기본값은 최다완등 정복자. 프로필 사진이 없으면 닉네임 첫 글자를 보여 준다.
+    expect(find.text('고'), findsOneWidget);
+    expect(find.text('새'), findsNothing);
+
+    await tester.tap(find.text('최단시간'));
+    await tester.pumpAndSettle();
+    expect(find.text('새'), findsOneWidget);
+    expect(find.text('고'), findsNothing);
   });
 
   testWidgets('찾는 코스가 없으면 안내한다', (tester) async {

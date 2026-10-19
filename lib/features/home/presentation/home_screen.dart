@@ -12,8 +12,11 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/pressable.dart';
+import '../../../core/widgets/segmented_tabs.dart';
 import '../../courses/data/course_repository.dart';
+import '../../courses/domain/competition.dart';
 import '../../courses/domain/course.dart';
+import '../../courses/presentation/competition_providers.dart';
 import '../../courses/presentation/course_map.dart';
 import '../../recording/data/location_service.dart';
 import '../../recording/domain/track_point.dart';
@@ -37,6 +40,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool _centerOnNextFix = false;
   String? _selectedId;
   bool _busy = false;
+  RankingKind _conquerorKind = RankingKind.most;
 
   @override
   void initState() {
@@ -128,6 +132,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _map.camera.zoom < 14 ? 15 : _map.camera.zoom,
   );
 
+  /// 코스를 누르거나 검색에서 고르면: 지도를 그 코스로 옮기고 코스 상세를 연다.
+  /// 상세에서 뒤로 오면 그 코스가 강조된 지도가 보인다.
   void _selectCourse(Course course) {
     _searchFocus.unfocus();
     _search.clear();
@@ -135,9 +141,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _map.fitCamera(
       CameraFit.coordinates(
         coordinates: [for (final p in course.path) toLatLng(p)],
-        padding: const EdgeInsets.fromLTRB(48, 160, 48, 280),
+        padding: const EdgeInsets.fromLTRB(48, 200, 48, 120),
       ),
     );
+    context.push(AppRoutes.course(course.id));
   }
 
   Future<void> _start() async {
@@ -153,8 +160,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final courses = ref.watch(coursesProvider).value ?? const <Course>[];
-    final selected = courses.where((c) => c.id == _selectedId).firstOrNull;
     final results = searchCourses(courses, _search.text);
+    final conquerors = {
+      for (final c
+          in ref.watch(conquerorsProvider).value ?? const <Conqueror>[])
+        if (c.kind == _conquerorKind) c.courseId: c,
+    };
 
     return Scaffold(
       body: Stack(
@@ -165,6 +176,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               courses: courses,
               selectedCourseId: _selectedId,
               myLocation: _myLocation,
+              conquerors: conquerors,
               onCourseTap: _selectCourse,
               onMapTap: () {
                 _searchFocus.unfocus();
@@ -181,10 +193,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 0,
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _SearchField(controller: _search, focusNode: _searchFocus),
                   if (_search.text.trim().isNotEmpty)
-                    _SearchResults(results: results, onTap: _selectCourse),
+                    _SearchResults(results: results, onTap: _selectCourse)
+                  else ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    // 지도에 보일 정복자 기준 (기본값: 참여 폭이 넓은 최다완등)
+                    SizedBox(
+                      width: 220,
+                      child: SegmentedTabs<RankingKind>(
+                        options: const {
+                          RankingKind.most: '최다완등',
+                          RankingKind.fastest: '최단시간',
+                        },
+                        selected: _conquerorKind,
+                        onChanged: (v) => setState(() => _conquerorKind = v),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -206,16 +234,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ],
       ),
       bottomNavigationBar: BottomActionBar(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (selected != null) ...[
-              _CourseCard(course: selected),
-              const SizedBox(height: AppSpacing.md),
-            ],
-            AppButton(label: '등산 기록 시작', onPressed: _busy ? null : _start),
-          ],
-        ),
+        child: AppButton(label: '등산 기록 시작', onPressed: _busy ? null : _start),
       ),
     );
   }
@@ -314,49 +333,6 @@ class _SearchResults extends StatelessWidget {
                   ),
               ],
             ),
-    );
-  }
-}
-
-/// 코스를 고르면 지도 아래에 올라오는 요약 카드
-class _CourseCard extends StatelessWidget {
-  const _CourseCard({required this.course});
-
-  final Course course;
-
-  @override
-  Widget build(BuildContext context) {
-    final time = course.officialTimeMin;
-    final difficulty = course.officialDifficulty;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppSpacing.xl),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundGrouped,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(course.fullName, style: AppTypography.subtitle),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            '${course.startName} → ${course.endName}',
-            style: AppTypography.caption,
-          ),
-          const SizedBox(height: AppSpacing.md),
-          Text(
-            [
-              '${formatKm(course.distanceM)} km',
-              if (time != null)
-                '오르막 약 ${formatHoursMinutes(Duration(minutes: time))}',
-              if (difficulty != null && difficulty.isNotEmpty)
-                '난이도 $difficulty',
-            ].join('  ·  '),
-            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
-          ),
-        ],
-      ),
     );
   }
 }

@@ -5,7 +5,9 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../core/design/design.dart';
 import '../../../core/map/map_tiles.dart';
+import '../../../core/widgets/user_avatar.dart';
 import '../../recording/domain/track_point.dart';
+import '../domain/competition.dart';
 import '../domain/course.dart';
 
 /// 처음 지도를 열었을 때의 위치 (부산)
@@ -25,7 +27,11 @@ class CourseMap extends ConsumerStatefulWidget {
     required this.onCourseTap,
     required this.onMapTap,
     this.myLocation,
+    this.conquerors = const {},
   });
+
+  /// 코스 ID → 그 코스의 정복자 (지도에 프로필 사진으로 표시)
+  final Map<String, Conqueror> conquerors;
 
   final MapController controller;
   final List<Course> courses;
@@ -120,6 +126,25 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                   child: _StartDot(selected: c.id == selected),
                 ),
               ),
+            // 정복자 프로필 사진: 코스 선의 가운데에 둔다 (기획서 4.3)
+            for (final c in ordered)
+              if (widget.conquerors[c.id] case final conqueror?)
+                Marker(
+                  point: toLatLng(c.path[c.path.length ~/ 2]),
+                  width: 40,
+                  height: 40,
+                  child: GestureDetector(
+                    onTap: () => widget.onCourseTap(c),
+                    child: UserAvatar(
+                      nickname: conqueror.nickname,
+                      imageUrl: conqueror.avatarUrl,
+                      size: 40,
+                      borderColor: c.id == selected
+                          ? AppColors.primary
+                          : AppColors.background,
+                    ),
+                  ),
+                ),
           ],
         ),
         if (me != null) ...[

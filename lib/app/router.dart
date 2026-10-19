@@ -6,6 +6,7 @@ import '../features/activities/presentation/activities_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/my_info_screen.dart';
+import '../features/courses/presentation/course_detail_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/recording/data/location_service.dart';
 import '../features/recording/presentation/location_permission_screen.dart';
@@ -65,6 +66,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => LocationPermissionScreen(
           access: LocationAccess.values.byName(state.pathParameters['access']!),
         ),
+      ),
+      GoRoute(
+        path: '/course/:id',
+        builder: (context, state) =>
+            CourseDetailScreen(courseId: state.pathParameters['id']!),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

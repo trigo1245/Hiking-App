@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../features/activities/presentation/activities_providers.dart';
 import '../features/courses/data/course_repository.dart';
+import '../features/courses/presentation/competition_providers.dart';
 
 /// 서버와 주고받는 작업을 하는 시점을 정한다.
 /// - 올리지 못한 기록 다시 올리기
@@ -44,6 +45,8 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
   void _sync() {
     unawaited(ref.read(uploadActionsProvider).uploadPending());
     unawaited(ref.read(courseRepositoryProvider).sync());
+    // 다른 사람이 정복자를 바꿨을 수 있으니 다시 받는다.
+    ref.invalidate(conquerorsProvider);
   }
 
   @override

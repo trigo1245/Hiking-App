@@ -154,7 +154,8 @@ supabase/         # SQL 마이그레이션
 - 시즌: **상반기(1~6월), 하반기(7~12월)** 단위로 초기화한다. 기준 시각은 한국 시간(KST). 시즌이 끝나면 그 시즌 순위는 바꾸지 않는다.
 - 역대 기록(명예의 전당)은 시즌과 별도로 영구 보존한다.
 - 랭킹 공개 범위: 일반 사용자는 **상위 10명 + 내 순위(기록 포함)**. 구독 사용자는 전체 순위(기록 포함) — 구독은 이후 단계에서 구현하되, 지금도 이 구분을 화면이 아니라 DB(RPC·RLS)에서 하도록 만든다.
-- 랭킹은 기기에서 계산하지 않고 서버 DB에서 계산한다(조작 방지).
+- 랭킹은 기기에서 계산하지 않고 서버 DB 함수(`get_course_ranking` 등)에서 계산한다. 구독자 구분은 `ranking_visible_rows()` 한 곳에서 한다.
+- 완주 판정(코스 매칭)은 프로토타입에서는 앱의 `CourseMatcher`(순수 Dart, 단위 테스트)가 하고, 결과를 `record_course_completions` 함수로 보낸다. 서버는 본인 기록인지·속도 이상 표시를 다시 확인한다. GPX 원본이 서버에 있으므로 이후 서버 재검증을 추가할 수 있다.
 - 코스 화면과 랭킹 화면에 "무리한 속도 경쟁은 사고로 이어질 수 있어요" 안전 문구를 항상 보여 준다.
 
 ### 리뷰 (평점)
@@ -193,12 +194,12 @@ Storage    : 버킷 tracks (비공개), 경로 {user_id}/{activity_id}.gpx
 mountains          : id, name, region, summit(좌표), height_m, source
 courses            : id, mountain_id, name, path(LineString, 들머리→정상), start_point, summit_point,
                      distance_m, official_time_min, source, license
-course_completions : id, activity_id, user_id, course_id, ascent_s(들머리→정상 시간),
+course_completions : id, activity_id(시연용은 null), user_id, course_id, ascent_s(들머리→정상 시간),
                      completed_at, season(예: 2026-H2), is_demo
 course_reviews     : course_id, user_id(둘의 조합 유일), difficulty, risk, view, crowd(각 1~5),
                      comment(200자 이내), created_at, updated_at
 ```
-- 경로 계산(겹침 비율, 거리)은 PostGIS 확장을 사용한다.
+- PostGIS 확장을 켜 두고 코스 경로를 geometry로 저장한다. (서버 재검증·공간 검색에 사용)
 - 다른 사용자의 행은 테이블을 직접 열지 않고, 랭킹·리뷰용 함수(RPC)나 뷰로 6-2장의 공개 항목만 돌려준다.
 
 - 모든 테이블에 RLS를 켠다. 1단계 정책: 본인 행만 읽기·쓰기 가능. 코스·산 정보는 로그인한 사용자 모두 읽기만 가능.
