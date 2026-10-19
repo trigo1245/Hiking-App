@@ -20,12 +20,13 @@ class UploadActions {
 
   String? get _userId => _ref.read(authRepositoryProvider).currentUser?.id;
 
-  Future<void> upload(String activityId) async {
+  /// [force]: 이미 올라간 기록도 다시 올린다. 성공하면 true.
+  Future<bool> upload(String activityId, {bool force = false}) async {
     final userId = _userId;
-    if (userId == null) return;
-    await _ref
+    if (userId == null) return false;
+    return _ref
         .read(activityUploaderProvider)
-        .upload(activityId, userId: userId);
+        .upload(activityId, userId: userId, force: force);
   }
 
   Future<void> uploadPending() async {

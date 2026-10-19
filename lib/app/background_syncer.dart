@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../features/activities/presentation/activities_providers.dart';
 import '../features/courses/data/course_repository.dart';
 import '../features/courses/presentation/competition_providers.dart';
+import '../features/subscription/data/subscription_remote.dart';
 
 /// 서버와 주고받는 작업을 하는 시점을 정한다.
 /// - 올리지 못한 기록 다시 올리기
@@ -47,6 +48,8 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
     unawaited(ref.read(courseRepositoryProvider).sync());
     // 다른 사람이 정복자를 바꿨을 수 있으니 다시 받는다.
     ref.invalidate(conquerorsProvider);
+    // 구독 상태도 서버 기준으로 다시 확인한다.
+    ref.invalidate(mySubscriptionProvider);
   }
 
   @override

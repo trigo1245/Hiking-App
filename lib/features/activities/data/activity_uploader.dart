@@ -31,8 +31,15 @@ class ActivityUploader {
   Future<void> _queue = Future.value();
 
   /// 기록 하나를 올린다. 성공하면 true.
-  Future<bool> upload(String activityId, {required String userId}) {
-    final result = _queue.then((_) => _upload(activityId, userId));
+  /// [force]: 이미 올라간 기록도 다시 올린다 (기록 상세의 "다시 올리기").
+  Future<bool> upload(
+    String activityId, {
+    required String userId,
+    bool force = false,
+  }) {
+    final result = _queue.then(
+      (_) => _upload(activityId, userId, force: force),
+    );
     _queue = result.then((_) {});
     return result;
   }
@@ -48,10 +55,14 @@ class ActivityUploader {
     return result;
   }
 
-  Future<bool> _upload(String activityId, String userId) async {
+  Future<bool> _upload(
+    String activityId,
+    String userId, {
+    bool force = false,
+  }) async {
     try {
       final summary = await _recording.loadSummary(activityId);
-      if (summary.uploadStatus == UploadStatus.done) return true;
+      if (!force && summary.uploadStatus == UploadStatus.done) return true;
 
       final points = await _recording.loadPoints(activityId);
       final path = '$userId/$activityId.gpx';

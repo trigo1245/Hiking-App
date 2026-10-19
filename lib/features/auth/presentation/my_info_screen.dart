@@ -1,15 +1,24 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/routes.dart';
 
 import '../../../core/design/design.dart';
+import '../../../core/utils/clock.dart';
+import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/skeleton_box.dart';
+import '../../activities/data/demo_activity_generator.dart';
+import '../../activities/presentation/activities_providers.dart';
+import '../../subscription/data/subscription_remote.dart';
 import '../domain/app_user.dart';
 import '../domain/auth_failure.dart';
 import 'auth_feedback.dart';
 import 'auth_providers.dart';
 
-/// 내 정보 탭: 닉네임, 로그인한 계정, 로그아웃.
+/// 내 정보 탭: 닉네임, 로그인한 계정, 프리미엄, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
   const MyInfoScreen({super.key});
 
@@ -60,6 +69,13 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
             style: AppTypography.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xxl),
+          const _PremiumCard(),
+          const SizedBox(height: AppSpacing.xxl),
+          // 시연·테스트용 기능은 개발 빌드에서만 보인다.
+          if (kDebugMode) ...[
+            const _DemoDataButton(),
+            const SizedBox(height: AppSpacing.lg),
+          ],
           Pressable(
             onPressed: _busy ? null : _signOut,
             child: Padding(
@@ -81,5 +97,115 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
     final provider = user?.provider;
     if (provider == null) return '로그인했어요';
     return '${provider.label} 계정으로 로그인했어요';
+  }
+}
+
+/// 프리미엄 상태 카드. 누르면 구독 화면으로 간다.
+class _PremiumCard extends ConsumerWidget {
+  const _PremiumCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final subscription = ref.watch(mySubscriptionProvider).value;
+    final active = subscription?.isActive ?? false;
+    final expires = subscription?.expiresAt.toLocal();
+    return Pressable(
+      onPressed: () => context.push(AppRoutes.premium),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    active ? '프리미엄 이용 중' : '프리미엄',
+                    style: AppTypography.subtitle.copyWith(
+                      color: active ? AppColors.primary : AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    active && expires != null
+                        ? '${expires.month}월 ${expires.day}일까지 · 관리하기'
+                        : '랭킹 전체 순위와 상세 분석을 받아 보세요',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// 개발용: 실제 코스를 따라 걸은 것 같은 시연용 기록을 만든다.
+class _DemoDataButton extends ConsumerStatefulWidget {
+  const _DemoDataButton();
+
+  @override
+  ConsumerState<_DemoDataButton> createState() => _DemoDataButtonState();
+}
+
+class _DemoDataButtonState extends ConsumerState<_DemoDataButton> {
+  bool _busy = false;
+
+  Future<void> _create() async {
+    final userId = ref.read(authRepositoryProvider).currentUser?.id;
+    if (_busy || userId == null) return;
+    setState(() => _busy = true);
+    String message;
+    try {
+      final courses = await ref.read(demoCoursesProvider.future);
+      final ids = await ref
+          .read(demoActivityGeneratorProvider)
+          .createDemoHikes(
+            courses: courses,
+            userId: userId,
+            now: ref.read(clockProvider)(),
+          );
+      // 일반 기록처럼 서버에 올리고 코스 완주도 판정한다.
+      await ref.read(uploadActionsProvider).uploadPending();
+      message = ids.isEmpty
+          ? '코스를 아직 받지 못했어요. 홈 지도에 코스가 보이면 다시 눌러 주세요'
+          : '시연용 기록 ${ids.length}개를 만들었어요. 기록 탭에서 볼 수 있어요';
+    } catch (e) {
+      debugPrint('[demo] $e');
+      message = '시연용 기록을 만들지 못했어요';
+    }
+    if (!mounted) return;
+    setState(() => _busy = false);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('개발용 (개발 빌드에서만 보여요)', style: AppTypography.caption),
+        const SizedBox(height: AppSpacing.sm),
+        AppButton(
+          label: _busy ? '만드는 중…' : '시연용 등산 기록 3개 만들기',
+          variant: AppButtonVariant.secondary,
+          onPressed: _busy ? null : _create,
+        ),
+      ],
+    );
   }
 }

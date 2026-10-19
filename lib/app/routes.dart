@@ -13,6 +13,13 @@ abstract final class AppRoutes {
 
   /// 코스 상세 (하단 탭 위에 쌓아서 뒤로 가기로 지도에 돌아온다)
   static String course(String courseId) => '/course/$courseId';
+  static String writeReview(String courseId) => '/course/$courseId/review';
+
+  /// 기록 상세 (기록 탭에서 카드를 누르면 열린다)
+  static String activity(String activityId) => '/activity/$activityId';
+
+  /// 프리미엄 구독
+  static const premium = '/premium';
   static String locationPermission(LocationAccess access) =>
       '/location-permission/${access.name}';
 }

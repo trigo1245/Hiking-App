@@ -3,15 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/activities/presentation/activities_screen.dart';
+import '../features/activities/presentation/activity_detail_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/my_info_screen.dart';
 import '../features/courses/presentation/course_detail_screen.dart';
+import '../features/courses/presentation/course_reviews_section.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/recording/data/location_service.dart';
 import '../features/recording/presentation/location_permission_screen.dart';
 import '../features/recording/presentation/recording_complete_screen.dart';
 import '../features/recording/presentation/recording_screen.dart';
+import '../features/subscription/presentation/premium_screen.dart';
 import 'app_shell.dart';
 import 'routes.dart';
 
@@ -71,6 +74,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/course/:id',
         builder: (context, state) =>
             CourseDetailScreen(courseId: state.pathParameters['id']!),
+        routes: [
+          // 리뷰 쓰기는 코스 상세 위에 쌓아서, 저장하면 상세로 돌아간다.
+          GoRoute(
+            path: 'review',
+            builder: (context, state) =>
+                WriteReviewScreen(courseId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/activity/:id',
+        builder: (context, state) =>
+            ActivityDetailScreen(activityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.premium,
+        builder: (context, state) => const PremiumScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

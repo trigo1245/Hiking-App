@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/routes.dart';
 
 import '../../../core/design/design.dart';
 import '../../../core/utils/format.dart';
@@ -11,10 +14,12 @@ import '../../../core/widgets/segmented_tabs.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../recording/presentation/start_recording.dart';
+import '../../subscription/data/subscription_remote.dart';
 import '../data/course_repository.dart';
 import '../domain/competition.dart';
 import '../domain/course.dart';
 import 'competition_providers.dart';
+import 'course_reviews_section.dart';
 
 /// 경쟁 화면에 항상 보여 주는 안전 문구 (기획서 4.7)
 const safetyNotice = '무리한 속도 경쟁은 사고로 이어질 수 있어요. 내 속도로 안전하게 올라요.';
@@ -93,8 +98,12 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                 _RankingList(
                   query: (courseId: course.id, kind: _kind, allTime: _allTime),
                 ),
+                const SizedBox(height: AppSpacing.sm),
+                const _RankingScopeNote(),
                 const SizedBox(height: AppSpacing.xxl),
                 const _SafetyNotice(),
+                const SizedBox(height: AppSpacing.xxxl),
+                CourseReviewsSection(courseId: course.id),
               ],
             ),
       bottomNavigationBar: course == null
@@ -436,6 +445,39 @@ class _SafetyNotice extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// 랭킹을 어디까지 보는지 알려 준다. 구독자는 전체, 일반 사용자는 상위 10명 + 내 순위.
+/// (실제로 몇 줄을 받는지는 서버 DB 함수가 구독 여부로 정한다)
+class _RankingScopeNote extends ConsumerWidget {
+  const _RankingScopeNote();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (ref.watch(isPremiumProvider)) {
+      return Text(
+        '프리미엄 · 전체 순위를 보고 있어요',
+        style: AppTypography.caption.copyWith(color: AppColors.primary),
+      );
+    }
+    return Pressable(
+      onPressed: () => context.push(AppRoutes.premium),
+      child: Text.rich(
+        TextSpan(
+          children: [
+            const TextSpan(
+              text: '상위 10명과 내 순위까지 보여요 · ',
+              style: AppTypography.caption,
+            ),
+            TextSpan(
+              text: '전체 순위 보기',
+              style: AppTypography.caption.copyWith(color: AppColors.primary),
+            ),
+          ],
+        ),
       ),
     );
   }

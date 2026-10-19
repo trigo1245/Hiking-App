@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../../app/routes.dart';
 
 import '../../../core/design/design.dart';
 import '../../../core/utils/clock.dart';
@@ -95,6 +98,14 @@ class _ActivityCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 카드를 누르면 기록 상세가 열린다.
+    return Pressable(
+      onPressed: () => context.push(AppRoutes.activity(activity.id)),
+      child: _card(ref),
+    );
+  }
+
+  Widget _card(WidgetRef ref) {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.xl),
       decoration: BoxDecoration(
