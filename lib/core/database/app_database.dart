@@ -65,7 +65,30 @@ class TrackPoints extends Table {
   DateTimeColumn get recordedAt => dateTime()();
 }
 
-@DriftDatabase(tables: [Activities, TrackPoints])
+/// 서버에서 받아 둔 코스. 인터넷이 없는 산에서도 지도에 코스 선을 그리기 위해 기기에 저장한다.
+@DataClassName('CourseRow')
+class Courses extends Table {
+  /// 서버 courses.id (uuid)
+  TextColumn get id => text()();
+  TextColumn get mountainName => text()();
+  TextColumn get name => text()();
+  TextColumn get startName => text()();
+  TextColumn get endName => text()();
+  RealColumn get distanceM => real()();
+  IntColumn get officialTimeMin => integer().nullable()();
+  TextColumn get officialDifficulty => text().nullable()();
+
+  /// 경로 좌표 [[경도, 위도], ...] (들머리 → 정상) JSON 문자열
+  TextColumn get pathJson => text()();
+  RealColumn get summitLat => real()();
+  RealColumn get summitLon => real()();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+@DriftDatabase(tables: [Activities, TrackPoints, Courses])
 class AppDatabase extends _$AppDatabase {
   /// [executor]를 넘기지 않으면 기기 저장소의 `hiking_app` DB를 연다.
   /// 테스트에서는 메모리 DB를 넘긴다.
@@ -75,12 +98,13 @@ class AppDatabase extends _$AppDatabase {
   /// 테이블 구조를 바꾸면 1 올리고, 아래 onUpgrade에 바꾸는 방법을 적는다.
   /// (이미 설치된 앱의 DB를 지우지 않고 고치기 위해)
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.addColumn(activities, activities.userId);
+      if (from < 3) await m.createTable(courses);
     },
     beforeOpen: (details) async {
       // 기록을 지우면 위치 점도 함께 지워지도록 외래 키를 켠다.

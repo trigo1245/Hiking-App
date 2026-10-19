@@ -29,6 +29,21 @@ class FakeLocationService implements LocationService {
     return _controller!.stream;
   }
 
+  /// 지도용 위치 권한이 이미 있는지
+  bool preciseAccess = false;
+  StreamController<LocationSample>? _mapController;
+
+  void emitMapPosition(LocationSample sample) => _mapController!.add(sample);
+
+  @override
+  Future<bool> hasPreciseAccess() async => preciseAccess;
+
+  @override
+  Stream<LocationSample> watchMapPosition() {
+    _mapController = StreamController<LocationSample>();
+    return _mapController!.stream;
+  }
+
   @override
   Future<void> openAppSettings() async => opened.add('app');
 

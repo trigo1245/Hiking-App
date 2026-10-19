@@ -29,6 +29,12 @@ abstract interface class LocationService {
   /// 구독하는 동안 위치를 보낸다. 구독 중에는 상단 고정 알림이 뜨고 화면이 꺼져도 계속된다.
   Stream<LocationSample> watchPositions();
 
+  /// 정밀 위치 권한이 이미 있는지 (묻지 않고 확인만 한다)
+  Future<bool> hasPreciseAccess();
+
+  /// 지도에 내 위치를 보여 주기 위한 위치. 기록이 아니므로 알림 없이, 화면이 켜져 있을 때만 받는다.
+  Stream<LocationSample> watchMapPosition();
+
   Future<void> openAppSettings();
   Future<void> openLocationSettings();
 }
@@ -89,20 +95,44 @@ class GeolocatorLocationService implements LocationService {
       ),
     );
 
-    return Geolocator.getPositionStream(locationSettings: settings).map(
-      (p) => LocationSample(
-        latitude: p.latitude,
-        longitude: p.longitude,
-        // 고도를 모르면 0과 정확도 0이 함께 온다.
-        altitude: p.altitude == 0 && p.altitudeAccuracy == 0
-            ? null
-            : p.altitude,
-        accuracy: p.accuracy,
-        speed: p.speed,
-        recordedAt: p.timestamp,
-      ),
-    );
+    return Geolocator.getPositionStream(locationSettings: settings)
+        .map(_toSample);
   }
+
+  @override
+  Future<bool> hasPreciseAccess() async {
+    if (!await Geolocator.isLocationServiceEnabled()) return false;
+    final permission = await Geolocator.checkPermission();
+    if (permission != LocationPermission.whileInUse &&
+        permission != LocationPermission.always) {
+      return false;
+    }
+    return await Geolocator.getLocationAccuracy() ==
+        LocationAccuracyStatus.precise;
+  }
+
+  @override
+  Stream<LocationSample> watchMapPosition() {
+    final settings = AndroidSettings(
+      forceLocationManager: true,
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5,
+      intervalDuration: const Duration(seconds: 3),
+      useMSLAltitude: true,
+    );
+    return Geolocator.getPositionStream(locationSettings: settings)
+        .map(_toSample);
+  }
+
+  static LocationSample _toSample(Position p) => LocationSample(
+    latitude: p.latitude,
+    longitude: p.longitude,
+    // 고도를 모르면 0과 정확도 0이 함께 온다.
+    altitude: p.altitude == 0 && p.altitudeAccuracy == 0 ? null : p.altitude,
+    accuracy: p.accuracy,
+    speed: p.speed,
+    recordedAt: p.timestamp,
+  );
 
   @override
   Future<void> openAppSettings() => Geolocator.openAppSettings();

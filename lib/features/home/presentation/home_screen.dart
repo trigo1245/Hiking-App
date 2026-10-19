@@ -1,17 +1,26 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
+import '../../../core/design/design.dart';
 import '../../../core/utils/format.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/confirm_sheet.dart';
-import '../../../core/widgets/empty_view.dart';
+import '../../../core/widgets/pressable.dart';
+import '../../courses/data/course_repository.dart';
+import '../../courses/domain/course.dart';
+import '../../courses/presentation/course_map.dart';
+import '../../recording/data/location_service.dart';
+import '../../recording/domain/track_point.dart';
 import '../../recording/presentation/recording_controller.dart';
 import '../../recording/presentation/start_recording.dart';
 
-/// 홈 탭. 이후 이번 달 요약, 최근 기록이 들어간다.
+/// 홈 탭 = 지도 화면. 위에는 산·코스 검색창, 아래에는 "등산 기록 시작" 버튼.
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
@@ -20,12 +29,32 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  final _map = MapController();
+  final _search = TextEditingController();
+  final _searchFocus = FocusNode();
+  StreamSubscription<LocationSample>? _locationSub;
+  LocationSample? _myLocation;
+  bool _centerOnNextFix = false;
+  String? _selectedId;
   bool _busy = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _checkUnfinished());
+    _search.addListener(() => setState(() {}));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkUnfinished();
+      _showMyLocationIfAllowed();
+    });
+  }
+
+  @override
+  void dispose() {
+    _locationSub?.cancel();
+    _search.dispose();
+    _searchFocus.dispose();
+    _map.dispose();
+    super.dispose();
   }
 
   /// 앱이 기록 중에 꺼졌다면 이어서 기록할지, 끝낼지 묻는다.
@@ -56,6 +85,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  /// 이미 위치 권한이 있으면 바로 내 위치를 보여 준다. (처음 켰을 때 권한을 묻지는 않는다)
+  Future<void> _showMyLocationIfAllowed() async {
+    if (await ref.read(locationServiceProvider).hasPreciseAccess()) {
+      _listenLocation();
+    }
+  }
+
+  void _listenLocation() {
+    _locationSub ??= ref
+        .read(locationServiceProvider)
+        .watchMapPosition()
+        .listen((sample) {
+          if (!mounted) return;
+          setState(() => _myLocation = sample);
+          if (_centerOnNextFix) {
+            _centerOnNextFix = false;
+            _moveTo(sample);
+          }
+        }, onError: (Object e) => debugPrint('[map] 위치 받기 실패: $e'));
+  }
+
+  /// 내 위치 버튼: 권한이 없으면 묻고, 있으면 내 위치로 지도를 옮긴다.
+  Future<void> _onMyLocation() async {
+    final me = _myLocation;
+    if (me != null) return _moveTo(me);
+
+    final access = await ref.read(locationServiceProvider).requestAccess();
+    if (!mounted) return;
+    if (access != LocationAccess.granted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('내 위치를 보려면 정확한 위치 권한이 필요해요')),
+      );
+      return;
+    }
+    _centerOnNextFix = true;
+    _listenLocation();
+  }
+
+  void _moveTo(LocationSample p) => _map.move(
+    toLatLngFromSample(p),
+    _map.camera.zoom < 14 ? 15 : _map.camera.zoom,
+  );
+
+  void _selectCourse(Course course) {
+    _searchFocus.unfocus();
+    _search.clear();
+    setState(() => _selectedId = course.id);
+    _map.fitCamera(
+      CameraFit.coordinates(
+        coordinates: [for (final p in course.path) toLatLng(p)],
+        padding: const EdgeInsets.fromLTRB(48, 160, 48, 280),
+      ),
+    );
+  }
+
   Future<void> _start() async {
     if (_busy) return;
     setState(() => _busy = true);
@@ -68,11 +152,243 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final courses = ref.watch(coursesProvider).value ?? const <Course>[];
+    final selected = courses.where((c) => c.id == _selectedId).firstOrNull;
+    final results = searchCourses(courses, _search.text);
+
     return Scaffold(
-      appBar: AppBar(title: const Text('홈')),
-      body: const EmptyView(message: '홈 화면을 준비하고 있어요'),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: CourseMap(
+              controller: _map,
+              courses: courses,
+              selectedCourseId: _selectedId,
+              myLocation: _myLocation,
+              onCourseTap: _selectCourse,
+              onMapTap: () {
+                _searchFocus.unfocus();
+                setState(() => _selectedId = null);
+              },
+            ),
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.screenHorizontal,
+                AppSpacing.md,
+                AppSpacing.screenHorizontal,
+                0,
+              ),
+              child: Column(
+                children: [
+                  _SearchField(controller: _search, focusNode: _searchFocus),
+                  if (_search.text.trim().isNotEmpty)
+                    _SearchResults(results: results, onTap: _selectCourse),
+                ],
+              ),
+            ),
+          ),
+          Positioned(
+            right: AppSpacing.screenHorizontal,
+            bottom: AppSpacing.lg,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                _RoundButton(
+                  icon: Icons.my_location_rounded,
+                  semanticLabel: '내 위치',
+                  onPressed: _onMyLocation,
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
       bottomNavigationBar: BottomActionBar(
-        child: AppButton(label: '등산 기록 시작', onPressed: _busy ? null : _start),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (selected != null) ...[
+              _CourseCard(course: selected),
+              const SizedBox(height: AppSpacing.md),
+            ],
+            AppButton(label: '등산 기록 시작', onPressed: _busy ? null : _start),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchField extends StatelessWidget {
+  const _SearchField({required this.controller, required this.focusNode});
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: controller,
+      focusNode: focusNode,
+      style: AppTypography.body,
+      textInputAction: TextInputAction.search,
+      decoration: InputDecoration(
+        hintText: '산, 코스 이름으로 검색',
+        hintStyle: AppTypography.body.copyWith(color: AppColors.textTertiary),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          color: AppColors.textTertiary,
+        ),
+        fillColor: AppColors.background,
+        // 지도 위에서도 검색창이 구분되도록 얇은 테두리를 둔다.
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppRadius.input),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        suffixIcon: controller.text.isEmpty
+            ? null
+            : IconButton(
+                icon: const Icon(Icons.close_rounded),
+                color: AppColors.textTertiary,
+                onPressed: controller.clear,
+              ),
+      ),
+    );
+  }
+}
+
+class _SearchResults extends StatelessWidget {
+  const _SearchResults({required this.results, required this.onTap});
+
+  final List<Course> results;
+  final ValueChanged<Course> onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.only(top: AppSpacing.sm),
+      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+      decoration: BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.circular(AppRadius.input),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: results.isEmpty
+          ? const Padding(
+              padding: EdgeInsets.all(AppSpacing.lg),
+              child: Text('찾는 코스가 없어요', style: AppTypography.caption),
+            )
+          : Column(
+              children: [
+                for (final c in results)
+                  Pressable(
+                    onPressed: () => onTap(c),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                        vertical: AppSpacing.md,
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(c.fullName, style: AppTypography.body),
+                                Text(
+                                  '${c.startName} → ${c.endName}',
+                                  style: AppTypography.caption,
+                                ),
+                              ],
+                            ),
+                          ),
+                          Text(
+                            '${formatKm(c.distanceM)} km',
+                            style: AppTypography.caption,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+    );
+  }
+}
+
+/// 코스를 고르면 지도 아래에 올라오는 요약 카드
+class _CourseCard extends StatelessWidget {
+  const _CourseCard({required this.course});
+
+  final Course course;
+
+  @override
+  Widget build(BuildContext context) {
+    final time = course.officialTimeMin;
+    final difficulty = course.officialDifficulty;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGrouped,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(course.fullName, style: AppTypography.subtitle),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '${course.startName} → ${course.endName}',
+            style: AppTypography.caption,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            [
+              '${formatKm(course.distanceM)} km',
+              if (time != null)
+                '오르막 약 ${formatHoursMinutes(Duration(minutes: time))}',
+              if (difficulty != null && difficulty.isNotEmpty)
+                '난이도 $difficulty',
+            ].join('  ·  '),
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RoundButton extends StatelessWidget {
+  const _RoundButton({
+    required this.icon,
+    required this.semanticLabel,
+    required this.onPressed,
+  });
+
+  final IconData icon;
+  final String semanticLabel;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onPressed: onPressed,
+      child: Container(
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppColors.background,
+          shape: BoxShape.circle,
+          border: Border.all(color: AppColors.divider),
+        ),
+        child: Icon(
+          icon,
+          color: AppColors.textPrimary,
+          semanticLabel: semanticLabel,
+        ),
       ),
     );
   }

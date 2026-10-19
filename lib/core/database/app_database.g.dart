@@ -1589,11 +1589,739 @@ class TrackPointsCompanion extends UpdateCompanion<TrackPointRow> {
   }
 }
 
+class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CoursesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mountainNameMeta = const VerificationMeta(
+    'mountainName',
+  );
+  @override
+  late final GeneratedColumn<String> mountainName = GeneratedColumn<String>(
+    'mountain_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _startNameMeta = const VerificationMeta(
+    'startName',
+  );
+  @override
+  late final GeneratedColumn<String> startName = GeneratedColumn<String>(
+    'start_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _endNameMeta = const VerificationMeta(
+    'endName',
+  );
+  @override
+  late final GeneratedColumn<String> endName = GeneratedColumn<String>(
+    'end_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _distanceMMeta = const VerificationMeta(
+    'distanceM',
+  );
+  @override
+  late final GeneratedColumn<double> distanceM = GeneratedColumn<double>(
+    'distance_m',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _officialTimeMinMeta = const VerificationMeta(
+    'officialTimeMin',
+  );
+  @override
+  late final GeneratedColumn<int> officialTimeMin = GeneratedColumn<int>(
+    'official_time_min',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _officialDifficultyMeta =
+      const VerificationMeta('officialDifficulty');
+  @override
+  late final GeneratedColumn<String> officialDifficulty =
+      GeneratedColumn<String>(
+        'official_difficulty',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _pathJsonMeta = const VerificationMeta(
+    'pathJson',
+  );
+  @override
+  late final GeneratedColumn<String> pathJson = GeneratedColumn<String>(
+    'path_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summitLatMeta = const VerificationMeta(
+    'summitLat',
+  );
+  @override
+  late final GeneratedColumn<double> summitLat = GeneratedColumn<double>(
+    'summit_lat',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _summitLonMeta = const VerificationMeta(
+    'summitLon',
+  );
+  @override
+  late final GeneratedColumn<double> summitLon = GeneratedColumn<double>(
+    'summit_lon',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    mountainName,
+    name,
+    startName,
+    endName,
+    distanceM,
+    officialTimeMin,
+    officialDifficulty,
+    pathJson,
+    summitLat,
+    summitLon,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'courses';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CourseRow> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('mountain_name')) {
+      context.handle(
+        _mountainNameMeta,
+        mountainName.isAcceptableOrUnknown(
+          data['mountain_name']!,
+          _mountainNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_mountainNameMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('start_name')) {
+      context.handle(
+        _startNameMeta,
+        startName.isAcceptableOrUnknown(data['start_name']!, _startNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_startNameMeta);
+    }
+    if (data.containsKey('end_name')) {
+      context.handle(
+        _endNameMeta,
+        endName.isAcceptableOrUnknown(data['end_name']!, _endNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_endNameMeta);
+    }
+    if (data.containsKey('distance_m')) {
+      context.handle(
+        _distanceMMeta,
+        distanceM.isAcceptableOrUnknown(data['distance_m']!, _distanceMMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_distanceMMeta);
+    }
+    if (data.containsKey('official_time_min')) {
+      context.handle(
+        _officialTimeMinMeta,
+        officialTimeMin.isAcceptableOrUnknown(
+          data['official_time_min']!,
+          _officialTimeMinMeta,
+        ),
+      );
+    }
+    if (data.containsKey('official_difficulty')) {
+      context.handle(
+        _officialDifficultyMeta,
+        officialDifficulty.isAcceptableOrUnknown(
+          data['official_difficulty']!,
+          _officialDifficultyMeta,
+        ),
+      );
+    }
+    if (data.containsKey('path_json')) {
+      context.handle(
+        _pathJsonMeta,
+        pathJson.isAcceptableOrUnknown(data['path_json']!, _pathJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathJsonMeta);
+    }
+    if (data.containsKey('summit_lat')) {
+      context.handle(
+        _summitLatMeta,
+        summitLat.isAcceptableOrUnknown(data['summit_lat']!, _summitLatMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summitLatMeta);
+    }
+    if (data.containsKey('summit_lon')) {
+      context.handle(
+        _summitLonMeta,
+        summitLon.isAcceptableOrUnknown(data['summit_lon']!, _summitLonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_summitLonMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CourseRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CourseRow(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      mountainName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}mountain_name'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      startName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}start_name'],
+      )!,
+      endName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}end_name'],
+      )!,
+      distanceM: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}distance_m'],
+      )!,
+      officialTimeMin: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}official_time_min'],
+      ),
+      officialDifficulty: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}official_difficulty'],
+      ),
+      pathJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path_json'],
+      )!,
+      summitLat: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}summit_lat'],
+      )!,
+      summitLon: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}summit_lon'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $CoursesTable createAlias(String alias) {
+    return $CoursesTable(attachedDatabase, alias);
+  }
+}
+
+class CourseRow extends DataClass implements Insertable<CourseRow> {
+  /// 서버 courses.id (uuid)
+  final String id;
+  final String mountainName;
+  final String name;
+  final String startName;
+  final String endName;
+  final double distanceM;
+  final int? officialTimeMin;
+  final String? officialDifficulty;
+
+  /// 경로 좌표 [[경도, 위도], ...] (들머리 → 정상) JSON 문자열
+  final String pathJson;
+  final double summitLat;
+  final double summitLon;
+  final DateTime updatedAt;
+  const CourseRow({
+    required this.id,
+    required this.mountainName,
+    required this.name,
+    required this.startName,
+    required this.endName,
+    required this.distanceM,
+    this.officialTimeMin,
+    this.officialDifficulty,
+    required this.pathJson,
+    required this.summitLat,
+    required this.summitLon,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['mountain_name'] = Variable<String>(mountainName);
+    map['name'] = Variable<String>(name);
+    map['start_name'] = Variable<String>(startName);
+    map['end_name'] = Variable<String>(endName);
+    map['distance_m'] = Variable<double>(distanceM);
+    if (!nullToAbsent || officialTimeMin != null) {
+      map['official_time_min'] = Variable<int>(officialTimeMin);
+    }
+    if (!nullToAbsent || officialDifficulty != null) {
+      map['official_difficulty'] = Variable<String>(officialDifficulty);
+    }
+    map['path_json'] = Variable<String>(pathJson);
+    map['summit_lat'] = Variable<double>(summitLat);
+    map['summit_lon'] = Variable<double>(summitLon);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  CoursesCompanion toCompanion(bool nullToAbsent) {
+    return CoursesCompanion(
+      id: Value(id),
+      mountainName: Value(mountainName),
+      name: Value(name),
+      startName: Value(startName),
+      endName: Value(endName),
+      distanceM: Value(distanceM),
+      officialTimeMin: officialTimeMin == null && nullToAbsent
+          ? const Value.absent()
+          : Value(officialTimeMin),
+      officialDifficulty: officialDifficulty == null && nullToAbsent
+          ? const Value.absent()
+          : Value(officialDifficulty),
+      pathJson: Value(pathJson),
+      summitLat: Value(summitLat),
+      summitLon: Value(summitLon),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory CourseRow.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CourseRow(
+      id: serializer.fromJson<String>(json['id']),
+      mountainName: serializer.fromJson<String>(json['mountainName']),
+      name: serializer.fromJson<String>(json['name']),
+      startName: serializer.fromJson<String>(json['startName']),
+      endName: serializer.fromJson<String>(json['endName']),
+      distanceM: serializer.fromJson<double>(json['distanceM']),
+      officialTimeMin: serializer.fromJson<int?>(json['officialTimeMin']),
+      officialDifficulty: serializer.fromJson<String?>(
+        json['officialDifficulty'],
+      ),
+      pathJson: serializer.fromJson<String>(json['pathJson']),
+      summitLat: serializer.fromJson<double>(json['summitLat']),
+      summitLon: serializer.fromJson<double>(json['summitLon']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'mountainName': serializer.toJson<String>(mountainName),
+      'name': serializer.toJson<String>(name),
+      'startName': serializer.toJson<String>(startName),
+      'endName': serializer.toJson<String>(endName),
+      'distanceM': serializer.toJson<double>(distanceM),
+      'officialTimeMin': serializer.toJson<int?>(officialTimeMin),
+      'officialDifficulty': serializer.toJson<String?>(officialDifficulty),
+      'pathJson': serializer.toJson<String>(pathJson),
+      'summitLat': serializer.toJson<double>(summitLat),
+      'summitLon': serializer.toJson<double>(summitLon),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  CourseRow copyWith({
+    String? id,
+    String? mountainName,
+    String? name,
+    String? startName,
+    String? endName,
+    double? distanceM,
+    Value<int?> officialTimeMin = const Value.absent(),
+    Value<String?> officialDifficulty = const Value.absent(),
+    String? pathJson,
+    double? summitLat,
+    double? summitLon,
+    DateTime? updatedAt,
+  }) => CourseRow(
+    id: id ?? this.id,
+    mountainName: mountainName ?? this.mountainName,
+    name: name ?? this.name,
+    startName: startName ?? this.startName,
+    endName: endName ?? this.endName,
+    distanceM: distanceM ?? this.distanceM,
+    officialTimeMin: officialTimeMin.present
+        ? officialTimeMin.value
+        : this.officialTimeMin,
+    officialDifficulty: officialDifficulty.present
+        ? officialDifficulty.value
+        : this.officialDifficulty,
+    pathJson: pathJson ?? this.pathJson,
+    summitLat: summitLat ?? this.summitLat,
+    summitLon: summitLon ?? this.summitLon,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  CourseRow copyWithCompanion(CoursesCompanion data) {
+    return CourseRow(
+      id: data.id.present ? data.id.value : this.id,
+      mountainName: data.mountainName.present
+          ? data.mountainName.value
+          : this.mountainName,
+      name: data.name.present ? data.name.value : this.name,
+      startName: data.startName.present ? data.startName.value : this.startName,
+      endName: data.endName.present ? data.endName.value : this.endName,
+      distanceM: data.distanceM.present ? data.distanceM.value : this.distanceM,
+      officialTimeMin: data.officialTimeMin.present
+          ? data.officialTimeMin.value
+          : this.officialTimeMin,
+      officialDifficulty: data.officialDifficulty.present
+          ? data.officialDifficulty.value
+          : this.officialDifficulty,
+      pathJson: data.pathJson.present ? data.pathJson.value : this.pathJson,
+      summitLat: data.summitLat.present ? data.summitLat.value : this.summitLat,
+      summitLon: data.summitLon.present ? data.summitLon.value : this.summitLon,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CourseRow(')
+          ..write('id: $id, ')
+          ..write('mountainName: $mountainName, ')
+          ..write('name: $name, ')
+          ..write('startName: $startName, ')
+          ..write('endName: $endName, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('officialTimeMin: $officialTimeMin, ')
+          ..write('officialDifficulty: $officialDifficulty, ')
+          ..write('pathJson: $pathJson, ')
+          ..write('summitLat: $summitLat, ')
+          ..write('summitLon: $summitLon, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    mountainName,
+    name,
+    startName,
+    endName,
+    distanceM,
+    officialTimeMin,
+    officialDifficulty,
+    pathJson,
+    summitLat,
+    summitLon,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CourseRow &&
+          other.id == this.id &&
+          other.mountainName == this.mountainName &&
+          other.name == this.name &&
+          other.startName == this.startName &&
+          other.endName == this.endName &&
+          other.distanceM == this.distanceM &&
+          other.officialTimeMin == this.officialTimeMin &&
+          other.officialDifficulty == this.officialDifficulty &&
+          other.pathJson == this.pathJson &&
+          other.summitLat == this.summitLat &&
+          other.summitLon == this.summitLon &&
+          other.updatedAt == this.updatedAt);
+}
+
+class CoursesCompanion extends UpdateCompanion<CourseRow> {
+  final Value<String> id;
+  final Value<String> mountainName;
+  final Value<String> name;
+  final Value<String> startName;
+  final Value<String> endName;
+  final Value<double> distanceM;
+  final Value<int?> officialTimeMin;
+  final Value<String?> officialDifficulty;
+  final Value<String> pathJson;
+  final Value<double> summitLat;
+  final Value<double> summitLon;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const CoursesCompanion({
+    this.id = const Value.absent(),
+    this.mountainName = const Value.absent(),
+    this.name = const Value.absent(),
+    this.startName = const Value.absent(),
+    this.endName = const Value.absent(),
+    this.distanceM = const Value.absent(),
+    this.officialTimeMin = const Value.absent(),
+    this.officialDifficulty = const Value.absent(),
+    this.pathJson = const Value.absent(),
+    this.summitLat = const Value.absent(),
+    this.summitLon = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CoursesCompanion.insert({
+    required String id,
+    required String mountainName,
+    required String name,
+    required String startName,
+    required String endName,
+    required double distanceM,
+    this.officialTimeMin = const Value.absent(),
+    this.officialDifficulty = const Value.absent(),
+    required String pathJson,
+    required double summitLat,
+    required double summitLon,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       mountainName = Value(mountainName),
+       name = Value(name),
+       startName = Value(startName),
+       endName = Value(endName),
+       distanceM = Value(distanceM),
+       pathJson = Value(pathJson),
+       summitLat = Value(summitLat),
+       summitLon = Value(summitLon),
+       updatedAt = Value(updatedAt);
+  static Insertable<CourseRow> custom({
+    Expression<String>? id,
+    Expression<String>? mountainName,
+    Expression<String>? name,
+    Expression<String>? startName,
+    Expression<String>? endName,
+    Expression<double>? distanceM,
+    Expression<int>? officialTimeMin,
+    Expression<String>? officialDifficulty,
+    Expression<String>? pathJson,
+    Expression<double>? summitLat,
+    Expression<double>? summitLon,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (mountainName != null) 'mountain_name': mountainName,
+      if (name != null) 'name': name,
+      if (startName != null) 'start_name': startName,
+      if (endName != null) 'end_name': endName,
+      if (distanceM != null) 'distance_m': distanceM,
+      if (officialTimeMin != null) 'official_time_min': officialTimeMin,
+      if (officialDifficulty != null) 'official_difficulty': officialDifficulty,
+      if (pathJson != null) 'path_json': pathJson,
+      if (summitLat != null) 'summit_lat': summitLat,
+      if (summitLon != null) 'summit_lon': summitLon,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CoursesCompanion copyWith({
+    Value<String>? id,
+    Value<String>? mountainName,
+    Value<String>? name,
+    Value<String>? startName,
+    Value<String>? endName,
+    Value<double>? distanceM,
+    Value<int?>? officialTimeMin,
+    Value<String?>? officialDifficulty,
+    Value<String>? pathJson,
+    Value<double>? summitLat,
+    Value<double>? summitLon,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return CoursesCompanion(
+      id: id ?? this.id,
+      mountainName: mountainName ?? this.mountainName,
+      name: name ?? this.name,
+      startName: startName ?? this.startName,
+      endName: endName ?? this.endName,
+      distanceM: distanceM ?? this.distanceM,
+      officialTimeMin: officialTimeMin ?? this.officialTimeMin,
+      officialDifficulty: officialDifficulty ?? this.officialDifficulty,
+      pathJson: pathJson ?? this.pathJson,
+      summitLat: summitLat ?? this.summitLat,
+      summitLon: summitLon ?? this.summitLon,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (mountainName.present) {
+      map['mountain_name'] = Variable<String>(mountainName.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (startName.present) {
+      map['start_name'] = Variable<String>(startName.value);
+    }
+    if (endName.present) {
+      map['end_name'] = Variable<String>(endName.value);
+    }
+    if (distanceM.present) {
+      map['distance_m'] = Variable<double>(distanceM.value);
+    }
+    if (officialTimeMin.present) {
+      map['official_time_min'] = Variable<int>(officialTimeMin.value);
+    }
+    if (officialDifficulty.present) {
+      map['official_difficulty'] = Variable<String>(officialDifficulty.value);
+    }
+    if (pathJson.present) {
+      map['path_json'] = Variable<String>(pathJson.value);
+    }
+    if (summitLat.present) {
+      map['summit_lat'] = Variable<double>(summitLat.value);
+    }
+    if (summitLon.present) {
+      map['summit_lon'] = Variable<double>(summitLon.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CoursesCompanion(')
+          ..write('id: $id, ')
+          ..write('mountainName: $mountainName, ')
+          ..write('name: $name, ')
+          ..write('startName: $startName, ')
+          ..write('endName: $endName, ')
+          ..write('distanceM: $distanceM, ')
+          ..write('officialTimeMin: $officialTimeMin, ')
+          ..write('officialDifficulty: $officialDifficulty, ')
+          ..write('pathJson: $pathJson, ')
+          ..write('summitLat: $summitLat, ')
+          ..write('summitLon: $summitLon, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $ActivitiesTable activities = $ActivitiesTable(this);
   late final $TrackPointsTable trackPoints = $TrackPointsTable(this);
+  late final $CoursesTable courses = $CoursesTable(this);
   late final Index trackPointsActivity = Index(
     'track_points_activity',
     'CREATE INDEX track_points_activity ON track_points (activity_id)',
@@ -1605,6 +2333,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     activities,
     trackPoints,
+    courses,
     trackPointsActivity,
   ];
   @override
@@ -2565,6 +3294,346 @@ typedef $$TrackPointsTableProcessedTableManager =
       TrackPointRow,
       PrefetchHooks Function({bool activityId})
     >;
+typedef $$CoursesTableCreateCompanionBuilder = CoursesCompanion Function({
+  required String id,
+  required String mountainName,
+  required String name,
+  required String startName,
+  required String endName,
+  required double distanceM,
+  Value<int?> officialTimeMin,
+  Value<String?> officialDifficulty,
+  required String pathJson,
+  required double summitLat,
+  required double summitLon,
+  required DateTime updatedAt,
+  Value<int> rowid,
+});
+typedef $$CoursesTableUpdateCompanionBuilder = CoursesCompanion Function({
+  Value<String> id,
+  Value<String> mountainName,
+  Value<String> name,
+  Value<String> startName,
+  Value<String> endName,
+  Value<double> distanceM,
+  Value<int?> officialTimeMin,
+  Value<String?> officialDifficulty,
+  Value<String> pathJson,
+  Value<double> summitLat,
+  Value<double> summitLon,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$CoursesTableFilterComposer
+    extends Composer<_$AppDatabase, $CoursesTable> {
+  $$CoursesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mountainName => $composableBuilder(
+    column: $table.mountainName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startName => $composableBuilder(
+    column: $table.startName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get endName => $composableBuilder(
+    column: $table.endName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get officialTimeMin => $composableBuilder(
+    column: $table.officialTimeMin,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get officialDifficulty => $composableBuilder(
+    column: $table.officialDifficulty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pathJson => $composableBuilder(
+    column: $table.pathJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get summitLat => $composableBuilder(
+    column: $table.summitLat,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get summitLon => $composableBuilder(
+    column: $table.summitLon,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CoursesTableOrderingComposer
+    extends Composer<_$AppDatabase, $CoursesTable> {
+  $$CoursesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mountainName => $composableBuilder(
+    column: $table.mountainName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startName => $composableBuilder(
+    column: $table.startName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get endName => $composableBuilder(
+    column: $table.endName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get distanceM => $composableBuilder(
+    column: $table.distanceM,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get officialTimeMin => $composableBuilder(
+    column: $table.officialTimeMin,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get officialDifficulty => $composableBuilder(
+    column: $table.officialDifficulty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pathJson => $composableBuilder(
+    column: $table.pathJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get summitLat => $composableBuilder(
+    column: $table.summitLat,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get summitLon => $composableBuilder(
+    column: $table.summitLon,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CoursesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CoursesTable> {
+  $$CoursesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get mountainName => $composableBuilder(
+    column: $table.mountainName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get startName =>
+      $composableBuilder(column: $table.startName, builder: (column) => column);
+
+  GeneratedColumn<String> get endName =>
+      $composableBuilder(column: $table.endName, builder: (column) => column);
+
+  GeneratedColumn<double> get distanceM =>
+      $composableBuilder(column: $table.distanceM, builder: (column) => column);
+
+  GeneratedColumn<int> get officialTimeMin => $composableBuilder(
+    column: $table.officialTimeMin,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get officialDifficulty => $composableBuilder(
+    column: $table.officialDifficulty,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pathJson =>
+      $composableBuilder(column: $table.pathJson, builder: (column) => column);
+
+  GeneratedColumn<double> get summitLat =>
+      $composableBuilder(column: $table.summitLat, builder: (column) => column);
+
+  GeneratedColumn<double> get summitLon =>
+      $composableBuilder(column: $table.summitLon, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$CoursesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CoursesTable,
+          CourseRow,
+          $$CoursesTableFilterComposer,
+          $$CoursesTableOrderingComposer,
+          $$CoursesTableAnnotationComposer,
+          $$CoursesTableCreateCompanionBuilder,
+          $$CoursesTableUpdateCompanionBuilder,
+          (CourseRow, BaseReferences<_$AppDatabase, $CoursesTable, CourseRow>),
+          CourseRow,
+          PrefetchHooks Function()
+        > {
+  $$CoursesTableTableManager(_$AppDatabase db, $CoursesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CoursesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CoursesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CoursesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> mountainName = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> startName = const Value.absent(),
+                Value<String> endName = const Value.absent(),
+                Value<double> distanceM = const Value.absent(),
+                Value<int?> officialTimeMin = const Value.absent(),
+                Value<String?> officialDifficulty = const Value.absent(),
+                Value<String> pathJson = const Value.absent(),
+                Value<double> summitLat = const Value.absent(),
+                Value<double> summitLon = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CoursesCompanion(
+                id: id,
+                mountainName: mountainName,
+                name: name,
+                startName: startName,
+                endName: endName,
+                distanceM: distanceM,
+                officialTimeMin: officialTimeMin,
+                officialDifficulty: officialDifficulty,
+                pathJson: pathJson,
+                summitLat: summitLat,
+                summitLon: summitLon,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String mountainName,
+                required String name,
+                required String startName,
+                required String endName,
+                required double distanceM,
+                Value<int?> officialTimeMin = const Value.absent(),
+                Value<String?> officialDifficulty = const Value.absent(),
+                required String pathJson,
+                required double summitLat,
+                required double summitLon,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => CoursesCompanion.insert(
+                id: id,
+                mountainName: mountainName,
+                name: name,
+                startName: startName,
+                endName: endName,
+                distanceM: distanceM,
+                officialTimeMin: officialTimeMin,
+                officialDifficulty: officialDifficulty,
+                pathJson: pathJson,
+                summitLat: summitLat,
+                summitLon: summitLon,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$CoursesTable, CourseRow>(table),
+                  BaseReferences<_$AppDatabase, $CoursesTable, CourseRow>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CoursesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CoursesTable,
+      CourseRow,
+      $$CoursesTableFilterComposer,
+      $$CoursesTableOrderingComposer,
+      $$CoursesTableAnnotationComposer,
+      $$CoursesTableCreateCompanionBuilder,
+      $$CoursesTableUpdateCompanionBuilder,
+      (CourseRow, BaseReferences<_$AppDatabase, $CoursesTable, CourseRow>),
+      CourseRow,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2573,4 +3642,6 @@ class $AppDatabaseManager {
       $$ActivitiesTableTableManager(_db, _db.activities);
   $$TrackPointsTableTableManager get trackPoints =>
       $$TrackPointsTableTableManager(_db, _db.trackPoints);
+  $$CoursesTableTableManager get courses =>
+      $$CoursesTableTableManager(_db, _db.courses);
 }

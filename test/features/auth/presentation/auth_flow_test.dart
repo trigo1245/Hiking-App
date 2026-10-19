@@ -22,7 +22,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(repo.calls, ['signInWithGoogle']);
-    expect(find.text('홈 화면을 준비하고 있어요'), findsOneWidget);
+    expect(find.text('산, 코스 이름으로 검색'), findsOneWidget);
 
     await tester.tap(find.text('내 정보').last);
     await tester.pumpAndSettle();
@@ -41,7 +41,7 @@ void main() {
 
     repo.completeKakaoSignIn();
     await tester.pumpAndSettle();
-    expect(find.text('홈 화면을 준비하고 있어요'), findsOneWidget);
+    expect(find.text('산, 코스 이름으로 검색'), findsOneWidget);
   });
 
   testWidgets('카카오 로그인 오류가 나중에 도착하면 안내 문구를 띄운다', (tester) async {

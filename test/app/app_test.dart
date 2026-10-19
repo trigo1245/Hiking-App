@@ -14,7 +14,7 @@ void main() {
     );
 
     // 처음에는 홈 화면
-    expect(find.text('홈 화면을 준비하고 있어요'), findsOneWidget);
+    expect(find.text('산, 코스 이름으로 검색'), findsOneWidget);
 
     await tester.tap(find.text('기록'));
     await tester.pumpAndSettle();
@@ -26,6 +26,6 @@ void main() {
 
     await tester.tap(find.text('홈').last);
     await tester.pumpAndSettle();
-    expect(find.text('홈 화면을 준비하고 있어요'), findsOneWidget);
+    expect(find.text('산, 코스 이름으로 검색'), findsOneWidget);
   });
 }
