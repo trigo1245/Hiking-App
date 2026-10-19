@@ -56,3 +56,10 @@ key.properties
 
 # Claude Code 개인 설정
 .claude/settings.local.json
+
+# 개발용 스크립트 전용 비밀 값 (브이월드 API 키 등). 앱에 들어가지 않는다.
+tool_env.json
+
+# 등산로 원본 중 큰 파일 (공유 드라이브에 보관)
+data/trails/raw/**/*.dxf
+data/trails/raw/**/*.zip
