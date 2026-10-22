@@ -32,4 +32,20 @@ class FakeActivityRemote implements ActivityRemote {
     if (failWith case final error?) throw error;
     this.completions[activityId] = completions;
   }
+
+  /// 받기에 실패할 GPX 경로 (일부만 실패하는 경우 확인용)
+  final brokenGpx = <String>{};
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchMyActivities() async {
+    if (failWith case final error?) throw error;
+    return [for (final r in rows.values) Map<String, dynamic>.from(r)];
+  }
+
+  @override
+  Future<String> downloadGpx(String path) async {
+    if (failWith case final error?) throw error;
+    if (brokenGpx.contains(path)) throw Exception('download failed');
+    return gpxFiles[path]!;
+  }
 }

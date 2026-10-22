@@ -10,6 +10,7 @@ import '../features/subscription/data/subscription_remote.dart';
 
 /// 서버와 주고받는 작업을 하는 시점을 정한다.
 /// - 올리지 못한 기록 다시 올리기
+/// - 다른 기기에서 올린 내 기록 받기 (기기를 바꾸거나 다시 설치해도 기록·통계가 이어지게)
 /// - 최신 코스 받아 기기에 저장하기 (오프라인 지도용)
 ///
 /// 시점: 로그인 후 하단 탭 화면이 처음 뜰 때, 앱이 다른 앱이나 잠금 화면에서 돌아올 때
@@ -44,7 +45,9 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
   }
 
   void _sync() {
-    unawaited(ref.read(uploadActionsProvider).uploadPending());
+    final records = ref.read(uploadActionsProvider);
+    // 이 기기의 기록을 먼저 올린 뒤, 다른 기기에서 올린 기록을 받는다.
+    unawaited(records.uploadPending().then((_) => records.downloadMissing()));
     unawaited(ref.read(courseRepositoryProvider).sync());
     // 다른 사람이 정복자를 바꿨을 수 있으니 다시 받는다.
     ref.invalidate(conquerorsProvider);

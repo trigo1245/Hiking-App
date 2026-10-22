@@ -10,7 +10,7 @@ String formatHourMinute(Duration d) =>
     '${d.inHours}:${(d.inMinutes % 60).toString().padLeft(2, '0')}';
 
 /// 고도 그래프 (가로: 지난 시간, 세로: 고도).
-/// 휴식 구간은 초록 배경, 위험 구간(급경사)은 선을 빨간색으로 칠한다.
+/// 휴식 구간은 초록, 위험 구간(급경사)은 빨강으로 선과 선 아래 채색을 함께 바꾼다.
 /// 손가락으로 누르거나 끌면 그 시각의 고도와 구간 종류를 보여 준다.
 class ElevationChart extends StatefulWidget {
   const ElevationChart({
@@ -120,7 +120,7 @@ class _ElevationChartState extends State<ElevationChart> {
           spacing: AppSpacing.lg,
           children: [
             _LegendItem(
-              color: AppColors.success.withValues(alpha: 0.25),
+              color: AppColors.success,
               label: '휴식 ${widget.rests.length}번',
             ),
             _LegendItem(
@@ -196,30 +196,6 @@ class _ElevationPainter extends CustomPainter {
       top + (1 - (s.altitudeM - minA) / (maxA - minA)) * h,
     );
 
-    // 휴식 구간: 초록 배경 띠
-    final restPaint = Paint()
-      ..color = AppColors.success.withValues(alpha: 0.18);
-    for (final r in rests) {
-      canvas.drawRect(
-        Rect.fromLTRB(
-          xOf(r.start),
-          0,
-          math.max(xOf(r.end), xOf(r.start) + 2),
-          size.height,
-        ),
-        restPaint,
-      );
-    }
-
-    // 흐린 가로 기준선 3개
-    final grid = Paint()
-      ..color = AppColors.divider
-      ..strokeWidth = 1;
-    for (var i = 0; i <= 2; i++) {
-      final y = top + h * i / 2;
-      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
-    }
-
     final line = Path()..moveTo(at(samples.first).dx, at(samples.first).dy);
     for (final s in samples.skip(1)) {
       line.lineTo(at(s).dx, at(s).dy);
@@ -228,31 +204,52 @@ class _ElevationPainter extends CustomPainter {
       ..lineTo(at(samples.last).dx, size.height)
       ..lineTo(at(samples.first).dx, size.height)
       ..close();
-
-    canvas.drawPath(
-      area,
-      Paint()..color = AppColors.primary.withValues(alpha: 0.12),
-    );
     Paint stroke(Color color) => Paint()
       ..color = color
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2
       ..strokeJoin = StrokeJoin.round;
-    canvas.drawPath(line, stroke(AppColors.primary));
 
-    // 위험 구간: 그 시간 범위만 잘라서 같은 선을 빨간색으로 덧그린다.
-    for (final d in dangers) {
+    // 구간별 색: 위험(빨강) 위에 휴식(초록)을 칠해, 겹치면 휴식이 보이게 한다.
+    final sections = [
+      for (final d in dangers) (d, AppColors.danger),
+      for (final r in rests) (r, AppColors.success),
+    ];
+    Rect clipOf(TimeRange r) => Rect.fromLTRB(
+      xOf(r.start),
+      0,
+      math.max(xOf(r.end), xOf(r.start) + 3),
+      size.height,
+    );
+
+    // 1) 선 아래 반투명 채색: 기본은 파랑, 구간은 그 구간 색
+    canvas.drawPath(area, Paint()..color = _fill(AppColors.primary));
+    for (final (range, color) in sections) {
       canvas
         ..save()
-        ..clipRect(
-          Rect.fromLTRB(
-            xOf(d.start),
-            0,
-            math.max(xOf(d.end), xOf(d.start) + 3),
-            size.height,
-          ),
-        )
-        ..drawPath(line, stroke(AppColors.danger)..strokeWidth = 3)
+        ..clipRect(clipOf(range))
+        // 파란 채색을 지우고 구간 색으로 다시 칠한다.
+        ..drawPath(area, Paint()..color = AppColors.background)
+        ..drawPath(area, Paint()..color = _fill(color))
+        ..restore();
+    }
+
+    // 2) 흐린 가로 기준선 3개
+    final grid = Paint()
+      ..color = AppColors.divider
+      ..strokeWidth = 1;
+    for (var i = 0; i <= 2; i++) {
+      final y = top + h * i / 2;
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), grid);
+    }
+
+    // 3) 선: 기본은 파랑, 구간은 그 시간 범위만 잘라 구간 색으로 덧그린다.
+    canvas.drawPath(line, stroke(AppColors.primary));
+    for (final (range, color) in sections) {
+      canvas
+        ..save()
+        ..clipRect(clipOf(range))
+        ..drawPath(line, stroke(color)..strokeWidth = 3)
         ..restore();
     }
 
@@ -267,8 +264,18 @@ class _ElevationPainter extends CustomPainter {
       );
       // 점 둘레에 배경색 테두리를 둘러 선 위에서도 보이게 한다.
       canvas.drawCircle(p, 6, Paint()..color = AppColors.background);
-      canvas.drawCircle(p, 4, Paint()..color = AppColors.primary);
+      canvas.drawCircle(p, 4, Paint()..color = _colorAt(samples[i].elapsed));
     }
+  }
+
+  /// 선 아래 반투명 채색
+  static Color _fill(Color color) => color.withValues(alpha: 0.14);
+
+  /// 그 시각이 속한 구간의 색 (휴식 > 위험 > 기본)
+  Color _colorAt(Duration t) {
+    if (rests.any((r) => r.contains(t))) return AppColors.success;
+    if (dangers.any((r) => r.contains(t))) return AppColors.danger;
+    return AppColors.primary;
   }
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/database/app_database.dart';
 import '../../recording/domain/recording_session.dart';
+import '../../recording/domain/track_point.dart';
 import '../domain/activity_summary.dart';
 
 /// DB 행을 화면에서 쓰는 요약으로 바꾼다.
@@ -53,6 +54,60 @@ class ActivitiesRepository {
       )
       ..orderBy([(a) => OrderingTerm.asc(a.startedAt)]);
     return [for (final r in await query.get()) r.id];
+  }
+
+  /// 기기에 있는 모든 기록 ID (기록 중인 것 포함, 계정 구분 없이)
+  Future<Set<String>> localIds() async {
+    final rows = await (_db.selectOnly(
+      _db.activities,
+    )..addColumns([_db.activities.id])).get();
+    return {for (final r in rows) r.read(_db.activities.id)!};
+  }
+
+  /// 서버에서 받은 기록을 끝난 기록·업로드 완료 상태로 저장한다. 요약과 점을 한 번에 넣는다.
+  Future<void> insertDownloaded(
+    ActivitySummary s, {
+    required String userId,
+    required List<TrackPoint> points,
+  }) async {
+    await _db.transaction(() async {
+      await _db
+          .into(_db.activities)
+          .insert(
+            ActivitiesCompanion.insert(
+              id: s.id,
+              userId: Value(userId),
+              title: Value(s.title.isEmpty ? null : s.title),
+              status: RecordingStatus.finished.name,
+              startedAt: s.startedAt,
+              endedAt: Value(s.endedAt),
+              currentSegment: Value(points.isEmpty ? 0 : points.last.segment),
+              elapsedS: Value(s.elapsed.inSeconds),
+              movingS: Value(s.moving.inSeconds),
+              distanceM: Value(s.distanceM),
+              elevationGainM: Value(s.elevationGainM),
+              maxAltitudeM: Value(s.maxAltitudeM),
+              pointCount: Value(s.pointCount),
+              isFlagged: Value(s.isFlagged),
+              uploadStatus: Value(UploadStatus.done.name),
+              createdAt: s.startedAt,
+            ),
+          );
+      await _db.batch(
+        (b) => b.insertAll(_db.trackPoints, [
+          for (final p in points)
+            TrackPointsCompanion.insert(
+              activityId: s.id,
+              segment: p.segment,
+              latitude: p.latitude,
+              longitude: p.longitude,
+              altitude: Value(p.altitude),
+              accuracy: p.accuracy,
+              recordedAt: p.recordedAt,
+            ),
+        ]),
+      );
+    });
   }
 
   /// 업로드 상태를 바꾼다. 사용자 ID가 없던 예전 기록은 이때 [userId]로 채운다.

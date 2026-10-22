@@ -2,6 +2,8 @@ import 'dart:ui';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/core/database/app_database.dart';
+import 'package:hiking_app/features/activities/data/activities_repository.dart';
+import 'package:hiking_app/features/activities/data/activity_uploader.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/courses/domain/competition.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
@@ -166,6 +168,36 @@ void main() {
     // 일반 사용자는 종합 분석 대신 안내를 본다.
     expect(find.text('내 산행을 종합해서 분석해 보세요'), findsOneWidget);
     expect(find.text('프리미엄 종합 분석'), findsNothing);
+  });
+
+  testWidgets('다른 휴대폰에서 올린 기록을 앱이 뜰 때 받아 내역에 보여 준다', (tester) async {
+    // 예전 휴대폰: 기록을 만들어 서버에 올린다.
+    final remote = FakeActivityRemote();
+    final oldPhone = testDatabase();
+    await tester.runAsync(() async {
+      final id = await seedFinished(oldPhone);
+      await ActivityUploader(
+        activities: ActivitiesRepository(oldPhone),
+        recording: RecordingRepository(oldPhone),
+        remote: remote,
+        loadCourses: () async => const [],
+      ).upload(id, userId: 'u1');
+    });
+    expect(remote.rows, hasLength(1));
+
+    // 새 휴대폰: 기기 DB가 비어 있어도 같은 계정으로 로그인하면 받아 온다.
+    await pumpApp(
+      tester,
+      authRepository: signedIn(),
+      database: testDatabase(),
+      remote: remote,
+      clock: clock,
+    );
+    await settleUploads(tester);
+    await openRecordsTab(tester);
+
+    expect(find.text('금정산 고당봉'), findsOneWidget);
+    expect(find.text('업로드 완료'), findsOneWidget);
   });
 
   testWidgets('기록이 없으면 다음 행동을 안내한다', (tester) async {

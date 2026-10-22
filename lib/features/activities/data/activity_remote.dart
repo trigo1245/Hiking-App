@@ -20,6 +20,12 @@ abstract interface class ActivityRemote {
     String activityId,
     List<CourseCompletion> completions,
   );
+
+  /// 서버에 올라간 내 기록 요약 전체 (다른 기기에서 기록을 받을 때). RLS로 본인 행만 온다.
+  Future<List<Map<String, dynamic>>> fetchMyActivities();
+
+  /// tracks 버킷의 [path]에 있는 GPX를 받는다.
+  Future<String> downloadGpx(String path);
 }
 
 /// 서버가 요청을 받고 거절한 오류인지. (아니면 네트워크 문제로 본다)
@@ -70,6 +76,40 @@ class SupabaseActivityRemote implements ActivityRemote {
       },
     );
   }
+
+  @override
+  Future<List<Map<String, dynamic>>> fetchMyActivities() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    return _client.from('activities').select().eq('user_id', userId);
+  }
+
+  @override
+  Future<String> downloadGpx(String path) async {
+    final bytes = await _client.storage.from('tracks').download(path);
+    return utf8.decode(bytes);
+  }
+}
+
+/// 서버 activities 행을 요약으로 바꾼다. 서버에 있으니 업로드 상태는 "완료"다.
+ActivitySummary activitySummaryFromServer(Map<String, dynamic> r) {
+  DateTime time(String key) => DateTime.parse(r[key] as String).toLocal();
+  double? real(String key) => (r[key] as num?)?.toDouble();
+  final startedAt = time('started_at');
+  return ActivitySummary(
+    id: r['id'] as String,
+    title: (r['title'] as String?) ?? '',
+    startedAt: startedAt,
+    endedAt: r['ended_at'] == null ? startedAt : time('ended_at'),
+    elapsed: Duration(seconds: (r['elapsed_s'] as int?) ?? 0),
+    moving: Duration(seconds: (r['moving_s'] as int?) ?? 0),
+    distanceM: real('distance_m') ?? 0,
+    elevationGainM: real('elevation_gain_m') ?? 0,
+    maxAltitudeM: real('max_altitude_m'),
+    pointCount: (r['point_count'] as int?) ?? 0,
+    isFlagged: (r['is_flagged'] as bool?) ?? false,
+    uploadStatus: UploadStatus.done,
+  );
 }
 
 /// 서버 activities 테이블 한 행. (CLAUDE.md 7장)
