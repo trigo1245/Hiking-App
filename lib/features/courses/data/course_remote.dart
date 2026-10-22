@@ -61,6 +61,10 @@ Course courseFromCatalogRow(Map<String, dynamic> row) {
       final String s => DateTime.parse(s),
       _ => null,
     },
+    elevations: switch (row['elevations_m']) {
+      final List<dynamic> list => [for (final e in list) (e as num).toDouble()],
+      _ => null,
+    },
   );
 }
 

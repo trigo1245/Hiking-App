@@ -84,6 +84,9 @@ class Courses extends Table {
   RealColumn get summitLon => real()();
   DateTimeColumn get updatedAt => dateTime()();
 
+  /// 경로 점마다의 고도 [m, ...] JSON 문자열 (스키마 4). 없으면 null.
+  TextColumn get elevationsJson => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {id};
 }
@@ -98,13 +101,18 @@ class AppDatabase extends _$AppDatabase {
   /// 테이블 구조를 바꾸면 1 올리고, 아래 onUpgrade에 바꾸는 방법을 적는다.
   /// (이미 설치된 앱의 DB를 지우지 않고 고치기 위해)
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
     onUpgrade: (m, from, to) async {
       if (from < 2) await m.addColumn(activities, activities.userId);
       if (from < 3) await m.createTable(courses);
+      if (from < 4) {
+        await m.addColumn(courses, courses.elevationsJson);
+        // 고도가 없는 예전 저장본을 비워, 다음 동기화 때 코스를 고도와 함께 다시 받게 한다.
+        await delete(courses).go();
+      }
     },
     beforeOpen: (details) async {
       // 기록을 지우면 위치 점도 함께 지워지도록 외래 키를 켠다.

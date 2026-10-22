@@ -41,6 +41,7 @@ Course testCourse({
   String mountainName = '승학산',
   String name = '동아대 코스',
   DateTime? updatedAt,
+  List<double>? elevations,
 }) => Course(
   id: id,
   mountainName: mountainName,
@@ -57,4 +58,6 @@ Course testCourse({
   ],
   summit: const GeoPoint(35.11683, 128.97982),
   updatedAt: updatedAt ?? DateTime.utc(2026, 10, 20, 9),
+  // 경로 점 3개마다의 고도 (주면 맞춤 예상 시간을 계산할 수 있다)
+  elevations: elevations,
 );

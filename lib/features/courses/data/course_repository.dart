@@ -68,6 +68,9 @@ class CourseRepository {
               summitLon: c.summit.lon,
               // 서버의 수정 시각을 그대로 저장해야 다음 비교가 맞는다.
               updatedAt: c.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
+              elevationsJson: Value(
+                c.elevations == null ? null : jsonEncode(c.elevations),
+              ),
             ),
         ]),
       );
@@ -90,6 +93,12 @@ class CourseRepository {
     ],
     summit: GeoPoint(r.summitLat, r.summitLon),
     updatedAt: r.updatedAt,
+    elevations: switch (r.elevationsJson) {
+      final String json => [
+        for (final e in jsonDecode(json) as List) (e as num).toDouble(),
+      ],
+      null => null,
+    },
   );
 }
 

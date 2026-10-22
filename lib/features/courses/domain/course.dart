@@ -20,6 +20,7 @@ class Course {
     this.officialTimeMin,
     this.officialDifficulty,
     this.updatedAt,
+    this.elevations,
   });
 
   final String id;
@@ -41,6 +42,9 @@ class Course {
 
   /// 서버에서 마지막으로 고친 시각 (바뀌었을 때만 내려받기에 쓴다)
   final DateTime? updatedAt;
+
+  /// [path]의 점마다 해발 고도(m, SRTM 30m). 맞춤 예상 소요시간에 쓴다. 없으면 null.
+  final List<double>? elevations;
 
   GeoPoint get start => path.first;
 

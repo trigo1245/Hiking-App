@@ -11,6 +11,7 @@ import 'package:hiking_app/features/courses/domain/competition.dart';
 import '../../../helpers/pump_app.dart';
 import '../../auth/fake_auth_repository.dart';
 import '../fake_competition_remote.dart';
+import '../../fakes_phase2.dart';
 import '../fake_course_remote.dart';
 
 void main() {
@@ -19,8 +20,10 @@ void main() {
   /// 코스 상세 화면을 연다.
   Future<void> openDetail(
     WidgetTester tester,
-    FakeCompetitionRemote competition,
-  ) async {
+    FakeCompetitionRemote competition, {
+    bool premium = false,
+    List<double>? elevations,
+  }) async {
     // 랭킹까지 한 화면에 보이도록 세로로 긴 화면을 쓴다.
     tester.view.physicalSize = const Size(800, 3000);
     tester.view.devicePixelRatio = 1;
@@ -31,9 +34,15 @@ void main() {
         user: const AppUser(id: 'u1', provider: SocialProvider.google),
       ),
       courseRemote: FakeCourseRemote([
-        testCourse(id: 'a', mountainName: '금정산', name: '범어사 코스'),
+        testCourse(
+          id: 'a',
+          mountainName: '금정산',
+          name: '범어사 코스',
+          elevations: elevations,
+        ),
       ]),
       competition: competition,
+      subscription: FakeSubscriptionRemote(active: premium),
       clock: clock,
     );
     await tester.runAsync(
@@ -133,5 +142,39 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('고당봉지킴이#1001'), findsOneWidget);
+  });
+
+  testWidgets('일반 사용자에게는 맞춤 예상 대신 프리미엄 안내 한 줄을 보여 준다', (tester) async {
+    await openDetail(tester, FakeCompetitionRemote());
+
+    expect(find.textContaining('프리미엄에서 볼 수 있어요'), findsOneWidget);
+    expect(find.text('나에게 맞춘 예상'), findsNothing);
+  });
+
+  testWidgets('구독자는 고도로 계산한 맞춤 예상 시간을 본다 (기록이 적으면 표준 기준)', (tester) async {
+    final competition = FakeCompetitionRemote()
+      ..stats = const CourseStats(
+        completionCount: 10,
+        averageAscent: Duration(minutes: 40),
+      );
+    // 3개 점, 약 1km에 120m 오르막
+    await openDetail(
+      tester,
+      competition,
+      premium: true,
+      elevations: const [200, 260, 320],
+    );
+
+    expect(find.text('나에게 맞춘 예상'), findsOneWidget);
+    expect(find.textContaining('약 '), findsWidgets);
+    expect(find.textContaining('오르는 시간 · 걷는 시간'), findsOneWidget);
+    expect(find.textContaining('완주자 평균보다'), findsOneWidget);
+    expect(find.textContaining('지금은 표준 등산객 기준이에요'), findsOneWidget);
+  });
+
+  testWidgets('코스에 고도가 없으면 계산할 수 없다고 알려 준다', (tester) async {
+    await openDetail(tester, FakeCompetitionRemote(), premium: true);
+
+    expect(find.text('이 코스는 고도 정보가 없어 예상 시간을 계산할 수 없어요'), findsOneWidget);
   });
 }

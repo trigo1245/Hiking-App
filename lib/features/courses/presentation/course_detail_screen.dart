@@ -21,7 +21,9 @@ import '../../subscription/data/subscription_remote.dart';
 import '../data/course_repository.dart';
 import '../domain/competition.dart';
 import '../domain/course.dart';
+import '../domain/course_estimate.dart';
 import 'competition_providers.dart';
+import 'course_estimate_provider.dart';
 import 'course_map.dart';
 import 'course_reviews_section.dart';
 
@@ -81,6 +83,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                 _CoursePathMap(course: course),
                 const SizedBox(height: AppSpacing.xxl),
                 _StatsCard(courseId: course.id),
+                const SizedBox(height: AppSpacing.md),
+                _PersonalEstimate(courseId: course.id),
                 const SizedBox(height: AppSpacing.xxxl),
                 _ConquerorSection(courseId: course.id),
                 const SizedBox(height: AppSpacing.xxxl),
@@ -249,6 +253,154 @@ class _StatsCard extends ConsumerWidget {
                   ),
               ],
             ),
+    );
+  }
+}
+
+/// 구독자: 내 기록으로 계산한 예상 소요시간(오르는 시간, 휴식 포함)·맞춤 난이도·안전 안내.
+/// 일반 사용자: 프리미엄 안내 한 줄.
+class _PersonalEstimate extends ConsumerWidget {
+  const _PersonalEstimate({required this.courseId});
+
+  final String courseId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!ref.watch(isPremiumProvider)) {
+      return Pressable(
+        onPressed: () => context.push(AppRoutes.premium),
+        child: Text.rich(
+          TextSpan(
+            children: [
+              const TextSpan(
+                text: '내 맞춤 예상 시간과 난이도는 ',
+                style: AppTypography.caption,
+              ),
+              TextSpan(
+                text: '프리미엄에서 볼 수 있어요',
+                style: AppTypography.caption.copyWith(color: AppColors.primary),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final estimate = ref.watch(courseEstimateProvider(courseId));
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      decoration: BoxDecoration(
+        color: AppColors.backgroundGrouped,
+        borderRadius: BorderRadius.circular(AppRadius.card),
+      ),
+      child: switch (estimate) {
+        AsyncData(value: null) => Text(
+          '이 코스는 고도 정보가 없어 예상 시간을 계산할 수 없어요',
+          style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+        ),
+        AsyncData(value: final e?) => _EstimateBody(estimate: e),
+        AsyncError() => Text(
+          '예상 시간을 계산하지 못했어요',
+          style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+        ),
+        _ => const SkeletonBox(width: double.infinity, height: 96),
+      },
+    );
+  }
+}
+
+class _EstimateBody extends StatelessWidget {
+  const _EstimateBody({required this.estimate});
+
+  final CourseEstimate estimate;
+
+  static String _minutes(Duration d) => formatHoursMinutes(d);
+
+  @override
+  Widget build(BuildContext context) {
+    final e = estimate;
+    final secondary = AppTypography.body.copyWith(
+      color: AppColors.textSecondary,
+    );
+    final compare = e.compareTo;
+    final diff = compare == null ? null : e.total - compare.time;
+    final mine = e.myRecords;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          '나에게 맞춘 예상',
+          style: AppTypography.caption.copyWith(color: AppColors.primary),
+        ),
+        const SizedBox(height: AppSpacing.xs),
+        Text('약 ${_minutes(e.total)}', style: AppTypography.title),
+        Text(
+          '오르는 시간 · 걷는 시간 ${_minutes(e.walking)} + 휴식 ${_minutes(e.rest)}',
+          style: secondary,
+        ),
+        if (e.difficulty case final d?) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(switch (d) {
+            PersonalDifficulty.easier => '평소보다 쉬운 편이에요',
+            PersonalDifficulty.usual => '평소 산행과 비슷한 정도예요',
+            PersonalDifficulty.harder => '평소보다 힘든 편이에요',
+          }, style: AppTypography.subtitle),
+          Text(
+            '평소 오르막 걷는 시간의 ${e.workloadRatio!.toStringAsFixed(1)}배',
+            style: secondary,
+          ),
+        ],
+        if (compare != null && diff != null) ...[
+          const SizedBox(height: AppSpacing.md),
+          Text(
+            diff.inMinutes.abs() < 1
+                ? '${compare.label}과 비슷하게 도착할 거예요'
+                : '${compare.label}보다 ${diff.inMinutes.abs()}분 '
+                      '${diff.isNegative ? '빨리' : '늦게'} 도착할 거예요',
+            style: AppTypography.body,
+          ),
+        ],
+        if (mine != null)
+          Text(
+            '내 기록 ${mine.count}번 · 평균 ${formatClock(mine.average)} · '
+            '최고 ${formatClock(mine.best)}',
+            style: AppTypography.body,
+          ),
+        for (final w in e.warnings) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 상태 색은 아이콘과 함께 쓴다 (색만으로 구분하지 않기).
+              const Icon(
+                Icons.warning_amber_rounded,
+                color: AppColors.danger,
+                size: 20,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Expanded(
+                child: Text(switch (w) {
+                  SteepSections(:final count, :final lengthM) =>
+                    '경사 30% 이상 급경사가 $count곳(약 ${lengthM.round()}m) 있어요.',
+                  SteepDownhillHabit() =>
+                    '급경사 내리막에서 빨라지는 편이에요. 같은 길로 내려올 때 특히 천천히 내려오세요.',
+                  HarderThanUsual() => '평소보다 힘든 코스예요. 물과 간식을 넉넉히 챙기고 일찍 출발하세요.',
+                }, style: AppTypography.body),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          e.personal
+              ? '최근 산행 ${e.basedOnHikes}번 기준 · 경사 보정(Tobler)'
+              : '산행 기록이 ${CourseEstimate.minHikes}번 쌓이면 나에게 맞춰 계산해요. '
+                    '지금은 표준 등산객 기준이에요.',
+          style: AppTypography.caption,
+        ),
+      ],
     );
   }
 }

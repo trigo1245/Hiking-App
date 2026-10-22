@@ -1722,6 +1722,17 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _elevationsJsonMeta = const VerificationMeta(
+    'elevationsJson',
+  );
+  @override
+  late final GeneratedColumn<String> elevationsJson = GeneratedColumn<String>(
+    'elevations_json',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -1736,6 +1747,7 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
     summitLat,
     summitLon,
     updatedAt,
+    elevationsJson,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -1847,6 +1859,15 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('elevations_json')) {
+      context.handle(
+        _elevationsJsonMeta,
+        elevationsJson.isAcceptableOrUnknown(
+          data['elevations_json']!,
+          _elevationsJsonMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -1904,6 +1925,10 @@ class $CoursesTable extends Courses with TableInfo<$CoursesTable, CourseRow> {
         DriftSqlType.dateTime,
         data['${effectivePrefix}updated_at'],
       )!,
+      elevationsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}elevations_json'],
+      ),
     );
   }
 
@@ -1929,6 +1954,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
   final double summitLat;
   final double summitLon;
   final DateTime updatedAt;
+
+  /// 경로 점마다의 고도 [m, ...] JSON 문자열 (스키마 4). 없으면 null.
+  final String? elevationsJson;
   const CourseRow({
     required this.id,
     required this.mountainName,
@@ -1942,6 +1970,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     required this.summitLat,
     required this.summitLon,
     required this.updatedAt,
+    this.elevationsJson,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -1962,6 +1991,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     map['summit_lat'] = Variable<double>(summitLat);
     map['summit_lon'] = Variable<double>(summitLon);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || elevationsJson != null) {
+      map['elevations_json'] = Variable<String>(elevationsJson);
+    }
     return map;
   }
 
@@ -1983,6 +2015,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       summitLat: Value(summitLat),
       summitLon: Value(summitLon),
       updatedAt: Value(updatedAt),
+      elevationsJson: elevationsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(elevationsJson),
     );
   }
 
@@ -2006,6 +2041,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       summitLat: serializer.fromJson<double>(json['summitLat']),
       summitLon: serializer.fromJson<double>(json['summitLon']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      elevationsJson: serializer.fromJson<String?>(json['elevationsJson']),
     );
   }
   @override
@@ -2024,6 +2060,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       'summitLat': serializer.toJson<double>(summitLat),
       'summitLon': serializer.toJson<double>(summitLon),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'elevationsJson': serializer.toJson<String?>(elevationsJson),
     };
   }
 
@@ -2040,6 +2077,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     double? summitLat,
     double? summitLon,
     DateTime? updatedAt,
+    Value<String?> elevationsJson = const Value.absent(),
   }) => CourseRow(
     id: id ?? this.id,
     mountainName: mountainName ?? this.mountainName,
@@ -2057,6 +2095,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     summitLat: summitLat ?? this.summitLat,
     summitLon: summitLon ?? this.summitLon,
     updatedAt: updatedAt ?? this.updatedAt,
+    elevationsJson: elevationsJson.present
+        ? elevationsJson.value
+        : this.elevationsJson,
   );
   CourseRow copyWithCompanion(CoursesCompanion data) {
     return CourseRow(
@@ -2078,6 +2119,9 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
       summitLat: data.summitLat.present ? data.summitLat.value : this.summitLat,
       summitLon: data.summitLon.present ? data.summitLon.value : this.summitLon,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      elevationsJson: data.elevationsJson.present
+          ? data.elevationsJson.value
+          : this.elevationsJson,
     );
   }
 
@@ -2095,7 +2139,8 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
           ..write('pathJson: $pathJson, ')
           ..write('summitLat: $summitLat, ')
           ..write('summitLon: $summitLon, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('elevationsJson: $elevationsJson')
           ..write(')'))
         .toString();
   }
@@ -2114,6 +2159,7 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
     summitLat,
     summitLon,
     updatedAt,
+    elevationsJson,
   );
   @override
   bool operator ==(Object other) =>
@@ -2130,7 +2176,8 @@ class CourseRow extends DataClass implements Insertable<CourseRow> {
           other.pathJson == this.pathJson &&
           other.summitLat == this.summitLat &&
           other.summitLon == this.summitLon &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.elevationsJson == this.elevationsJson);
 }
 
 class CoursesCompanion extends UpdateCompanion<CourseRow> {
@@ -2146,6 +2193,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
   final Value<double> summitLat;
   final Value<double> summitLon;
   final Value<DateTime> updatedAt;
+  final Value<String?> elevationsJson;
   final Value<int> rowid;
   const CoursesCompanion({
     this.id = const Value.absent(),
@@ -2160,6 +2208,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     this.summitLat = const Value.absent(),
     this.summitLon = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.elevationsJson = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CoursesCompanion.insert({
@@ -2175,6 +2224,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     required double summitLat,
     required double summitLon,
     required DateTime updatedAt,
+    this.elevationsJson = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        mountainName = Value(mountainName),
@@ -2199,6 +2249,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     Expression<double>? summitLat,
     Expression<double>? summitLon,
     Expression<DateTime>? updatedAt,
+    Expression<String>? elevationsJson,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2214,6 +2265,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
       if (summitLat != null) 'summit_lat': summitLat,
       if (summitLon != null) 'summit_lon': summitLon,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (elevationsJson != null) 'elevations_json': elevationsJson,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2231,6 +2283,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     Value<double>? summitLat,
     Value<double>? summitLon,
     Value<DateTime>? updatedAt,
+    Value<String?>? elevationsJson,
     Value<int>? rowid,
   }) {
     return CoursesCompanion(
@@ -2246,6 +2299,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
       summitLat: summitLat ?? this.summitLat,
       summitLon: summitLon ?? this.summitLon,
       updatedAt: updatedAt ?? this.updatedAt,
+      elevationsJson: elevationsJson ?? this.elevationsJson,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2289,6 +2343,9 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (elevationsJson.present) {
+      map['elevations_json'] = Variable<String>(elevationsJson.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2310,6 +2367,7 @@ class CoursesCompanion extends UpdateCompanion<CourseRow> {
           ..write('summitLat: $summitLat, ')
           ..write('summitLon: $summitLon, ')
           ..write('updatedAt: $updatedAt, ')
+          ..write('elevationsJson: $elevationsJson, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -3307,6 +3365,7 @@ typedef $$CoursesTableCreateCompanionBuilder = CoursesCompanion Function({
   required double summitLat,
   required double summitLon,
   required DateTime updatedAt,
+  Value<String?> elevationsJson,
   Value<int> rowid,
 });
 typedef $$CoursesTableUpdateCompanionBuilder = CoursesCompanion Function({
@@ -3322,6 +3381,7 @@ typedef $$CoursesTableUpdateCompanionBuilder = CoursesCompanion Function({
   Value<double> summitLat,
   Value<double> summitLon,
   Value<DateTime> updatedAt,
+  Value<String?> elevationsJson,
   Value<int> rowid,
 });
 
@@ -3391,6 +3451,11 @@ class $$CoursesTableFilterComposer
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
     column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get elevationsJson => $composableBuilder(
+    column: $table.elevationsJson,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -3463,6 +3528,11 @@ class $$CoursesTableOrderingComposer
     column: $table.updatedAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get elevationsJson => $composableBuilder(
+    column: $table.elevationsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CoursesTableAnnotationComposer
@@ -3515,6 +3585,11 @@ class $$CoursesTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get elevationsJson => $composableBuilder(
+    column: $table.elevationsJson,
+    builder: (column) => column,
+  );
 }
 
 class $$CoursesTableTableManager
@@ -3557,6 +3632,7 @@ class $$CoursesTableTableManager
                 Value<double> summitLat = const Value.absent(),
                 Value<double> summitLon = const Value.absent(),
                 Value<DateTime> updatedAt = const Value.absent(),
+                Value<String?> elevationsJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CoursesCompanion(
                 id: id,
@@ -3571,6 +3647,7 @@ class $$CoursesTableTableManager
                 summitLat: summitLat,
                 summitLon: summitLon,
                 updatedAt: updatedAt,
+                elevationsJson: elevationsJson,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -3587,6 +3664,7 @@ class $$CoursesTableTableManager
                 required double summitLat,
                 required double summitLon,
                 required DateTime updatedAt,
+                Value<String?> elevationsJson = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CoursesCompanion.insert(
                 id: id,
@@ -3601,6 +3679,7 @@ class $$CoursesTableTableManager
                 summitLat: summitLat,
                 summitLon: summitLon,
                 updatedAt: updatedAt,
+                elevationsJson: elevationsJson,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

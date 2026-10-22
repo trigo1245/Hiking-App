@@ -120,6 +120,7 @@ supabase/         # SQL 마이그레이션
 ### 2단계
 8. **지도 (홈 탭)**: 코스 선과 정복자 마커(프로필 사진). 코스를 누르면 코스 상세로 간다. 보기 전환 토글(최단시간 / 최다완등, 기본값 최다완등). 내 위치 표시. 출처 표시. 처음 코스를 받으면 모든 코스가 보이도록 지도 범위를 맞춘다
 9. **코스 상세**: 코스 전체 경로 지도(들머리 → 정상), 거리, 공식 소요시간, 완주 기록 평균 소요시간, 항목별 평점. 랭킹(이번 시즌 / 명예의 전당), 리뷰 목록. 안전 문구 상시 표시
+   - 완주 기록 카드 아래 **나에게 맞춘 예상**(구독자): 오르는 시간(휴식 포함), 맞춤 난이도, 완주자 평균(없으면 공식 시간)과 비교, 이 코스 내 기록, 안전 안내. 일반 사용자는 프리미엄 안내 한 줄
 10. **리뷰 작성**: 항목별 1~5점, 한 줄 후기(선택). 그 코스를 완주한 사용자만 진입 가능
 11. **닉네임 변경**: 내 정보에서 진입
 12. **프리미엄 (내 정보에서 진입)**: 혜택 목록, 시연용 "결제하기"(실제 결제 없음), 구독 해지. 해지하면 남은 기간과 상관없이 바로 끝난다(시연 편의)
@@ -127,7 +128,7 @@ supabase/         # SQL 마이그레이션
 14. **통계 (기록 탭)**: 기간 이번 시즌 / 올해 / 전체
    - 모두: 등산 횟수, 완등 횟수, 등반 주기(평균 며칠마다, 마지막 산행 후 지난 날, 연속 주), 누적 거리·오른 높이·시간(에베레스트 비유), 최근 6개월 월별 횟수, 자주 간 코스 상위 3개
    - 구독자: 체력 추이, 피로도 추이, 오르막형·내리막형, 휴식 패턴, 급경사 내리막 습관, 코스별 내 최고 기록. 일반 사용자는 프리미엄 안내
-   - 코스 예상 소요시간은 여기에 넣지 않는다(이후 등산로 평가·리뷰 쪽에서 다룬다)
+   - 코스 예상 소요시간은 통계가 아니라 코스 상세(9번)에서 보여 준다
 
 ---
 
@@ -208,6 +209,15 @@ supabase/         # SQL 마이그레이션
 - **위험 구간**: 50m 구간의 경사가 30%(약 17°) 이상. 오르막·내리막 모두.
 - 통계의 완등 횟수·코스별 기록은 서버 `course_completions`(랭킹과 같은 기준)에서 받고, 나머지는 기기에 저장된 기록으로 계산한다.
 
+### 맞춤 예상 소요시간·난이도 (프리미엄, 코스 상세)
+- 코스 고도: 개발 도구(`tool/fetch_course_elevations.dart`)가 SRTM 30m 고도를 미리 받아 `courses.elevations_m`에 넣는다. 앱은 실행 중에 고도 API를 부르지 않는다(오프라인에서도 계산).
+- 계산은 기기에서 순수 Dart(`CourseProfile`, `CourseEstimate`)로 한다.
+- 예상 시간 = 코스를 50m씩 나눈 Tobler 표준 시간 ÷ 내 속도 비율(오르막·평지·내리막 따로). 기준은 **최근 10번 산행**, 코스와 같이 **오르는 시간(들머리 → 정상)**만, **휴식 포함**(최근 산행의 휴식 비율만큼 더함, 최대 50%).
+- 산행이 **3번 미만**이면 표준 등산객 기준으로 보여 주고 그렇다고 안내한다.
+- 맞춤 난이도 = 이 코스 걷는 시간 ÷ 내 평소 오르막 걷는 시간(최근 산행 중간값). 0.8배 미만 쉬운 편, 1.25배 초과 힘든 편, 그 사이 평소 정도.
+- 안전 안내: 경사 30% 이상 급경사 구간, 급경사 내리막에서 빨라지는 습관(통계와 같은 1.1배 기준), 평소보다 힘든 코스면 준비 안내. 경고 아이콘과 함께 보여 준다.
+- 이미 완주한 코스면 서버 완주 기록으로 내 평균·최고 기록을 함께 보여 준다.
+
 ### 공개 범위와 프로필
 - 다른 사용자에게 보이는 것은 **순위, 닉네임#태그, 프로필 사진, 기록(시간·완등 횟수)** 뿐이다. 위치 경로(GPX)와 기록 상세는 본인만 본다.
 - 프로필 사진은 카카오·구글 프로필 사진을 그대로 쓴다(앱에서 바꾸는 기능은 없음).
@@ -238,7 +248,7 @@ Storage    : 버킷 tracks (비공개), 경로 {user_id}/{activity_id}.gpx
 ```
 mountains          : id, name, region, summit(좌표), height_m, source
 courses            : id, mountain_id, name, path(LineString, 들머리→정상), start_point, summit_point,
-                     distance_m, official_time_min, source, license
+                     distance_m, official_time_min, source, license, elevations_m(경로 점마다 고도)
 course_completions : id, activity_id(시연용은 null), user_id, course_id, ascent_s(들머리→정상 시간),
                      completed_at, season(예: 2026-H2), is_demo
 course_reviews     : course_id, user_id(둘의 조합 유일), difficulty, risk, view, crowd(각 1~5),
@@ -329,5 +339,6 @@ flutter build apk --release --dart-define-from-file=env.json
 dart run tool/fetch_vworld_trails.dart    # 브이월드 등산로 받기
 dart run tool/build_courses.dart          # 직접 정의한 코스 (data/trails/courses.json)
 dart run tool/auto_courses.dart           # 부산 산 자동 코스 (data/trails/courses_auto.json)
+dart run tool/fetch_course_elevations.dart # 코스 점마다 고도 (SRTM 30m, 위 두 명령 다음에 실행)
 dart run tool/export_courses_sql.dart     # → supabase/seed/courses.sql (SQL Editor에서 실행)
 ```
