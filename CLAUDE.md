@@ -3,6 +3,13 @@
 이 파일은 Claude Code가 매 세션 시작 시 읽는 프로젝트 안내문이다. 팀원 모두가 같은 파일을 공유한다.
 프로젝트 내내 변하지 않는 사실과 규칙만 적는다. 일회성 작업 지시는 넣지 않는다.
 
+### 문서 갱신 규칙
+- 사용자의 지시가 일회성 작업이 아니라 **구조·규칙·범위를 정하는 결정**이면(예: 화면 구성, 데이터 기준, 수치 기준, 공개 범위, 작업 방식), 그 작업을 하면서 이 파일과 `docs/planning.md`를 함께 고친다.
+  - `CLAUDE.md`: 구현 규칙·기술 선택·작업 방식
+  - `docs/planning.md`: 기획·BM 관점의 결정. 12장 "프로토타입 구현 결정 사항" 표에 넣고, 기획 방향이 바뀌면 해당 장도 고친다.
+- 기존 내용과 충돌하면 새 결정에 맞게 고치고, 이미 구현된 내용이 "이후 단계"로 남아 있지 않게 한다.
+- 일회성 지시(특정 버그 수정, 이번 한 번의 작업 요청)는 넣지 않는다.
+
 ---
 
 ## 1. 프로젝트 개요
@@ -109,10 +116,12 @@ supabase/         # SQL 마이그레이션
    - 딥링크 `com.hikingapp.hikingapp://login-callback`은 `lib/core/config/env.dart`, `AndroidManifest.xml`, Supabase Redirect URLs 세 곳이 같아야 한다.
 
 ### 2단계
-8. **지도 (홈 탭)**: 코스 선과 정복자 마커(프로필 사진). 코스를 누르면 아래에서 코스 요약 카드가 올라오고, 카드를 누르면 코스 상세로 간다. 보기 전환 토글(최단시간 / 최다완등, 기본값 최다완등). 내 위치 표시. 출처 표시
+8. **지도 (홈 탭)**: 코스 선과 정복자 마커(프로필 사진). 코스를 누르면 코스 상세로 간다. 보기 전환 토글(최단시간 / 최다완등, 기본값 최다완등). 내 위치 표시. 출처 표시. 처음 코스를 받으면 모든 코스가 보이도록 지도 범위를 맞춘다
 9. **코스 상세**: 거리, 공식 소요시간, 완주 기록 평균 소요시간, 항목별 평점. 랭킹(이번 시즌 / 명예의 전당), 리뷰 목록. 안전 문구 상시 표시
 10. **리뷰 작성**: 항목별 1~5점, 한 줄 후기(선택). 그 코스를 완주한 사용자만 진입 가능
 11. **닉네임 변경**: 내 정보에서 진입
+12. **프리미엄 (내 정보에서 진입)**: 혜택 목록, 시연용 "결제하기"(실제 결제 없음), 구독 해지. 해지하면 남은 기간과 상관없이 바로 끝난다(시연 편의)
+13. **기록 상세의 프리미엄 분석**: 구독자는 고도 그래프, 구간별(오르막·평지·내리막) 페이스, km별 기록, 전반·후반 비교, 같은 코스 기록 비교를 본다. 일반 사용자는 기본 수치와 프리미엄 안내만 본다
 
 ---
 
@@ -163,7 +172,7 @@ supabase/         # SQL 마이그레이션
 - 기준: 최단시간, 최다완등. 지도 기본 보기는 최다완등.
 - 시즌: **상반기(1~6월), 하반기(7~12월)** 단위로 초기화한다. 기준 시각은 한국 시간(KST). 시즌이 끝나면 그 시즌 순위는 바꾸지 않는다.
 - 역대 기록(명예의 전당)은 시즌과 별도로 영구 보존한다.
-- 랭킹 공개 범위: 일반 사용자는 **상위 10명 + 내 순위(기록 포함)**. 구독 사용자는 전체 순위(기록 포함) — 구독은 이후 단계에서 구현하되, 지금도 이 구분을 화면이 아니라 DB(RPC·RLS)에서 하도록 만든다.
+- 랭킹 공개 범위: 일반 사용자는 **상위 10명 + 내 순위(기록 포함)**. 구독 사용자는 전체 순위(기록 포함). 이 구분은 화면이 아니라 DB(RPC·RLS)에서 한다.
 - 랭킹은 기기에서 계산하지 않고 서버 DB 함수(`get_course_ranking` 등)에서 계산한다. 구독자 구분은 `ranking_visible_rows()` 한 곳에서 한다.
 - 완주 판정(코스 매칭)은 프로토타입에서는 앱의 `CourseMatcher`(순수 Dart, 단위 테스트)가 하고, 결과를 `record_course_completions` 함수로 보낸다. 서버는 본인 기록인지·속도 이상 표시를 다시 확인한다. GPX 원본이 서버에 있으므로 이후 서버 재검증을 추가할 수 있다.
 - 코스 화면과 랭킹 화면에 "무리한 속도 경쟁은 사고로 이어질 수 있어요" 안전 문구를 항상 보여 준다.
@@ -172,6 +181,11 @@ supabase/         # SQL 마이그레이션
 - 항목: 난이도, 경사·위험, 조망, 혼잡도 — 각 1~5점. 한 줄 후기는 선택, 200자 이내.
 - 실제 소요시간은 사용자가 입력하지 않고 완주 기록의 평균으로 보여 준다.
 - 그 코스를 완주한 사용자만 작성할 수 있다. 코스당 1인 1개, 수정·삭제 가능.
+
+### 프리미엄 구독 (시연용)
+- 실제 결제 없이 `start_demo_subscription`으로 1개월 구독을 만든다(`is_demo = true`). 해지(`cancel_subscription`)는 바로 끝난다.
+- 구독 여부는 서버의 `is_subscriber()`로 판단한다. 앱은 화면 표시용으로만 구독 상태를 받아 쓴다.
+- 기록 분석 계산은 `activities/domain`의 순수 Dart(`ActivityAnalyzer`)로 하고 단위 테스트한다.
 
 ### 공개 범위와 프로필
 - 다른 사용자에게 보이는 것은 **순위, 닉네임#태그, 프로필 사진, 기록(시간·완등 횟수)** 뿐이다. 위치 경로(GPX)와 기록 상세는 본인만 본다.
@@ -207,8 +221,10 @@ courses            : id, mountain_id, name, path(LineString, 들머리→정상)
 course_completions : id, activity_id(시연용은 null), user_id, course_id, ascent_s(들머리→정상 시간),
                      completed_at, season(예: 2026-H2), is_demo
 course_reviews     : course_id, user_id(둘의 조합 유일), difficulty, risk, view, crowd(각 1~5),
-                     comment(200자 이내), created_at, updated_at
+                     comment(200자 이내), created_at, updated_at, is_demo
+subscriptions      : user_id(기본키), plan, started_at, expires_at, canceled_at, is_demo, updated_at
 ```
+- 코스 데이터는 `tool/export_courses_sql.dart`가 만든 `supabase/seed/courses.sql`로 넣는다. 시연용 데이터는 `supabase/seed/demo_*.sql`로 넣는다.
 - PostGIS 확장을 켜 두고 코스 경로를 geometry로 저장한다. (서버 재검증·공간 검색에 사용)
 - 다른 사용자의 행은 테이블을 직접 열지 않고, 랭킹·리뷰용 함수(RPC)나 뷰로 6-2장의 공개 항목만 돌려준다.
 
@@ -268,11 +284,13 @@ course_reviews     : course_id, user_id(둘의 조합 유일), difficulty, risk,
 
 ## 10. 협업 규칙
 
-- `main` 브랜치에 직접 커밋하지 않는다. 기능마다 브랜치를 만든다: `feat/recording-screen`, `fix/upload-retry`.
+- 지금은 1명이 작업하므로 `main`에 바로 커밋·push한다.
+  - 팀원이 함께 작업하기 시작하면 `main`에 직접 커밋하지 않고 기능마다 브랜치(`feat/recording-screen`, `fix/upload-retry`)를 만든 뒤, Pull Request로 다른 팀원이 확인하고 합친다.
 - 커밋 메시지: `feat: 기록 화면 추가`, `fix: 업로드 재시도 오류 수정`, `docs: ...`, `refactor: ...`, `test: ...`
-- 작업이 끝나면 Pull Request를 만들고 다른 팀원이 확인한 뒤 합친다.
 - **절대 커밋하지 않는 것**: `env.json`(Supabase URL·키), 서명 키(`*.jks`, `key.properties`). `.gitignore`에 등록되어 있는지 확인한다.
 - 비밀 값은 `env.json`에 두고 `flutter run --dart-define-from-file=env.json`으로 주입한다. 팀원용 예시 파일 `env.example.json`만 커밋한다.
+- 브이월드 API 키는 개발 도구용 `tool_env.json`(커밋 안 함)에만 둔다. 앱과 `env.json`에는 넣지 않는다.
+- 구글 Client Secret, 카카오 REST 키·Client Secret은 Supabase 대시보드에만 넣는다. `service_role`·`sb_secret_` 키는 어디에도 두지 않는다.
 
 ---
 
