@@ -5,12 +5,29 @@ import 'package:flutter/material.dart';
 import '../../../core/design/design.dart';
 import '../domain/activity_analysis.dart';
 
-/// 고도 그래프 (가로: 걸은 거리, 세로: 고도). 한 줄짜리라 범례는 두지 않는다.
-/// 손가락으로 누르거나 끌면 그 지점의 거리와 고도를 보여 준다.
+/// "1:05"처럼 시:분으로 보여 준다.
+String formatHourMinute(Duration d) =>
+    '${d.inHours}:${(d.inMinutes % 60).toString().padLeft(2, '0')}';
+
+/// 고도 그래프 (가로: 지난 시간, 세로: 고도).
+/// 휴식 구간은 초록 배경, 위험 구간(급경사)은 선을 빨간색으로 칠한다.
+/// 손가락으로 누르거나 끌면 그 시각의 고도와 구간 종류를 보여 준다.
 class ElevationChart extends StatefulWidget {
-  const ElevationChart({super.key, required this.samples, this.height = 180});
+  const ElevationChart({
+    super.key,
+    required this.samples,
+    required this.total,
+    this.rests = const [],
+    this.dangers = const [],
+    this.height = 180,
+  });
 
   final List<ElevationSample> samples;
+
+  /// 가로축 전체 길이 (기록 시작 ~ 끝)
+  final Duration total;
+  final List<TimeRange> rests;
+  final List<TimeRange> dangers;
   final double height;
 
   @override
@@ -23,23 +40,29 @@ class _ElevationChartState extends State<ElevationChart> {
 
   void _pick(double dx, double width) {
     final s = widget.samples;
-    final maxD = s.last.distanceM;
-    if (maxD <= 0) return;
-    final target = (dx / width).clamp(0.0, 1.0) * maxD;
+    final total = widget.total.inMilliseconds;
+    if (total <= 0) return;
+    final target = (dx / width).clamp(0.0, 1.0) * total;
     var best = 0;
     for (var i = 1; i < s.length; i++) {
-      if ((s[i].distanceM - target).abs() <
-          (s[best].distanceM - target).abs()) {
+      if ((s[i].elapsed.inMilliseconds - target).abs() <
+          (s[best].elapsed.inMilliseconds - target).abs()) {
         best = i;
       }
     }
     setState(() => _active = best);
   }
 
+  String _tag(Duration t) {
+    if (widget.rests.any((r) => r.contains(t))) return ' · 휴식';
+    if (widget.dangers.any((r) => r.contains(t))) return ' · 위험 구간';
+    return '';
+  }
+
   @override
   Widget build(BuildContext context) {
     final s = widget.samples;
-    if (s.length < 2) {
+    if (s.length < 2 || widget.total <= Duration.zero) {
       return SizedBox(
         height: widget.height,
         child: const Center(
@@ -56,8 +79,8 @@ class _ElevationChartState extends State<ElevationChart> {
         Text(
           active == null
               ? '최고 ${s.map((e) => e.altitudeM).reduce(math.max).round()} m'
-              : '${(active.distanceM / 1000).toStringAsFixed(2)} km · '
-                    '${active.altitudeM.round()} m',
+              : '${formatHourMinute(active.elapsed)} · '
+                    '${active.altitudeM.round()} m${_tag(active.elapsed)}',
           style: AppTypography.body.copyWith(color: AppColors.textSecondary),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -72,7 +95,13 @@ class _ElevationChartState extends State<ElevationChart> {
               onTapUp: (_) => setState(() => _active = null),
               child: CustomPaint(
                 size: Size(width, widget.height),
-                painter: _ElevationPainter(s, _active),
+                painter: _ElevationPainter(
+                  samples: s,
+                  total: widget.total,
+                  rests: widget.rests,
+                  dangers: widget.dangers,
+                  active: _active,
+                ),
               ),
             );
           },
@@ -81,10 +110,22 @@ class _ElevationChartState extends State<ElevationChart> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text('0 km', style: AppTypography.caption),
-            Text(
-              '${(s.last.distanceM / 1000).toStringAsFixed(1)} km',
-              style: AppTypography.caption,
+            const Text('0:00', style: AppTypography.caption),
+            Text(formatHourMinute(widget.total), style: AppTypography.caption),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        // 범례: 색만으로 구분하지 않도록 이름을 함께 쓴다.
+        Wrap(
+          spacing: AppSpacing.lg,
+          children: [
+            _LegendItem(
+              color: AppColors.success.withValues(alpha: 0.25),
+              label: '휴식 ${widget.rests.length}번',
+            ),
+            _LegendItem(
+              color: AppColors.danger,
+              label: '위험 구간 ${widget.dangers.length}곳',
             ),
           ],
         ),
@@ -93,10 +134,45 @@ class _ElevationChartState extends State<ElevationChart> {
   }
 }
 
+class _LegendItem extends StatelessWidget {
+  const _LegendItem({required this.color, required this.label});
+
+  final Color color;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: AppSpacing.md,
+          height: AppSpacing.md,
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(2),
+          ),
+        ),
+        const SizedBox(width: AppSpacing.xs),
+        Text(label, style: AppTypography.caption),
+      ],
+    );
+  }
+}
+
 class _ElevationPainter extends CustomPainter {
-  _ElevationPainter(this.samples, this.active);
+  _ElevationPainter({
+    required this.samples,
+    required this.total,
+    required this.rests,
+    required this.dangers,
+    required this.active,
+  });
 
   final List<ElevationSample> samples;
+  final Duration total;
+  final List<TimeRange> rests;
+  final List<TimeRange> dangers;
   final int? active;
 
   @override
@@ -110,14 +186,30 @@ class _ElevationPainter extends CustomPainter {
       minA = mid - 25;
       maxA = mid + 25;
     }
-    final maxD = samples.last.distanceM;
     const top = 8.0;
     final h = size.height - top;
+    double xOf(Duration t) =>
+        t.inMilliseconds / total.inMilliseconds * size.width;
 
     Offset at(ElevationSample s) => Offset(
-      maxD == 0 ? 0 : s.distanceM / maxD * size.width,
+      xOf(s.elapsed),
       top + (1 - (s.altitudeM - minA) / (maxA - minA)) * h,
     );
+
+    // 휴식 구간: 초록 배경 띠
+    final restPaint = Paint()
+      ..color = AppColors.success.withValues(alpha: 0.18);
+    for (final r in rests) {
+      canvas.drawRect(
+        Rect.fromLTRB(
+          xOf(r.start),
+          0,
+          math.max(xOf(r.end), xOf(r.start) + 2),
+          size.height,
+        ),
+        restPaint,
+      );
+    }
 
     // 흐린 가로 기준선 3개
     final grid = Paint()
@@ -133,22 +225,36 @@ class _ElevationPainter extends CustomPainter {
       line.lineTo(at(s).dx, at(s).dy);
     }
     final area = Path.from(line)
-      ..lineTo(size.width, size.height)
-      ..lineTo(0, size.height)
+      ..lineTo(at(samples.last).dx, size.height)
+      ..lineTo(at(samples.first).dx, size.height)
       ..close();
 
     canvas.drawPath(
       area,
       Paint()..color = AppColors.primary.withValues(alpha: 0.12),
     );
-    canvas.drawPath(
-      line,
-      Paint()
-        ..color = AppColors.primary
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2
-        ..strokeJoin = StrokeJoin.round,
-    );
+    Paint stroke(Color color) => Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2
+      ..strokeJoin = StrokeJoin.round;
+    canvas.drawPath(line, stroke(AppColors.primary));
+
+    // 위험 구간: 그 시간 범위만 잘라서 같은 선을 빨간색으로 덧그린다.
+    for (final d in dangers) {
+      canvas
+        ..save()
+        ..clipRect(
+          Rect.fromLTRB(
+            xOf(d.start),
+            0,
+            math.max(xOf(d.end), xOf(d.start) + 3),
+            size.height,
+          ),
+        )
+        ..drawPath(line, stroke(AppColors.danger)..strokeWidth = 3)
+        ..restore();
+    }
 
     if (active case final i?) {
       final p = at(samples[i]);

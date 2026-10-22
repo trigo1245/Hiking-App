@@ -32,6 +32,14 @@ class FakeCompetitionRemote implements CompetitionRemote {
     if (failWith case final error?) throw error;
     return conquerors;
   }
+
+  List<MyCompletion> myCompletions = const [];
+
+  @override
+  Future<List<MyCompletion>> fetchMyCompletions() async {
+    if (failWith case final error?) throw error;
+    return myCompletions;
+  }
 }
 
 RankingEntry entry(int rank, String name, int value, {bool isMe = false}) =>

@@ -88,3 +88,18 @@ class Conqueror {
   final String? avatarUrl;
   final int value;
 }
+
+/// 서버에 기록된 내 코스 완주 한 건 (랭킹과 같은 기준, 시연용 완주 포함)
+class MyCompletion {
+  const MyCompletion({
+    required this.courseId,
+    required this.ascent,
+    required this.completedAt,
+  });
+
+  final String courseId;
+
+  /// 들머리 → 정상 시간
+  final Duration ascent;
+  final DateTime completedAt;
+}

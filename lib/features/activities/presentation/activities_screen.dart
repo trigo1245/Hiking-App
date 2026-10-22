@@ -9,41 +9,93 @@ import '../../../core/utils/clock.dart';
 import '../../../core/utils/format.dart';
 import '../../../core/widgets/metric_text.dart';
 import '../../../core/widgets/pressable.dart';
+import '../../../core/widgets/segmented_tabs.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../domain/activity_summary.dart';
 import 'activities_providers.dart';
+import 'stats_view.dart';
 
-/// 기록 탭: 이번 달 요약과 날짜 역순 기록 카드, 업로드 상태.
-class ActivitiesScreen extends ConsumerWidget {
+/// 기록 탭의 두 화면. 처음에는 통계를 보여 준다.
+enum RecordsView { stats, history }
+
+/// 기록 탭: [통계 | 내역].
+/// - 통계: 지금까지의 산행 종합 (구독자는 종합 분석 추가)
+/// - 내역: 이번 달 요약과 날짜 역순 기록 카드, 업로드 상태
+class ActivitiesScreen extends ConsumerStatefulWidget {
   const ActivitiesScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ActivitiesScreen> createState() => _ActivitiesScreenState();
+}
+
+class _ActivitiesScreenState extends ConsumerState<ActivitiesScreen> {
+  RecordsView _view = RecordsView.stats;
+
+  @override
+  Widget build(BuildContext context) {
     final activities = ref.watch(myActivitiesProvider);
-    final now = ref.read(clockProvider)();
 
     return Scaffold(
       appBar: AppBar(title: const Text('기록')),
-      body: switch (activities) {
-        AsyncData(:final value) when value.isEmpty => const _EmptyState(),
-        AsyncData(:final value) => ListView(
-          padding: const EdgeInsets.fromLTRB(
-            AppSpacing.screenHorizontal,
-            AppSpacing.sm,
-            AppSpacing.screenHorizontal,
-            AppSpacing.xxl,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.screenHorizontal,
+              AppSpacing.sm,
+              AppSpacing.screenHorizontal,
+              AppSpacing.md,
+            ),
+            child: SegmentedTabs<RecordsView>(
+              options: const {
+                RecordsView.stats: '통계',
+                RecordsView.history: '내역',
+              },
+              selected: _view,
+              onChanged: (v) => setState(() => _view = v),
+            ),
           ),
-          children: [
-            _MonthSummaryView(summary: MonthSummary.of(value, now)),
-            const SizedBox(height: AppSpacing.xxl),
-            for (final activity in value) ...[
-              _ActivityCard(activity: activity),
-              const SizedBox(height: AppSpacing.md),
-            ],
-          ],
-        ),
-        _ => const _LoadingSkeleton(),
-      },
+          Expanded(
+            child: switch (activities) {
+              AsyncData(:final value) when value.isEmpty => const _EmptyState(),
+              AsyncData(:final value) => switch (_view) {
+                RecordsView.stats => StatsView(activities: value),
+                RecordsView.history => _History(activities: value),
+              },
+              _ => const _LoadingSkeleton(),
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 내역: 이번 달 요약과 날짜 역순 기록 카드
+class _History extends ConsumerWidget {
+  const _History({required this.activities});
+
+  final List<ActivitySummary> activities;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final now = ref.read(clockProvider)();
+    final value = activities;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenHorizontal,
+        AppSpacing.sm,
+        AppSpacing.screenHorizontal,
+        AppSpacing.xxl,
+      ),
+      children: [
+        _MonthSummaryView(summary: MonthSummary.of(value, now)),
+        const SizedBox(height: AppSpacing.xxl),
+        for (final activity in value) ...[
+          _ActivityCard(activity: activity),
+          const SizedBox(height: AppSpacing.md),
+        ],
+      ],
     );
   }
 }

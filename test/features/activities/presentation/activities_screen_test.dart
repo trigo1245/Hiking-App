@@ -1,6 +1,9 @@
+import 'dart:ui';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/core/database/app_database.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
+import 'package:hiking_app/features/courses/domain/competition.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
 import 'package:hiking_app/features/recording/domain/track_stats.dart';
@@ -9,6 +12,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../helpers/gpx.dart';
 import '../../../helpers/pump_app.dart';
 import '../../auth/fake_auth_repository.dart';
+import '../../courses/fake_competition_remote.dart';
 import '../fake_activity_remote.dart';
 
 void main() {
@@ -46,9 +50,17 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  Future<void> openRecordsTab(WidgetTester tester) async {
+  /// 기록 탭을 연다. 처음에는 통계가 보이므로 [history]면 내역으로 바꾼다.
+  Future<void> openRecordsTab(
+    WidgetTester tester, {
+    bool history = true,
+  }) async {
     await tester.tap(find.text('기록').last);
     await tester.pumpAndSettle();
+    if (history && find.text('내역').evaluate().isNotEmpty) {
+      await tester.tap(find.text('내역'));
+      await tester.pumpAndSettle();
+    }
   }
 
   testWidgets('앱이 뜨면 올리지 못한 기록을 자동으로 올리고, 기록 탭에 완료로 보인다', (tester) async {
@@ -116,6 +128,44 @@ void main() {
     await openRecordsTab(tester);
 
     expect(find.text('업로드 대기'), findsOneWidget);
+  });
+
+  testWidgets('기록 탭은 통계부터 보여 주고, 완등 횟수는 서버 완주 기록으로 센다', (tester) async {
+    // 통계 화면이 스크롤 없이 아래쪽까지 그려지도록 세로로 긴 화면을 쓴다.
+    tester.view.physicalSize = const Size(800, 3000);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
+    final db = testDatabase();
+    await seedFinished(db);
+    final competition = FakeCompetitionRemote()
+      ..myCompletions = [
+        MyCompletion(
+          courseId: 'a',
+          ascent: const Duration(minutes: 47),
+          completedAt: t0,
+        ),
+      ];
+
+    await pumpApp(
+      tester,
+      authRepository: signedIn(),
+      database: db,
+      remote: FakeActivityRemote(),
+      competition: competition,
+      clock: clock,
+    );
+    await settleUploads(tester);
+    await openRecordsTab(tester, history: false);
+
+    expect(find.text('통계'), findsOneWidget);
+    expect(find.text('등반 주기'), findsOneWidget);
+    expect(find.text('산행이 2번 이상 쌓이면 주기를 알려 드려요'), findsOneWidget);
+    expect(find.text('월별 등산 횟수'), findsOneWidget);
+    // 등산 1번, 완등 1번
+    expect(find.text('1 번'), findsNWidgets(2));
+    // 일반 사용자는 종합 분석 대신 안내를 본다.
+    expect(find.text('내 산행을 종합해서 분석해 보세요'), findsOneWidget);
+    expect(find.text('프리미엄 종합 분석'), findsNothing);
   });
 
   testWidgets('기록이 없으면 다음 행동을 안내한다', (tester) async {

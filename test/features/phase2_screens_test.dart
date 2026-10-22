@@ -89,6 +89,8 @@ void main() {
 
       await tester.tap(find.text('기록').last);
       await settle(tester);
+      await tester.tap(find.text('내역'));
+      await settle(tester);
       await tester.tap(find.text('시연용 금정산 두 번째 산행'));
       await settle(tester);
 
@@ -99,7 +101,9 @@ void main() {
       expect(find.text('상세 분석'), findsNothing);
     });
 
-    testWidgets('프리미엄이면 고도 그래프·구간별 페이스·km별 기록·같은 코스 비교가 보인다', (tester) async {
+    testWidgets('프리미엄이면 시간별 고도 그래프(휴식·위험 구간)·경사 보정 페이스·km별 기록·같은 코스 비교가 보인다', (
+      tester,
+    ) async {
       tallScreen(tester);
       final (db, id) = await dbWithHike(tester);
       await pumpApp(
@@ -114,7 +118,13 @@ void main() {
       await push(tester, AppRoutes.activity(id));
 
       expect(find.text('상세 분석'), findsOneWidget);
-      expect(find.text('구간별 페이스'), findsOneWidget);
+      expect(find.text('시간에 따른 고도'), findsOneWidget);
+      // 시연용 기록: 오르다 3분, 정상에서 10분 쉬고, 경사 36% 급경사를 오르내린다.
+      expect(find.text('휴식 2번'), findsOneWidget);
+      expect(find.textContaining('위험 구간 '), findsWidgets);
+      expect(find.text('경사 보정 페이스'), findsOneWidget);
+      expect(find.textContaining('평지 환산'), findsOneWidget);
+      expect(find.textContaining('표준 등산객(Tobler 공식)의'), findsOneWidget);
       expect(find.text('오르막'), findsOneWidget);
       expect(find.text('km별 기록'), findsOneWidget);
       expect(find.text('전반·후반 오르막 속도'), findsOneWidget);
@@ -122,6 +132,40 @@ void main() {
       expect(find.text('금정산 범어사 코스 내 기록'), findsOneWidget);
       expect(find.textContaining('(이번 기록)'), findsOneWidget);
       expect(find.text('  최고'), findsOneWidget);
+    });
+
+    testWidgets('프리미엄이면 기록 탭 통계에 종합 분석이 보인다', (tester) async {
+      tallScreen(tester);
+      final (db, _) = await dbWithHike(tester);
+      await pumpApp(
+        tester,
+        authRepository: signedIn(),
+        database: db,
+        courseRemote: FakeCourseRemote([beomeosa()]),
+        subscription: FakeSubscriptionRemote(active: true),
+        competition: FakeCompetitionRemote()
+          ..myCompletions = [
+            MyCompletion(
+              courseId: 'beomeosa',
+              ascent: const Duration(minutes: 41),
+              completedAt: DateTime(2026, 10, 18),
+            ),
+          ],
+        clock: clock,
+      );
+      await settle(tester);
+      await tester.tap(find.text('기록').last);
+      await settle(tester);
+
+      expect(find.text('프리미엄 종합 분석'), findsOneWidget);
+      expect(find.text('체력 추이'), findsOneWidget);
+      expect(find.text('점선 = 표준'), findsOneWidget);
+      expect(find.text('휴식 패턴'), findsOneWidget);
+      expect(find.textContaining('분 걷고 한 번 쉬어요'), findsOneWidget);
+      // 시연용 기록은 급경사 내리막을 평소처럼 빠르게 내려온다.
+      expect(find.textContaining('급경사 내리막에서 평소 내리막보다'), findsOneWidget);
+      expect(find.text('코스별 내 최고 기록'), findsOneWidget);
+      expect(find.text('1번 · 최고 0:41:00'), findsNWidgets(2));
     });
 
     testWidgets('GPX 내보내기를 누르면 GPX 파일을 공유한다', (tester) async {

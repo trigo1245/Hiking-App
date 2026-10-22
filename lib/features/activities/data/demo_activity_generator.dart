@@ -66,10 +66,23 @@ class DemoActivityGenerator {
   }) async {
     final path = _resample(course.path, 10);
     final length = (path.length - 1) * 10.0;
-    // 코스 길이에 맞춘 그럴듯한 고도: 출발 60m, 평균 경사 약 16% (최대 750m 오름)
+    // 코스 길이에 맞춘 그럴듯한 고도: 출발 60m, 평균 경사 약 16% (최대 750m 오름).
+    // 60~72% 지점은 경사 36% 급경사 (위험 구간 표시 확인용)
     final gain = math.min(750.0, length * 0.16);
+    const steepFrom = 0.6, steepTo = 0.72, steepLen = steepTo - steepFrom;
+    final steepGain = math.min(0.36 * steepLen * length, gain * 0.5);
+    final gentleGain = gain - steepGain;
+    double climbed(double x) {
+      if (x <= steepFrom) return gentleGain * x / (1 - steepLen);
+      if (x <= steepTo) {
+        return gentleGain * steepFrom / (1 - steepLen) +
+            steepGain * (x - steepFrom) / steepLen;
+      }
+      return gentleGain * (x - steepLen) / (1 - steepLen) + steepGain;
+    }
+
     double altitudeAt(int i) =>
-        60 + gain * (i / (path.length - 1)) + math.sin(i / 7) * 4;
+        60 + climbed(i / (path.length - 1)) + math.sin(i / 7) * 4;
 
     final session = await _recording.start(start, userId: userId);
     final calculator = TrackStatsCalculator();
@@ -94,8 +107,16 @@ class DemoActivityGenerator {
     }
 
     // 오르막: 후반으로 갈수록 조금씩 느려진다 (피로도 분석 확인용)
+    // 40% 지점에서 3분 쉬어 간다 (휴식 구간 표시 확인용)
+    final restAt = (path.length * 0.4).round();
     for (var i = 0; i < path.length; i++) {
       await add(path[i], altitudeAt(i));
+      if (i == restAt) {
+        for (var k = 0; k < 3; k++) {
+          t = t.add(const Duration(minutes: 1));
+          await add(path[i], altitudeAt(i));
+        }
+      }
       final slowdown = i > path.length / 2 ? 3 : 0;
       t = t.add(Duration(seconds: upSecondsPer10m + slowdown));
     }

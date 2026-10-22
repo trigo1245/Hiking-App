@@ -316,12 +316,36 @@ class _PremiumAnalysis extends ConsumerWidget {
       children: [
         const Text('상세 분석', style: AppTypography.subtitle),
         const SizedBox(height: AppSpacing.lg),
-        const Text('고도', style: AppTypography.caption),
+        const Text('시간에 따른 고도', style: AppTypography.caption),
         const SizedBox(height: AppSpacing.xs),
-        ElevationChart(samples: a.elevationProfile),
+        ElevationChart(
+          samples: a.elevationProfile,
+          total: a.totalDuration,
+          rests: a.rests,
+          dangers: a.dangers,
+        ),
+        if (a.rests.isNotEmpty || a.dangers.isNotEmpty) ...[
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            [
+              if (a.rests.isNotEmpty)
+                '휴식 ${a.rests.length}번 · 총 ${formatHoursMinutes(a.restDuration)}',
+              if (a.dangers.isNotEmpty) '경사 30% 이상 위험 구간 ${a.dangers.length}곳',
+            ].join('\n'),
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
         const SizedBox(height: AppSpacing.xxl),
-        const Text('구간별 페이스', style: AppTypography.caption),
-        const SizedBox(height: AppSpacing.sm),
+        const Text('경사 보정 페이스', style: AppTypography.caption),
+        const SizedBox(height: AppSpacing.xs),
+        if (a.gradeAdjustedPace case final pace?) ...[
+          Text('평지 환산 ${formatPace(pace)} /km', style: AppTypography.subtitle),
+          Text(
+            '표준 등산객(Tobler 공식)의 ${((a.efficiency ?? 0) * 100).round()}% 속도로 걸었어요',
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
         Row(
           children: [
             for (final (kind, label) in const [
@@ -375,8 +399,10 @@ class _GradeTile extends StatelessWidget {
   final String label;
   final GradeSummary summary;
 
+  /// 오르막·평지·내리막의 경사 보정 페이스(평지 환산)와 실제 속도
   @override
   Widget build(BuildContext context) {
+    final pace = summary.gradeAdjustedPace;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -385,14 +411,18 @@ class _GradeTile extends StatelessWidget {
           TextSpan(
             children: [
               TextSpan(
-                text: summary.speedKmh.toStringAsFixed(1),
+                text: pace == null ? '-' : formatPace(pace),
                 style: AppTypography.subtitle,
               ),
-              TextSpan(text: ' km/h', style: AppTypography.caption),
+              TextSpan(text: ' /km', style: AppTypography.caption),
             ],
           ),
         ),
-        Text('${formatKm(summary.distanceM)} km', style: AppTypography.caption),
+        Text(
+          '실제 ${summary.speedKmh.toStringAsFixed(1)} km/h · '
+          '${formatKm(summary.distanceM)} km',
+          style: AppTypography.caption,
+        ),
       ],
     );
   }

@@ -25,3 +25,9 @@ String formatDateTime(DateTime t) {
   final minute = t.minute.toString().padLeft(2, '0');
   return '${t.month}월 ${t.day}일 $period $hour:$minute';
 }
+
+/// 1km당 걸리는 시간(페이스). 예: 12'05"
+String formatPace(Duration perKm) {
+  final seconds = perKm.inSeconds;
+  return "${seconds ~/ 60}'${(seconds % 60).toString().padLeft(2, '0')}\"";
+}

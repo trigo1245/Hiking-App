@@ -16,6 +16,9 @@ abstract interface class CompetitionRemote {
   Future<CourseStats> fetchStats(String courseId);
 
   Future<List<Conqueror>> fetchConquerors(Season season);
+
+  /// 내 코스 완주 전체 (통계용). 다른 사람 행은 RLS로 막혀 있다.
+  Future<List<MyCompletion>> fetchMyCompletions();
 }
 
 class SupabaseCompetitionRemote implements CompetitionRemote {
@@ -82,6 +85,24 @@ class SupabaseCompetitionRemote implements CompetitionRemote {
           nicknameTag: r['nickname_tag'] as String,
           avatarUrl: r['avatar_url'] as String?,
           value: r['score'] as int,
+        ),
+    ];
+  }
+
+  @override
+  Future<List<MyCompletion>> fetchMyCompletions() async {
+    final userId = _client.auth.currentUser?.id;
+    if (userId == null) return const [];
+    final rows = await _client
+        .from('course_completions')
+        .select('course_id, ascent_s, completed_at')
+        .eq('user_id', userId);
+    return [
+      for (final r in rows)
+        MyCompletion(
+          courseId: r['course_id'] as String,
+          ascent: Duration(seconds: r['ascent_s'] as int),
+          completedAt: DateTime.parse(r['completed_at'] as String),
         ),
     ];
   }
