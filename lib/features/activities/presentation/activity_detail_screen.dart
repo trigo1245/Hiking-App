@@ -419,7 +419,8 @@ class _GradeTile extends StatelessWidget {
           ),
         ),
         Text(
-          '실제 ${summary.speedKmh.toStringAsFixed(1)} km/h · '
+          // 좁은 칸에서 단위만 줄바꿈되지 않게 두 줄로 나눈다.
+          '실제 ${summary.speedKmh.toStringAsFixed(1)} km/h\n'
           '${formatKm(summary.distanceM)} km',
           style: AppTypography.caption,
         ),
