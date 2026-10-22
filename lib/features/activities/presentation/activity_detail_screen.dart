@@ -6,7 +6,7 @@ import 'package:latlong2/latlong.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
-import '../../../core/map/map_tiles.dart';
+import '../../../core/map/route_preview_map.dart';
 import '../../../core/utils/format.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
@@ -100,14 +100,14 @@ class ActivityDetailScreen extends ConsumerWidget {
   }
 }
 
-/// 지도 위 내 경로. 출발점은 채운 점, 도착점은 빈 점.
-class _TrackMap extends ConsumerWidget {
+/// 지도 위 내 경로 (기기에 저장한 실제 GPS 점). 출발점은 채운 점, 도착점은 빈 점.
+class _TrackMap extends StatelessWidget {
   const _TrackMap({required this.detail});
 
   final ActivityDetail detail;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final points = [
       for (final p in detail.points) LatLng(p.latitude, p.longitude),
     ];
@@ -122,65 +122,22 @@ class _TrackMap extends ConsumerWidget {
         child: const Text('경로가 없는 기록이에요', style: AppTypography.caption),
       );
     }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppRadius.card),
-      child: SizedBox(
-        height: 240,
-        child: FlutterMap(
-          options: MapOptions(
-            initialCameraFit: CameraFit.coordinates(
-              coordinates: points,
-              padding: const EdgeInsets.all(AppSpacing.xxxl),
-            ),
-          ),
-          children: [
-            if (ref.watch(mapTilesEnabledProvider))
-              TileLayer(
-                urlTemplate: osmTileUrl,
-                userAgentPackageName: mapUserAgentPackageName,
-              ),
-            PolylineLayer(
-              polylines: [
-                Polyline(
-                  points: points,
-                  strokeWidth: 4,
-                  color: AppColors.primary,
-                  borderStrokeWidth: 2,
-                  borderColor: AppColors.background,
-                ),
-              ],
-            ),
-            MarkerLayer(
-              markers: [
-                Marker(
-                  point: points.first,
-                  width: 16,
-                  height: 16,
-                  child: _Dot(filled: true),
-                ),
-                Marker(
-                  point: points.last,
-                  width: 16,
-                  height: 16,
-                  child: _Dot(filled: false),
-                ),
-              ],
-            ),
-            Align(
-              alignment: Alignment.bottomLeft,
-              child: Container(
-                margin: const EdgeInsets.all(AppSpacing.xs),
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs),
-                color: AppColors.background.withValues(alpha: 0.8),
-                child: const Text(
-                  '© OpenStreetMap contributors',
-                  style: AppTypography.caption,
-                ),
-              ),
-            ),
-          ],
+    return RoutePreviewMap(
+      points: points,
+      markers: [
+        Marker(
+          point: points.first,
+          width: 16,
+          height: 16,
+          child: const _Dot(filled: true),
         ),
-      ),
+        Marker(
+          point: points.last,
+          width: 16,
+          height: 16,
+          child: const _Dot(filled: false),
+        ),
+      ],
     );
   }
 }

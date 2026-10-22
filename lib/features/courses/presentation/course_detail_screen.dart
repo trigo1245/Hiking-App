@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 
 import '../../../core/design/design.dart';
+import '../../../core/map/map_tiles.dart';
+import '../../../core/map/route_preview_map.dart';
 import '../../../core/utils/format.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
@@ -19,6 +22,7 @@ import '../data/course_repository.dart';
 import '../domain/competition.dart';
 import '../domain/course.dart';
 import 'competition_providers.dart';
+import 'course_map.dart';
 import 'course_reviews_section.dart';
 
 /// 경쟁 화면에 항상 보여 주는 안전 문구 (기획서 4.7)
@@ -73,6 +77,8 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
               ),
               children: [
                 _CourseHeader(course: course),
+                const SizedBox(height: AppSpacing.xxl),
+                _CoursePathMap(course: course),
                 const SizedBox(height: AppSpacing.xxl),
                 _StatsCard(courseId: course.id),
                 const SizedBox(height: AppSpacing.xxxl),
@@ -163,6 +169,38 @@ class _CourseHeader extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ],
+    );
+  }
+}
+
+/// 코스 전체 경로 (들머리 → 정상). 기기에 저장한 코스 선이라 인터넷이 없어도 보인다.
+class _CoursePathMap extends StatelessWidget {
+  const _CoursePathMap({required this.course});
+
+  final Course course;
+
+  @override
+  Widget build(BuildContext context) {
+    return RoutePreviewMap(
+      points: [for (final p in course.path) toLatLng(p)],
+      attribution: mapAttribution,
+      // 정상 이름표(가로 약 160)가 지도 밖으로 잘리지 않게 좌우·위를 넓게 둔다.
+      fitPadding: const EdgeInsets.fromLTRB(80, 56, 80, 32),
+      markers: [
+        Marker(
+          point: toLatLng(course.start),
+          width: 28,
+          height: 28,
+          child: const StartDot(selected: true),
+        ),
+        Marker(
+          point: toLatLng(course.summit),
+          width: 160,
+          height: 48,
+          alignment: Alignment.topCenter,
+          child: SummitLabel(name: course.endName),
         ),
       ],
     );

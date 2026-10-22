@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/courses/domain/competition.dart';
@@ -39,6 +40,13 @@ void main() {
     // 정상 표시 (서버에서 받아 기기에 저장한 코스)
     expect(find.text('▲ 승학산'), findsOneWidget);
     expect(find.text('▲ 금정산'), findsOneWidget);
+    // 지도를 돌려도 표시는 바로 서 있다.
+    expect(
+      tester
+          .widgetList<MarkerLayer>(find.byType(MarkerLayer))
+          .map((l) => l.rotate),
+      everyElement(isTrue),
+    );
   });
 
   testWidgets('검색해서 코스를 고르면 코스 상세가 열리고, 뒤로 가면 지도로 돌아온다', (tester) async {

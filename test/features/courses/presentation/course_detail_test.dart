@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiking_app/app/routes.dart';
+import 'package:hiking_app/core/map/route_preview_map.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/courses/domain/competition.dart';
 
@@ -75,6 +76,9 @@ void main() {
     await openDetail(tester, competition);
 
     expect(find.text('금정산 범어사 코스'), findsOneWidget);
+    // 코스 전체 경로 지도 (들머리 → 정상)
+    expect(find.byType(RoutePreviewMap), findsOneWidget);
+    expect(find.text('▲ 금정산 정상'), findsOneWidget);
     expect(find.text('완주 기록 42회 · 평균 52분'), findsOneWidget);
     expect(find.text('내 완주 6회 · 최고 0:47:10'), findsOneWidget);
 

@@ -129,7 +129,9 @@ class _CourseMapState extends ConsumerState<CourseMap> {
             ],
           ),
         ),
+        // rotate: 지도를 돌려도 표시(이름표·사진·점)는 바로 서 있게 한다.
         MarkerLayer(
+          rotate: true,
           markers: [
             for (final MapEntry(key: name, value: summit) in summits.entries)
               Marker(
@@ -137,7 +139,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                 width: 120,
                 height: 48,
                 alignment: Alignment.topCenter,
-                child: _SummitLabel(name: name),
+                child: SummitLabel(name: name),
               ),
             for (final c in marked)
               Marker(
@@ -146,7 +148,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                 height: 28,
                 child: GestureDetector(
                   onTap: () => widget.onCourseTap(c),
-                  child: _StartDot(selected: c.id == selected),
+                  child: StartDot(selected: c.id == selected),
                 ),
               ),
             // 정복자 프로필 사진: 코스 선의 가운데에 둔다 (기획서 4.3)
@@ -182,6 +184,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
             ],
           ),
           MarkerLayer(
+            rotate: true,
             markers: [
               Marker(
                 point: LatLng(me.latitude, me.longitude),
@@ -210,8 +213,8 @@ class _CourseMapState extends ConsumerState<CourseMap> {
   }
 }
 
-class _SummitLabel extends StatelessWidget {
-  const _SummitLabel({required this.name});
+class SummitLabel extends StatelessWidget {
+  const SummitLabel({super.key, required this.name});
 
   final String name;
 
@@ -242,8 +245,8 @@ class _SummitLabel extends StatelessWidget {
   }
 }
 
-class _StartDot extends StatelessWidget {
-  const _StartDot({required this.selected});
+class StartDot extends StatelessWidget {
+  const StartDot({super.key, required this.selected});
 
   final bool selected;
 
