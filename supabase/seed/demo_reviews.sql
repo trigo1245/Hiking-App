@@ -39,6 +39,7 @@ from (
 cross join (
   select id, (row_number() over (order by slug))::integer as n
   from public.courses
+  where slug not like 'auto-%'  -- 자동 생성 코스에는 시연용 리뷰를 넣지 않는다
 ) as c
 where (u.n + c.n) % 3 <> 0
   and exists (

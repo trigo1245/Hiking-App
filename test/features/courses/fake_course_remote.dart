@@ -7,13 +7,31 @@ class FakeCourseRemote implements CourseRemote {
 
   List<Course> courses;
   Object? failWith;
+
+  /// 코스 전체를 내려받은 횟수
   int fetchCalls = 0;
+
+  /// 버전만 물어본 횟수
+  int versionCalls = 0;
 
   @override
   Future<List<Course>> fetchCourses() async {
     fetchCalls++;
     if (failWith case final error?) throw error;
     return courses;
+  }
+
+  @override
+  Future<CatalogVersion> fetchVersion() async {
+    versionCalls++;
+    if (failWith case final error?) throw error;
+    final times = [for (final c in courses) ?c.updatedAt];
+    return CatalogVersion(
+      count: courses.length,
+      latestUpdate: times.isEmpty
+          ? null
+          : times.reduce((a, b) => a.isAfter(b) ? a : b),
+    );
   }
 }
 
@@ -22,6 +40,7 @@ Course testCourse({
   String id = 'c1',
   String mountainName = '승학산',
   String name = '동아대 코스',
+  DateTime? updatedAt,
 }) => Course(
   id: id,
   mountainName: mountainName,
@@ -37,4 +56,5 @@ Course testCourse({
     GeoPoint(35.11677, 128.97989),
   ],
   summit: const GeoPoint(35.11683, 128.97982),
+  updatedAt: updatedAt ?? DateTime.utc(2026, 10, 20, 9),
 );

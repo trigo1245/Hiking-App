@@ -8,27 +8,42 @@
 import 'dart:convert';
 import 'dart:io';
 
+/// 직접 만든 코스와 자동 생성 코스 설정 파일
+const _configFiles = [
+  'data/trails/courses.json',
+  'data/trails/courses_auto.json',
+];
+
 void main() {
-  final config = jsonDecode(
-    File('data/trails/courses.json').readAsStringSync(),
-  ) as Map<String, dynamic>;
+  final mountains = <Map<String, dynamic>>[];
+  final courses = <Map<String, dynamic>>[];
+  for (final path in _configFiles) {
+    final file = File(path);
+    if (!file.existsSync()) continue;
+    final config = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+    mountains.addAll((config['mountains'] as List).cast());
+    courses.addAll((config['courses'] as List).cast());
+  }
   final out = StringBuffer()
     ..writeln('-- 자동 생성 파일: dart run tool/export_courses_sql.dart')
-    ..writeln('-- 원본: data/trails/courses.json, data/trails/courses/*.geojson')
+    ..writeln(
+      '-- 원본: ${_configFiles.join(', ')}, data/trails/courses/**/*.geojson',
+    )
     ..writeln('-- 먼저 migrations/20261020000000_create_courses.sql을 실행해야 한다.')
+    ..writeln('-- 산 ${mountains.length}개, 코스 ${courses.length}개')
     ..writeln()
     ..writeln('begin;')
     ..writeln();
 
-  for (final m in (config['mountains'] as List).cast<Map<String, dynamic>>()) {
+  for (final m in mountains) {
     final summit = m['summit'] as Map<String, dynamic>;
     out.writeln(
       'insert into public.mountains '
       '(slug, name, region, height_m, summit_name, summit, source)\n'
       'values (${_s(m['id'])}, ${_s(m['name'])}, ${_s(m['region'])}, '
-      '${m['height_m']}, ${_s(summit['name'])}, '
+      '${m['height_m'] ?? 'null'}, ${_s(summit['name'])}, '
       'extensions.st_setsrid(extensions.st_makepoint(${summit['lon']}, ${summit['lat']}), 4326), '
-      "'브이월드 검색·OpenStreetMap 대조')\n"
+      '${_s(m['source'] ?? '브이월드 검색·OpenStreetMap 대조')})\n'
       'on conflict (slug) do update set name = excluded.name, region = excluded.region, '
       'height_m = excluded.height_m, summit_name = excluded.summit_name, '
       'summit = excluded.summit, source = excluded.source;',
@@ -36,9 +51,10 @@ void main() {
     out.writeln();
   }
 
-  for (final c in (config['courses'] as List).cast<Map<String, dynamic>>()) {
+  for (final c in courses) {
     final feature = jsonDecode(
-      File('data/trails/courses/${c['id']}.geojson').readAsStringSync(),
+      File('${c['file'] ?? 'data/trails/courses/${c['id']}.geojson'}')
+          .readAsStringSync(),
     ) as Map<String, dynamic>;
     final p = feature['properties'] as Map<String, dynamic>;
     final geometry = jsonEncode(feature['geometry']);

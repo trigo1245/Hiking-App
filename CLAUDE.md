@@ -10,10 +10,17 @@
 등산인 커뮤니티 Android 앱 (대학 개발 프로젝트, 팀 프로젝트).
 최종 목표: 등산 기록 → 등산로 평가 → 코스별 경쟁(정복자) → 개인 구독 → 동호회.
 
+### 과제 범위와 마무리 기준
+- 이 앱은 **학교 과제 제출용**이다. 실제로 배포하거나 앱 스토어에 올릴 계획이 없다.
+- **테스트와 과제 시연에 충분한 수준에서 멈춘다.** 시연에 필요 없는 완성도를 위한 작업은 하지 않는다.
+- 배포·스토어 등록 과정에서만 생기는 문제(스토어 심사, 출시용 서명 키, 실제 결제 연동, 대규모 사용자 대비, 개인정보처리방침 등)는 **제안하거나 언급하지 않는다.**
+- 다만 **과제 시연 수준에서도 걸릴 수 있는 제약**은 작업 중 알게 되면 반드시 알린다.
+  - 예: Supabase 무료 요금제의 DB 용량·Storage 용량·전송량, 브이월드·OpenStreetMap API 호출 한도와 이용 정책, 에뮬레이터 한계(고도·키보드 등), 시험하지 못한 서버 SQL
+
 **현재 단계: 프로토타입 2단계** (1단계 마무리와 함께 진행)
 - 1단계 범위: 메인 화면, 로그인, 등산 기록 측정(GPS), 기록 저장, 서버 업로드
-- 2단계 범위: 지도(flutter_map + OSM), 등산로(코스) 데이터, 코스 매칭, 경쟁(정복 랭킹), 리뷰(평점), 닉네임 변경 → 6-2장
-- 범위 밖(이후 단계): 구독 결제, 동호회, 상태 제보, 정복자 교체 알림, 평가자 경험치 보정, 사진 첨부, 오프라인 지도 일괄 다운로드
+- 2단계 범위: 지도(flutter_map + OSM), 등산로(코스) 데이터, 코스 매칭, 경쟁(정복 랭킹), 리뷰(평점), 프리미엄 구독(시연용 결제), 닉네임 변경 → 6-2장
+- 범위 밖: 실제 결제 연동, 동호회, 상태 제보, 정복자 교체 알림, 평가자 경험치 보정, 사진 첨부, 오프라인 지도 일괄 다운로드
 - 서버 업로드가 있어야 랭킹을 만들 수 있으므로 업로드 → 코스 데이터·지도 → 코스 매칭·랭킹 → 리뷰 순서로 진행한다.
 
 기획 문서는 `docs/` 폴더에 있다. 기능의 의도나 BM 관련 판단이 필요할 때만 읽는다.
@@ -44,7 +51,7 @@
 | 백엔드 | Supabase (Auth, PostgreSQL, Storage) — supabase_flutter |
 | 로그인 | google_sign_in (구글 네이티브 로그인), 카카오는 Supabase OAuth(브라우저) |
 | 지도 | flutter_map + latlong2 (내 위치 점은 직접 그린다. flutter_map_location_marker는 권한 요청 흐름이 겹쳐 쓰지 않음) |
-| 지도 타일 | OpenStreetMap 기본 타일 (개발·시연용. 외부 배포 전 아웃도어 타일 제공처로 교체 검토) |
+| 지도 타일 | OpenStreetMap 기본 타일 (과제 시연용) |
 | 기타 | uuid, path_provider, permission_handler (12.x 고정: 13.x는 compileSdk 37이 필요해 현재 빌드 도구와 맞지 않음) |
 | 폰트 | Pretendard (OFL 라이선스, assets에 포함) |
 
@@ -140,6 +147,9 @@ supabase/         # SQL 마이그레이션
 ### 지도와 오프라인
 - 인터넷이 안 되는 산에서도 **GPS 내 위치와 코스 선은 표시**한다. 코스 데이터는 기기에 저장해 두고, 지도 타일은 한 번 본 영역만 캐시로 보여 준다(타일이 없으면 빈 배경 위에 위치와 코스 선만).
 - 오프라인 표시에 큰 제약이 확인되면 구현 전에 보고하고, 팀 결정에 따라 뺄 수 있다.
+- 코스 선은 항상 그리고, 코스 표시(정상 이름표·들머리 점·정복자 사진)는 확대 12.5~15에서만 보여 준다(`course_map.dart`의 `courseMarkerMinZoom`·`courseMarkerMaxZoom`). 더 멀면 표시끼리 겹치고, 더 가까우면 길과 내 위치를 가린다. 선택한 코스는 항상 표시한다.
+- 앱은 코스 목록의 버전(코스 수·마지막 수정 시각)을 먼저 물어보고, 바뀌었을 때만 코스 전체를 내려받는다(전송량 절약).
+- 코스는 직접 정의한 것(`data/trails/courses.json`)과 자동 생성한 것(`data/trails/courses_auto.json`, slug가 `auto-`로 시작)이 있다. 자동 생성 코스에는 시연용 데이터를 넣지 않는다.
 
 ### 코스 매칭 (완주 인정)
 - 코스는 **들머리 → 정상** 한 방향(오르는 길)을 하나의 단위로 둔다.
@@ -275,4 +285,10 @@ flutter analyze
 flutter test
 dart run build_runner build --delete-conflicting-outputs   # drift 코드 생성
 flutter build apk --release --dart-define-from-file=env.json
+
+# 코스 데이터 다시 만들기 (tool_env.json에 브이월드 키 필요)
+dart run tool/fetch_vworld_trails.dart    # 브이월드 등산로 받기
+dart run tool/build_courses.dart          # 직접 정의한 코스 (data/trails/courses.json)
+dart run tool/auto_courses.dart           # 부산 산 자동 코스 (data/trails/courses_auto.json)
+dart run tool/export_courses_sql.dart     # → supabase/seed/courses.sql (SQL Editor에서 실행)
 ```

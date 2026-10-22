@@ -1,0 +1,2690 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-10-22T06:37:48Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 1328125444,
+  "lat": 35.1943616,
+  "lon": 129.1450072,
+  "tags": {
+    "ele": "634",
+    "name": "장산",
+    "name:en": "JangSan Mountain",
+    "name:ja": "萇山",
+    "natural": "peak",
+    "wikidata": "Q27288990"
+  }
+},
+{
+  "type": "node",
+  "id": 1332024704,
+  "lat": 35.1853333,
+  "lon": 129.1555934,
+  "tags": {
+    "ele": "370",
+    "historic": "memorial",
+    "name": "옥녀봉",
+    "name:en": "Oknyeo Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1332024705,
+  "lat": 35.1789647,
+  "lon": 129.1556944,
+  "tags": {
+    "ele": "238",
+    "historic": "memorial",
+    "name": "이산봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1332024706,
+  "lat": 35.1857278,
+  "lon": 129.1509073,
+  "tags": {
+    "ele": "401",
+    "historic": "memorial",
+    "name": "중봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1332024709,
+  "lat": 35.1660847,
+  "lon": 129.1510161,
+  "tags": {
+    "ele": "147.7",
+    "name": "봉대산",
+    "name:en": "Bongdae Mountain",
+    "natural": "peak",
+    "note": "148봉"
+  }
+},
+{
+  "type": "node",
+  "id": 1425707788,
+  "lat": 35.1203800,
+  "lon": 129.1053500,
+  "tags": {
+    "ele": "105.4",
+    "name": "비룡산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1429013192,
+  "lat": 35.3117491,
+  "lon": 129.1325694,
+  "tags": {
+    "ele": "569",
+    "name": "철마서봉",
+    "name:ko": "철마서봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1431796378,
+  "lat": 35.2801497,
+  "lon": 129.0506168,
+  "tags": {
+    "ele": "801.5",
+    "name": "금정산(고당봉)",
+    "name:en": "Geumjeongsan(Godangbong)",
+    "name:ko": "금정산(고당봉)",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1431969739,
+  "lat": 35.2289001,
+  "lon": 129.0444022,
+  "tags": {
+    "ele": "639.8",
+    "historic": "memorial",
+    "name": "상계봉",
+    "name:ko": "상계봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1431970790,
+  "lat": 35.2372821,
+  "lon": 129.0480325,
+  "tags": {
+    "ele": "615.6",
+    "name": "파리봉",
+    "name:ko": "파리봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1432286149,
+  "lat": 35.1614330,
+  "lon": 129.0952584,
+  "tags": {
+    "ele": "415",
+    "name": "금련산",
+    "name:en": "Geumnyeonsan Mountain",
+    "name:ja": "金蓮山",
+    "name:ko": "금련산",
+    "natural": "peak",
+    "wikidata": "Q27296332"
+  }
+},
+{
+  "type": "node",
+  "id": 1432293082,
+  "lat": 35.1573354,
+  "lon": 129.0819088,
+  "tags": {
+    "ele": "427",
+    "name": "황령산",
+    "name:en": "hwangnyeongsan",
+    "name:ja": "荒嶺山",
+    "name:ko": "황령산",
+    "name:ko-Hani": "荒嶺山",
+    "natural": "peak",
+    "wikidata": "Q16182760"
+  }
+},
+{
+  "type": "node",
+  "id": 1435041189,
+  "lat": 35.1254046,
+  "lon": 129.0256748,
+  "tags": {
+    "ele": "398.2",
+    "name": "구봉산",
+    "name:en": "Gubongsan Mountain",
+    "natural": "peak",
+    "wikidata": "Q27296338"
+  }
+},
+{
+  "type": "node",
+  "id": 1451947650,
+  "lat": 35.2407764,
+  "lon": 129.1279129,
+  "tags": {
+    "ele": "240",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451948708,
+  "lat": 35.2425508,
+  "lon": 129.1296027,
+  "tags": {
+    "ele": "273",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451949209,
+  "lat": 35.2456526,
+  "lon": 129.1320971,
+  "tags": {
+    "ele": "291.4",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451949438,
+  "lat": 35.2466077,
+  "lon": 129.1324297,
+  "tags": {
+    "ele": "286.3",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451949867,
+  "lat": 35.2510978,
+  "lon": 129.1345342,
+  "tags": {
+    "ele": "339.6",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451950135,
+  "lat": 35.2518559,
+  "lon": 129.1355894,
+  "tags": {
+    "ele": "344.1",
+    "name": "아홉산",
+    "name:ko": "아홉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451953548,
+  "lat": 35.2503943,
+  "lon": 129.1455249,
+  "tags": {
+    "ele": "450",
+    "name": "개좌산",
+    "natural": "peak",
+    "wikidata": "Q27295215"
+  }
+},
+{
+  "type": "node",
+  "id": 1451953727,
+  "lat": 35.2471703,
+  "lon": 129.1481534,
+  "tags": {
+    "ele": "451",
+    "name": "무지산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1451959984,
+  "lat": 35.2298278,
+  "lon": 129.1035378,
+  "tags": {
+    "communication:amateur_radio:sota": "HL/BS-018 SOTA",
+    "ele": "317m",
+    "name": "윤산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091852,
+  "lat": 35.2548500,
+  "lon": 128.9679500,
+  "tags": {
+    "ele": "352.9",
+    "name": "백두산",
+    "name:en": "Baekdusan",
+    "name:ko": "백두산",
+    "name:ko-Latn": "Baekdusan",
+    "natural": "peak",
+    "source": "gps",
+    "wikidata": "Q27295231"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091862,
+  "lat": 35.2956211,
+  "lon": 128.9646400,
+  "tags": {
+    "ele": "459.6",
+    "man_made": "survey_point",
+    "name": "동신어산",
+    "name:en": "Dongsineosan",
+    "name:ko": "동신어산",
+    "name:ko-Latn": "Dongsineosan",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091863,
+  "lat": 35.2428897,
+  "lon": 128.9330577,
+  "tags": {
+    "ele": "381",
+    "name": "돗대산",
+    "name:en": "Dotdaesan",
+    "name:ko": "돗대산",
+    "name:ko-Latn": "Dotdaesan",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091868,
+  "lat": 35.2789198,
+  "lon": 128.9399959,
+  "tags": {
+    "ele": "535",
+    "name": "장척산",
+    "name:en": "Jangcheoksan",
+    "name:ko": "장척산",
+    "name:ko-Latn": "Jangcheoksan",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091874,
+  "lat": 35.2477670,
+  "lon": 128.9505400,
+  "tags": {
+    "ele": "341.6",
+    "name": "까치산",
+    "name:en": "Kkachisan",
+    "name:ko": "까치산",
+    "name:ko-Latn": "Kkachisan",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091884,
+  "lat": 35.2669910,
+  "lon": 128.9235570,
+  "tags": {
+    "ele": "606",
+    "name": "신어산 동봉",
+    "name:en": "Sineosan Dongbong",
+    "name:ko": "신어산 동봉",
+    "name:ko-Latn": "Sineosan Dongbong",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091885,
+  "lat": 35.2753450,
+  "lon": 128.9097660,
+  "tags": {
+    "ele": "641.4",
+    "name": "신어산 서봉",
+    "name:en": "Sineosan seobong",
+    "name:ko": "신어산 서봉",
+    "name:ko-Latn": "Sineosan seobong",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906091886,
+  "lat": 35.2701011,
+  "lon": 128.9204059,
+  "tags": {
+    "ele": "631.1",
+    "name": "신어산",
+    "name:en": "Sineosan",
+    "name:ko": "신어산",
+    "name:ko-Latn": "Sineosan",
+    "natural": "peak",
+    "source": "gps",
+    "wikidata": "Q27267855"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094804,
+  "lat": 35.2352780,
+  "lon": 128.9289567,
+  "tags": {
+    "ele": "236.7",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094807,
+  "lat": 35.2717300,
+  "lon": 128.8470400,
+  "tags": {
+    "ele": "237",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094816,
+  "lat": 35.2523140,
+  "lon": 128.9490990,
+  "tags": {
+    "ele": "273.8",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094820,
+  "lat": 35.2597920,
+  "lon": 128.9711960,
+  "tags": {
+    "ele": "275",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094824,
+  "lat": 35.2906500,
+  "lon": 128.8653200,
+  "tags": {
+    "ele": "288.7",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094831,
+  "lat": 35.2441310,
+  "lon": 128.9536610,
+  "tags": {
+    "ele": "310",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094845,
+  "lat": 35.2922400,
+  "lon": 128.8604800,
+  "tags": {
+    "ele": "347.4",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094868,
+  "lat": 35.2883900,
+  "lon": 128.8576700,
+  "tags": {
+    "ele": "392",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094874,
+  "lat": 35.2782974,
+  "lon": 128.8780808,
+  "tags": {
+    "ele": "402.9",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094876,
+  "lat": 35.2491670,
+  "lon": 128.9233330,
+  "tags": {
+    "ele": "404",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094891,
+  "lat": 35.2743900,
+  "lon": 128.9026600,
+  "tags": {
+    "ele": "412",
+    "name": "아미랑봉",
+    "name:en": "AMIRANGBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094894,
+  "lat": 35.2666670,
+  "lon": 128.9426110,
+  "tags": {
+    "ele": "422",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094900,
+  "lat": 35.2774860,
+  "lon": 128.9353750,
+  "tags": {
+    "ele": "453",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094903,
+  "lat": 35.2770350,
+  "lon": 128.9573690,
+  "tags": {
+    "ele": "478.2",
+    "name": "선무봉",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094912,
+  "lat": 35.2817340,
+  "lon": 128.9538500,
+  "tags": {
+    "ele": "481.3",
+    "name": "예덕산",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094915,
+  "lat": 35.2893160,
+  "lon": 128.9680270,
+  "tags": {
+    "ele": "498.8",
+    "name": "새부리봉",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 1906094925,
+  "lat": 35.2773440,
+  "lon": 128.9420330,
+  "tags": {
+    "ele": "522",
+    "name": "삼각점",
+    "natural": "peak",
+    "source": "gps"
+  }
+},
+{
+  "type": "node",
+  "id": 2685076445,
+  "lat": 35.3071943,
+  "lon": 129.1891318,
+  "tags": {
+    "ele": "409.6",
+    "name": "천마산",
+    "natural": "peak",
+    "wikidata": "Q27295209"
+  }
+},
+{
+  "type": "node",
+  "id": 3750590169,
+  "lat": 35.2505673,
+  "lon": 129.1121000,
+  "tags": {
+    "ele": "175.7",
+    "name": "부엉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 4191905140,
+  "lat": 35.1629845,
+  "lon": 129.1237846,
+  "tags": {
+    "ele": "126",
+    "name": "백산",
+    "name:en": "Mt. Beak",
+    "name:ko": "백산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 4879865874,
+  "lat": 35.0825399,
+  "lon": 129.0551734,
+  "tags": {
+    "ele": "396",
+    "name": "봉래산",
+    "name:en": "Mt. Bongnae",
+    "name:ja": "蓬莱山",
+    "name:ko": "봉래산",
+    "natural": "peak",
+    "wikidata": "Q16219907"
+  }
+},
+{
+  "type": "node",
+  "id": 5346184205,
+  "lat": 35.0976513,
+  "lon": 128.9713180,
+  "tags": {
+    "ele": "210",
+    "name": "동매산",
+    "name:ja": "トンメ山",
+    "natural": "peak",
+    "wikidata": "Q27296320"
+  }
+},
+{
+  "type": "node",
+  "id": 5346184206,
+  "lat": 35.1168280,
+  "lon": 128.9798167,
+  "tags": {
+    "ele": "497",
+    "name": "승학산",
+    "name:en": "SEUNGHAKSAN",
+    "name:ja": "乗鶴山",
+    "natural": "peak",
+    "wikidata": "Q12603862",
+    "wikipedia": "ko:승학산"
+  }
+},
+{
+  "type": "node",
+  "id": 5658759035,
+  "lat": 35.1207159,
+  "lon": 128.8957931,
+  "tags": {
+    "name": "노적봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 5750035916,
+  "lat": 35.2010439,
+  "lon": 129.1700605,
+  "tags": {
+    "ele": "434",
+    "name": "구곡산",
+    "natural": "peak",
+    "wikidata": "Q27296328"
+  }
+},
+{
+  "type": "node",
+  "id": 5750035942,
+  "lat": 35.1833054,
+  "lon": 129.0218495,
+  "tags": {
+    "ele": "641.3",
+    "name": "백양산",
+    "name:en": "BAEKYANGSAN",
+    "name:ko": "백양산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 6421179028,
+  "lat": 35.2697662,
+  "lon": 129.0607380,
+  "tags": {
+    "ele": "687",
+    "name": "원효봉",
+    "name:en": "Wonhyobong",
+    "name:ko": "원효봉",
+    "natural": "peak",
+    "source": "survey"
+  }
+},
+{
+  "type": "node",
+  "id": 7465315218,
+  "lat": 35.1231354,
+  "lon": 128.9995753,
+  "tags": {
+    "ele": "542.1",
+    "name": "구덕산",
+    "name:en": "Gudeoksan Mountain",
+    "name:ja": "九徳山",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7465315219,
+  "lat": 35.1350885,
+  "lon": 129.0167031,
+  "tags": {
+    "ele": "511",
+    "name": "엄광산",
+    "name:en": "Eomgwangsan",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7531158389,
+  "lat": 35.1185235,
+  "lon": 128.9995861,
+  "tags": {
+    "ele": "521",
+    "name": "시약산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7531158481,
+  "lat": 35.1395460,
+  "lon": 129.0374283,
+  "tags": {
+    "ele": "308.4",
+    "name": "수정산",
+    "name:en": "Sujongsan",
+    "natural": "peak",
+    "wikidata": "Q27296340"
+  }
+},
+{
+  "type": "node",
+  "id": 7608221249,
+  "lat": 35.2691117,
+  "lon": 129.2068643,
+  "tags": {
+    "ele": "388",
+    "name": "일광산",
+    "natural": "peak",
+    "wikidata": "Q27295212"
+  }
+},
+{
+  "type": "node",
+  "id": 7608221250,
+  "lat": 35.3078051,
+  "lon": 129.2109706,
+  "tags": {
+    "ele": "587",
+    "name": "달음산",
+    "natural": "peak",
+    "wikidata": "Q27295204"
+  }
+},
+{
+  "type": "node",
+  "id": 7608221251,
+  "lat": 35.3054704,
+  "lon": 129.1805607,
+  "tags": {
+    "ele": "457",
+    "name": "함박산",
+    "natural": "peak",
+    "wikidata": "Q27295210"
+  }
+},
+{
+  "type": "node",
+  "id": 7611344676,
+  "lat": 35.3205023,
+  "lon": 129.1546534,
+  "tags": {
+    "ele": "549",
+    "name": "망월산",
+    "name:ko": "망월산(소학대)",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7611344677,
+  "lat": 35.3075947,
+  "lon": 129.1647720,
+  "tags": {
+    "ele": "511",
+    "name": "문래봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7611344678,
+  "lat": 35.3129547,
+  "lon": 129.1505132,
+  "tags": {
+    "ele": "574",
+    "name": "소산봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7611408891,
+  "lat": 35.3096784,
+  "lon": 129.1359151,
+  "tags": {
+    "ele": "605.4",
+    "name": "철마산",
+    "natural": "peak",
+    "wikidata": "Q27290086"
+  }
+},
+{
+  "type": "node",
+  "id": 7613833077,
+  "lat": 35.2983816,
+  "lon": 129.1502272,
+  "tags": {
+    "ele": "543",
+    "name": "거문산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7614392019,
+  "lat": 35.2849609,
+  "lon": 129.1840607,
+  "tags": {
+    "ele": "352",
+    "name": "아홉산",
+    "natural": "peak",
+    "wikidata": "Q27295211"
+  }
+},
+{
+  "type": "node",
+  "id": 7614392029,
+  "lat": 35.3012315,
+  "lon": 129.2192716,
+  "tags": {
+    "ele": "424",
+    "name": "월음산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7642440767,
+  "lat": 35.2978157,
+  "lon": 129.0571659,
+  "tags": {
+    "ele": "735.9",
+    "name": "장군봉",
+    "name:en": "JANGGOONBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7642571031,
+  "lat": 35.2644972,
+  "lon": 129.0625389,
+  "tags": {
+    "ele": "643.6",
+    "name": "의상봉",
+    "name:en": "Euisangbong",
+    "name:ko": "의상봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7642571032,
+  "lat": 35.2301464,
+  "lon": 129.0597021,
+  "tags": {
+    "ele": "552",
+    "name": "동제봉",
+    "name:en": "Dongjebong",
+    "name:ko": "동제봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7645444289,
+  "lat": 35.2298671,
+  "lon": 129.0541507,
+  "tags": {
+    "ele": "605",
+    "name": "망미봉",
+    "name:en": "Mangmibong",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7645444290,
+  "lat": 35.2318088,
+  "lon": 129.0462865,
+  "tags": {
+    "ele": "640",
+    "name": "상학봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7972716238,
+  "lat": 35.2496700,
+  "lon": 129.1345697,
+  "tags": {
+    "ele": "340.3",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 7972724197,
+  "lat": 35.1174285,
+  "lon": 129.1218859,
+  "tags": {
+    "ele": "224",
+    "name": "장산봉",
+    "natural": "peak",
+    "wikidata": "Q27288991"
+  }
+},
+{
+  "type": "node",
+  "id": 8567075469,
+  "lat": 35.1233635,
+  "lon": 128.9937439,
+  "tags": {
+    "ele": "480.4",
+    "name": "구덕산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10157432392,
+  "lat": 35.3178429,
+  "lon": 129.1559172,
+  "tags": {
+    "ele": "520",
+    "name": "매암산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10188173571,
+  "lat": 35.2257011,
+  "lon": 128.8680446,
+  "tags": {
+    "ele": "179",
+    "name": "임호산",
+    "name:ko": "임호산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10213468223,
+  "lat": 35.1406060,
+  "lon": 128.9993325,
+  "tags": {
+    "ele": "296",
+    "name": "석탑봉",
+    "name:ko": "석탑봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10213468230,
+  "lat": 35.1480348,
+  "lon": 128.8498986,
+  "tags": {
+    "ele": "227",
+    "name": "풍상산",
+    "name:ko": "풍상산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10213468259,
+  "lat": 35.1736687,
+  "lon": 129.1912364,
+  "tags": {
+    "ele": "198",
+    "name": "신곡산",
+    "name:ko": "신곡산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10213468270,
+  "lat": 35.1797662,
+  "lon": 129.0195158,
+  "tags": {
+    "ele": "551",
+    "name": "애진봉",
+    "name:en": "AEJINBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250203565,
+  "lat": 35.0431972,
+  "lon": 128.8449167,
+  "tags": {
+    "ele": "313.4",
+    "name": "응봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250220975,
+  "lat": 35.1084778,
+  "lon": 129.0284167,
+  "tags": {
+    "ele": "169.1",
+    "name": "보수산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250220995,
+  "lat": 35.1050139,
+  "lon": 129.0330306,
+  "tags": {
+    "ele": "76.6",
+    "name": "복병산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221007,
+  "lat": 35.1026806,
+  "lon": 129.1029667,
+  "tags": {
+    "ele": "180.5",
+    "name": "신선대",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221008,
+  "lat": 35.1027083,
+  "lon": 129.0129167,
+  "tags": {
+    "ele": "162.5",
+    "name": "아미산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221231,
+  "lat": 35.0666300,
+  "lon": 129.0725400,
+  "tags": {
+    "ele": "149.6",
+    "name": "중리산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221237,
+  "lat": 35.0657000,
+  "lon": 128.9685100,
+  "tags": {
+    "ele": "214",
+    "name": "아미산",
+    "name:ja": "峨嵋山",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221238,
+  "lat": 35.0652028,
+  "lon": 128.8515389,
+  "tags": {
+    "ele": "138.9",
+    "name": "국수당",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221265,
+  "lat": 35.0582800,
+  "lon": 129.0916900,
+  "tags": {
+    "ele": "252.4",
+    "name": "태종산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221287,
+  "lat": 35.0526400,
+  "lon": 129.0884600,
+  "tags": {
+    "ele": "198",
+    "name": "묘방산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221289,
+  "lat": 35.0514917,
+  "lon": 128.8466806,
+  "tags": {
+    "ele": "199.9",
+    "name": "강금봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250221300,
+  "lat": 35.0486000,
+  "lon": 128.9964900,
+  "tags": {
+    "ele": "95",
+    "name": "두송산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250227903,
+  "lat": 35.1849083,
+  "lon": 129.0511694,
+  "tags": {
+    "ele": "149.7",
+    "name": "금용산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250227908,
+  "lat": 35.1834083,
+  "lon": 129.1866667,
+  "tags": {
+    "ele": "172.6",
+    "name": "부흥봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250228378,
+  "lat": 35.0827306,
+  "lon": 129.0744722,
+  "tags": {
+    "ele": "74.2",
+    "name": "일산봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250228384,
+  "lat": 35.0810444,
+  "lon": 128.9818278,
+  "tags": {
+    "ele": "156.4",
+    "name": "봉화산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250228389,
+  "lat": 35.0800100,
+  "lon": 129.0579000,
+  "tags": {
+    "ele": "389",
+    "name": "자봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250228400,
+  "lat": 35.0782000,
+  "lon": 129.0940100,
+  "tags": {
+    "ele": "136.2",
+    "name": "아치산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250228405,
+  "lat": 35.0770900,
+  "lon": 129.0594900,
+  "tags": {
+    "ele": "361",
+    "name": "손봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250232211,
+  "lat": 35.0767806,
+  "lon": 129.0114056,
+  "tags": {
+    "ele": "152.1",
+    "name": "장군산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250232234,
+  "lat": 35.0698333,
+  "lon": 129.0137250,
+  "tags": {
+    "ele": "144.7",
+    "name": "진정산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250242747,
+  "lat": 35.0974700,
+  "lon": 129.1186100,
+  "tags": {
+    "ele": "6.7",
+    "name": "나암",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250242785,
+  "lat": 35.0920306,
+  "lon": 129.0681833,
+  "tags": {
+    "ele": "74",
+    "name": "농청산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250242807,
+  "lat": 35.0897900,
+  "lon": 129.0639100,
+  "tags": {
+    "ele": "66.2",
+    "name": "노루등대",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250244014,
+  "lat": 35.0889083,
+  "lon": 129.0137000,
+  "tags": {
+    "ele": "326.1",
+    "name": "천마산",
+    "name:en": "Tianma Mountain",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250246713,
+  "lat": 35.1011083,
+  "lon": 129.0325472,
+  "tags": {
+    "ele": "51.4",
+    "name": "용두산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250265790,
+  "lat": 35.2836722,
+  "lon": 129.2091139,
+  "tags": {
+    "ele": "151.3",
+    "name": "연애산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250265799,
+  "lat": 35.2829028,
+  "lon": 128.8629417,
+  "tags": {
+    "ele": "280.6",
+    "name": "아훼동산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250265804,
+  "lat": 35.2813200,
+  "lon": 128.8762100,
+  "tags": {
+    "ele": "331",
+    "name": "옥선봉",
+    "name:en": "OKSUNBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270865,
+  "lat": 35.1309194,
+  "lon": 128.9855139,
+  "tags": {
+    "ele": "387.6",
+    "name": "승학산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270866,
+  "lat": 35.1303500,
+  "lon": 128.8938800,
+  "tags": {
+    "ele": "66.1",
+    "name": "끝돌바위",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270877,
+  "lat": 35.1270400,
+  "lon": 128.8960300,
+  "tags": {
+    "ele": "143.4",
+    "name": "사자바위",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270881,
+  "lat": 35.1267600,
+  "lon": 129.1205700,
+  "tags": {
+    "ele": "127",
+    "name": "해파랑봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270886,
+  "lat": 35.1259722,
+  "lon": 129.0856000,
+  "tags": {
+    "ele": "105.2",
+    "name": "샘물터산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250270893,
+  "lat": 35.1245556,
+  "lon": 128.8909278,
+  "tags": {
+    "ele": "243.8",
+    "name": "노적봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250271987,
+  "lat": 35.1461200,
+  "lon": 128.8743500,
+  "tags": {
+    "ele": "79.8",
+    "name": "굴암산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250271995,
+  "lat": 35.1441917,
+  "lon": 129.0525806,
+  "tags": {
+    "ele": "120.4",
+    "name": "만리산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250275312,
+  "lat": 35.1210940,
+  "lon": 128.8707455,
+  "tags": {
+    "communication:amateur_radio:sota": "HL/BS-019 SOTA",
+    "ele": "329.1",
+    "name": "봉화산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250275327,
+  "lat": 35.1183083,
+  "lon": 129.0880556,
+  "tags": {
+    "ele": "122.5",
+    "name": "홍곡산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250275347,
+  "lat": 35.1140528,
+  "lon": 129.1049389,
+  "tags": {
+    "ele": "173.3",
+    "name": "봉오리산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250275348,
+  "lat": 35.1140667,
+  "lon": 129.0010611,
+  "tags": {
+    "ele": "391.5",
+    "name": "시약산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250277916,
+  "lat": 35.1406889,
+  "lon": 129.0760556,
+  "tags": {
+    "ele": "133.4",
+    "name": "묘봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250277955,
+  "lat": 35.1321700,
+  "lon": 128.9842900,
+  "tags": {
+    "ele": "383.8",
+    "name": "승학산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250277968,
+  "lat": 35.1307917,
+  "lon": 129.0818667,
+  "tags": {
+    "ele": "140.1",
+    "name": "천제산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284010,
+  "lat": 35.1660300,
+  "lon": 129.1895200,
+  "tags": {
+    "ele": "165.8",
+    "name": "와우산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284011,
+  "lat": 35.1661800,
+  "lon": 129.0127700,
+  "tags": {
+    "ele": "406",
+    "name": "갓봉",
+    "name:en": "GATBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284016,
+  "lat": 35.1650600,
+  "lon": 129.1920400,
+  "tags": {
+    "ele": "156",
+    "name": "해마루",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284017,
+  "lat": 35.1650472,
+  "lon": 128.8715250,
+  "tags": {
+    "ele": "242.6",
+    "name": "금병산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284021,
+  "lat": 35.1647278,
+  "lon": 128.8443833,
+  "tags": {
+    "ele": "362.5",
+    "name": "옥녀봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284029,
+  "lat": 35.1637400,
+  "lon": 129.0780600,
+  "tags": {
+    "ele": "347",
+    "name": "행경산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284058,
+  "lat": 35.1575400,
+  "lon": 129.1303900,
+  "tags": {
+    "ele": "71",
+    "name": "진조말산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284060,
+  "lat": 35.1568750,
+  "lon": 129.1817000,
+  "tags": {
+    "ele": "109.3",
+    "name": "와우산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284071,
+  "lat": 35.1535100,
+  "lon": 129.1520100,
+  "tags": {
+    "ele": "53",
+    "name": "운대산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284072,
+  "lat": 35.1534980,
+  "lon": 129.0801396,
+  "tags": {
+    "ele": "391.6",
+    "name": "사자봉",
+    "name:en": "Lion's Peak",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284089,
+  "lat": 35.1490600,
+  "lon": 129.0836500,
+  "tags": {
+    "ele": "268.9",
+    "name": "갈미봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284803,
+  "lat": 35.2268100,
+  "lon": 129.2418200,
+  "tags": {
+    "ele": "0.6",
+    "name": "청돌",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250284804,
+  "lat": 35.2264667,
+  "lon": 129.1999528,
+  "tags": {
+    "ele": "286",
+    "name": "양달산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287509,
+  "lat": 35.1839000,
+  "lon": 129.0612400,
+  "tags": {
+    "ele": "199.9",
+    "name": "화지산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287515,
+  "lat": 35.1829278,
+  "lon": 129.2075694,
+  "tags": {
+    "ele": "68.6",
+    "name": "망덕봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287520,
+  "lat": 35.1802904,
+  "lon": 129.0960194,
+  "tags": {
+    "ele": "256.4",
+    "name": "배산",
+    "natural": "peak",
+    "wikidata": "Q27296333"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287523,
+  "lat": 35.1796306,
+  "lon": 129.2057722,
+  "tags": {
+    "ele": "23.3",
+    "name": "죽도산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287529,
+  "lat": 35.1786340,
+  "lon": 129.0167131,
+  "tags": {
+    "ele": "587.8",
+    "name": "유두봉",
+    "name:en": "YUDOOBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287556,
+  "lat": 35.1737694,
+  "lon": 129.1912583,
+  "tags": {
+    "ele": "197.9",
+    "name": "광어곡",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287587,
+  "lat": 35.2038300,
+  "lon": 129.0939100,
+  "tags": {
+    "ele": "105.4",
+    "name": "망월산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287588,
+  "lat": 35.2031800,
+  "lon": 128.8911700,
+  "tags": {
+    "ele": "18",
+    "name": "송산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250287608,
+  "lat": 35.1984806,
+  "lon": 129.1950833,
+  "tags": {
+    "ele": "155.6",
+    "name": "곽걸산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289214,
+  "lat": 35.1977200,
+  "lon": 129.0234200,
+  "tags": {
+    "ele": "583.4",
+    "name": "낙타봉",
+    "name:en": "NAGTABONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289215,
+  "lat": 35.1971360,
+  "lon": 128.9157630,
+  "tags": {
+    "ele": "40",
+    "name": "덕도산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289223,
+  "lat": 35.1943556,
+  "lon": 129.0477583,
+  "tags": {
+    "ele": "399.3",
+    "name": "금정봉(쇠미산)",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289224,
+  "lat": 35.1947000,
+  "lon": 128.9003100,
+  "tags": {
+    "ele": "47.2",
+    "name": "오봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289227,
+  "lat": 35.1934600,
+  "lon": 129.0256300,
+  "tags": {
+    "ele": "617",
+    "name": "불태령(불웅령)",
+    "name:en": "BULTAERYEONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289236,
+  "lat": 35.1919700,
+  "lon": 128.9459900,
+  "tags": {
+    "ele": "35",
+    "name": "칠점산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289241,
+  "lat": 35.1903100,
+  "lon": 129.0040900,
+  "tags": {
+    "ele": "269",
+    "name": "범방산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289246,
+  "lat": 35.1878342,
+  "lon": 129.0211451,
+  "tags": {
+    "ele": "613.2",
+    "name": "중봉",
+    "name:en": "JUNGBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250289251,
+  "lat": 35.1874389,
+  "lon": 129.2085000,
+  "tags": {
+    "ele": "50.7",
+    "name": "멍두산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250292989,
+  "lat": 35.3296117,
+  "lon": 128.9223252,
+  "tags": {
+    "ele": "433",
+    "name": "금동산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250293004,
+  "lat": 35.3237611,
+  "lon": 128.8770778,
+  "tags": {
+    "ele": "277.9",
+    "name": "시루봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294832,
+  "lat": 35.2191500,
+  "lon": 129.1220028,
+  "tags": {
+    "ele": "77.2",
+    "name": "추마산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294835,
+  "lat": 35.2183400,
+  "lon": 128.9013000,
+  "tags": {
+    "ele": "25",
+    "name": "전산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294853,
+  "lat": 35.2159200,
+  "lon": 129.2274200,
+  "tags": {
+    "ele": "0.1",
+    "name": "샛바위",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294856,
+  "lat": 35.2132056,
+  "lon": 129.2163333,
+  "tags": {
+    "ele": "154.1",
+    "name": "연화봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294857,
+  "lat": 35.2134361,
+  "lon": 129.1803028,
+  "tags": {
+    "ele": "308.5",
+    "name": "감딤산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294862,
+  "lat": 35.2110583,
+  "lon": 129.1761389,
+  "tags": {
+    "ele": "236.7",
+    "name": "구치머리",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294864,
+  "lat": 35.2100400,
+  "lon": 129.1102500,
+  "tags": {
+    "ele": "175.2",
+    "name": "옥봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294866,
+  "lat": 35.2098400,
+  "lon": 129.0924500,
+  "tags": {
+    "ele": "145.9",
+    "name": "마안산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294872,
+  "lat": 35.2079000,
+  "lon": 128.8465972,
+  "tags": {
+    "ele": "89.8",
+    "name": "칠산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250294876,
+  "lat": 35.2069139,
+  "lon": 129.1366556,
+  "tags": {
+    "ele": "273.7",
+    "name": "주봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308515,
+  "lat": 35.2690200,
+  "lon": 129.0962420,
+  "tags": {
+    "ele": "191",
+    "name": "금구산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308528,
+  "lat": 35.2655222,
+  "lon": 128.9843139,
+  "tags": {
+    "ele": "117.8",
+    "name": "지라안산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308548,
+  "lat": 35.2602800,
+  "lon": 129.0367200,
+  "tags": {
+    "ele": "496",
+    "name": "장골봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308566,
+  "lat": 35.2568611,
+  "lon": 128.8552500,
+  "tags": {
+    "ele": "377.2",
+    "name": "경운산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308570,
+  "lat": 35.2558400,
+  "lon": 129.2106600,
+  "tags": {
+    "ele": "125",
+    "name": "셋드산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308571,
+  "lat": 35.2552198,
+  "lon": 129.2069086,
+  "tags": {
+    "ele": "138.6",
+    "name": "셋드산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308577,
+  "lat": 35.2544710,
+  "lon": 128.8888140,
+  "tags": {
+    "ele": "383",
+    "name": "강암봉",
+    "name:en": "GANGAMBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308581,
+  "lat": 35.2525600,
+  "lon": 128.8876800,
+  "tags": {
+    "ele": "376",
+    "name": "분성산",
+    "name:en": "BOONSUNGSAN",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308587,
+  "lat": 35.2501556,
+  "lon": 129.2256667,
+  "tags": {
+    "ele": "101.5",
+    "name": "모산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308590,
+  "lat": 35.2499800,
+  "lon": 129.2053500,
+  "tags": {
+    "ele": "171.7",
+    "name": "주산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308601,
+  "lat": 35.2462528,
+  "lon": 129.2453222,
+  "tags": {
+    "ele": "55.4",
+    "name": "부흥대",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250308602,
+  "lat": 35.2462100,
+  "lon": 129.1170000,
+  "tags": {
+    "ele": "69",
+    "name": "땅뫼산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310912,
+  "lat": 35.2459528,
+  "lon": 128.8923111,
+  "tags": {
+    "ele": "326.9",
+    "name": "분성산",
+    "name:en": "BOONSUNGSAN",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310920,
+  "lat": 35.2430111,
+  "lon": 128.8758139,
+  "tags": {
+    "ele": "46.1",
+    "name": "구지봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310925,
+  "lat": 35.2420528,
+  "lon": 129.1936056,
+  "tags": {
+    "ele": "369.2",
+    "name": "산성",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310932,
+  "lat": 35.2413972,
+  "lon": 129.1485583,
+  "tags": {
+    "ele": "258.6",
+    "name": "운봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310939,
+  "lat": 35.2406600,
+  "lon": 129.2494600,
+  "tags": {
+    "ele": "7.9",
+    "name": "양글끝",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310948,
+  "lat": 35.2371900,
+  "lon": 129.2476300,
+  "tags": {
+    "ele": "1.4",
+    "name": "작은넙둑바위",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310949,
+  "lat": 35.2376604,
+  "lon": 129.0618085,
+  "tags": {
+    "ele": "521",
+    "name": "대륙봉(평평바위)",
+    "name:en": "DAERYUKBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310967,
+  "lat": 35.2336111,
+  "lon": 129.2292667,
+  "tags": {
+    "ele": "229.4",
+    "name": "봉대산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310968,
+  "lat": 35.2336100,
+  "lon": 129.2292800,
+  "tags": {
+    "ele": "229.4",
+    "name": "봉대산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310969,
+  "lat": 35.2330300,
+  "lon": 129.0388500,
+  "tags": {
+    "ele": "548",
+    "name": "화산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310977,
+  "lat": 35.2317000,
+  "lon": 128.8906800,
+  "tags": {
+    "ele": "106",
+    "name": "남산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310978,
+  "lat": 35.2305000,
+  "lon": 129.2463200,
+  "tags": {
+    "ele": "3.9",
+    "name": "삿갓바위",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250310996,
+  "lat": 35.2274588,
+  "lon": 128.8569259,
+  "tags": {
+    "ele": "165.1",
+    "name": "함박산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319226,
+  "lat": 35.2779111,
+  "lon": 129.1432500,
+  "tags": {
+    "ele": "145.5",
+    "name": "도독고산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319228,
+  "lat": 35.2768580,
+  "lon": 129.1256730,
+  "tags": {
+    "ele": "264",
+    "name": "선동봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319247,
+  "lat": 35.2725500,
+  "lon": 129.1156389,
+  "tags": {
+    "ele": "170.6",
+    "name": "호두술산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319248,
+  "lat": 35.2728917,
+  "lon": 128.9882333,
+  "tags": {
+    "ele": "65.4",
+    "name": "밀봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319255,
+  "lat": 35.2718222,
+  "lon": 129.1376167,
+  "tags": {
+    "ele": "240.3",
+    "name": "장년산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319547,
+  "lat": 35.3088600,
+  "lon": 129.1572800,
+  "tags": {
+    "ele": "367",
+    "name": "소산벌",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319553,
+  "lat": 35.3073500,
+  "lon": 129.0522000,
+  "tags": {
+    "ele": "604",
+    "name": "금륜산",
+    "name:en": "KEUMYUNSAN",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319557,
+  "lat": 35.3063059,
+  "lon": 128.9972596,
+  "tags": {
+    "ele": "133.1",
+    "name": "증산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319568,
+  "lat": 35.3046100,
+  "lon": 129.1013100,
+  "tags": {
+    "ele": "225",
+    "name": "이화봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319569,
+  "lat": 35.3041000,
+  "lon": 128.8600000,
+  "tags": {
+    "communication:amateur_radio:sota": "HL/GN-198",
+    "ele": "428",
+    "name": "삼각점",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319574,
+  "lat": 35.3034028,
+  "lon": 128.8821556,
+  "tags": {
+    "ele": "251.8",
+    "name": "안산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319577,
+  "lat": 35.3025600,
+  "lon": 129.0883600,
+  "tags": {
+    "ele": "282",
+    "name": "사배이산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250319604,
+  "lat": 35.2956271,
+  "lon": 129.0602260,
+  "tags": {
+    "ele": "718",
+    "name": "갑오봉",
+    "name:en": "GABOBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250323413,
+  "lat": 35.2925083,
+  "lon": 128.9191722,
+  "tags": {
+    "ele": "348.6",
+    "name": "도봉산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250323419,
+  "lat": 35.2914417,
+  "lon": 129.1325917,
+  "tags": {
+    "ele": "265.8",
+    "name": "공덕산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250323421,
+  "lat": 35.2900889,
+  "lon": 129.0736611,
+  "tags": {
+    "ele": "599.9",
+    "name": "계명산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250323431,
+  "lat": 35.2868306,
+  "lon": 128.9873806,
+  "tags": {
+    "ele": "136.6",
+    "name": "각성산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250327211,
+  "lat": 35.3216611,
+  "lon": 128.8904194,
+  "tags": {
+    "ele": "493.7",
+    "name": "석룡산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250327226,
+  "lat": 35.3188400,
+  "lon": 129.0769400,
+  "tags": {
+    "ele": "255.4",
+    "name": "산밭골산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250327235,
+  "lat": 35.3178800,
+  "lon": 129.1051600,
+  "tags": {
+    "ele": "251.7",
+    "name": "봉림대",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250327244,
+  "lat": 35.3159600,
+  "lon": 129.2184500,
+  "tags": {
+    "ele": "314.6",
+    "name": "갈미봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250327246,
+  "lat": 35.3143000,
+  "lon": 129.0481800,
+  "tags": {
+    "ele": "536",
+    "name": "다방봉",
+    "name:en": "DABANGBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250331841,
+  "lat": 35.3282333,
+  "lon": 129.2956611,
+  "tags": {
+    "ele": "125.1",
+    "name": "봉대산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10250331842,
+  "lat": 35.3286500,
+  "lon": 129.2206600,
+  "tags": {
+    "ele": "196.4",
+    "name": "신선산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10279488637,
+  "lat": 35.2263490,
+  "lon": 129.0261197,
+  "tags": {
+    "ele": "352",
+    "name": "함박봉로",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10734245748,
+  "lat": 35.0969321,
+  "lon": 129.0036172,
+  "tags": {
+    "ele": "240",
+    "name": "옥녀봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 10814693372,
+  "lat": 35.1722399,
+  "lon": 129.0098583,
+  "tags": {
+    "ele": "454",
+    "name": "삼각봉",
+    "name:en": "SAMGAKBONG",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11028865803,
+  "lat": 35.1941141,
+  "lon": 129.0286812,
+  "tags": {
+    "ele": "598",
+    "name": "매봉이",
+    "name:en": "MAEBONGI",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11087790119,
+  "lat": 35.2155447,
+  "lon": 129.0400418,
+  "tags": {
+    "name": "용을산",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11299174549,
+  "lat": 35.3014385,
+  "lon": 129.0538116,
+  "tags": {
+    "ele": "727",
+    "name": "727봉(철계단봉)",
+    "name:en": "727Bong",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11299473721,
+  "lat": 35.2721580,
+  "lon": 129.0608261,
+  "tags": {
+    "ele": "670.5",
+    "name": "사기봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 11336914904,
+  "lat": 35.2745993,
+  "lon": 129.0482746,
+  "tags": {
+    "name": "미륵봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 12594143079,
+  "lat": 35.1581686,
+  "lon": 128.8429658,
+  "tags": {
+    "name": "작은옥녀봉",
+    "natural": "peak"
+  }
+},
+{
+  "type": "node",
+  "id": 13000912615,
+  "lat": 35.1483754,
+  "lon": 129.0407085,
+  "tags": {
+    "ele": "236",
+    "name": "팔금산",
+    "natural": "peak"
+  }
+}
+
+  ]
+}

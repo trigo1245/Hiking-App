@@ -9,6 +9,8 @@ import '../../../helpers/pump_app.dart';
 import '../fake_course_remote.dart';
 
 void main() {
+  versionTests();
+
   test('서버 course_catalog 한 행을 코스로 바꾼다 (경로는 GeoJSON)', () {
     final course = courseFromCatalogRow({
       'id': '6f1c…',
@@ -91,5 +93,53 @@ void main() {
     await repo.sync();
 
     expect((await repo.watchAll().first).map((c) => c.id), ['b']);
+  });
+}
+
+void versionTests() {
+  test('서버 코스가 바뀌지 않았으면 다시 내려받지 않는다', () async {
+    final db = testDatabase();
+    final remote = FakeCourseRemote([testCourse(id: 'a'), testCourse(id: 'b')]);
+    final repo = CourseRepository(db, remote);
+
+    await repo.sync();
+    expect(remote.fetchCalls, 1);
+
+    await repo.sync();
+    await repo.sync();
+    expect(remote.versionCalls, 3);
+    expect(remote.fetchCalls, 1);
+  });
+
+  test('코스가 고쳐지면(수정 시각이 바뀌면) 다시 내려받는다', () async {
+    final db = testDatabase();
+    final remote = FakeCourseRemote([testCourse(id: 'a')]);
+    final repo = CourseRepository(db, remote);
+    await repo.sync();
+
+    remote.courses = [
+      testCourse(
+        id: 'a',
+        name: '고친 코스',
+        updatedAt: DateTime.utc(2026, 10, 22, 9),
+      ),
+    ];
+    await repo.sync();
+
+    expect(remote.fetchCalls, 2);
+    expect((await repo.watchAll().first).single.name, '고친 코스');
+  });
+
+  test('코스 수가 바뀌면(추가·삭제) 다시 내려받는다', () async {
+    final db = testDatabase();
+    final remote = FakeCourseRemote([testCourse(id: 'a'), testCourse(id: 'b')]);
+    final repo = CourseRepository(db, remote);
+    await repo.sync();
+
+    remote.courses = [testCourse(id: 'a')];
+    await repo.sync();
+
+    expect(remote.fetchCalls, 2);
+    expect(await repo.watchAll().first, hasLength(1));
   });
 }

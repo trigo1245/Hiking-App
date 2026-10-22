@@ -1,6 +1,7 @@
 -- 시연용 경쟁 데이터 (개발용 Supabase 프로젝트에서만 실행한다. CLAUDE.md 6-2장)
 -- 먼저 migrations/20261021000000_create_competition.sql 과 seed/courses.sql 을 실행해야 한다.
 -- 여러 번 실행해도 된다. (실행할 때마다 시연용 완주 기록을 지우고 다시 넣는다)
+-- 시연용 데이터는 직접 만든 코스 4개에만 넣는다. 자동 생성 코스(slug가 auto-로 시작)에는 넣지 않는다.
 -- 지우는 방법은 맨 아래에 있다.
 
 begin;
@@ -57,6 +58,7 @@ from generate_series(1, 12) as u(n)
 cross join (
   select id, official_time_min, (row_number() over (order by slug))::integer as n
   from public.courses
+  where slug not like 'auto-%'  -- 자동 생성 코스에는 시연용 기록을 넣지 않는다
 ) as c
 cross join lateral generate_series(1, ((u.n + c.n) % 5) + 1) as g
 cross join lateral (
@@ -75,7 +77,9 @@ select
   public.season_of(t.at),
   true
 from generate_series(1, 4) as u(n)
-cross join public.courses as c
+cross join (
+  select * from public.courses where slug not like 'auto-%'
+) as c
 cross join lateral (
   select timestamptz '2026-04-12 08:00:00+09' + u.n * interval '7 days' as at
 ) as t;

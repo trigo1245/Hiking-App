@@ -21,11 +21,27 @@ class CourseRepository {
           .watch()
           .map((rows) => rows.map(_toCourse).toList());
 
-  /// 서버에서 최신 코스를 받아 기기 저장본을 통째로 바꾼다.
+  /// 기기에 저장된 코스의 버전 (코스 수, 서버 기준 마지막 수정 시각)
+  Future<CatalogVersion> localVersion() async {
+    final count = _db.courses.id.count();
+    final latest = _db.courses.updatedAt.max();
+    final row = await (_db.selectOnly(
+      _db.courses,
+    )..addColumns([count, latest])).getSingle();
+    return CatalogVersion(
+      count: row.read(count) ?? 0,
+      latestUpdate: row.read(latest),
+    );
+  }
+
+  /// 서버의 코스가 바뀌었을 때만 내려받아 기기 저장본을 통째로 바꾼다.
+  /// 먼저 버전(코스 수, 마지막 수정 시각)만 물어보고, 같으면 내려받지 않는다.
   /// 인터넷이 없으면 저장본을 그대로 두고 false를 돌려준다.
   Future<bool> sync() async {
     final List<Course> courses;
     try {
+      final remote = await _remote.fetchVersion();
+      if (remote.sameAs(await localVersion())) return true;
       courses = await _remote.fetchCourses();
     } catch (error) {
       debugPrint('[courses] 코스 받기 실패, 저장해 둔 코스를 씀: $error');
@@ -50,7 +66,8 @@ class CourseRepository {
               ]),
               summitLat: c.summit.lat,
               summitLon: c.summit.lon,
-              updatedAt: DateTime.now(),
+              // 서버의 수정 시각을 그대로 저장해야 다음 비교가 맞는다.
+              updatedAt: c.updatedAt ?? DateTime.fromMillisecondsSinceEpoch(0),
             ),
         ]),
       );
@@ -72,6 +89,7 @@ class CourseRepository {
         GeoPoint((c[1] as num).toDouble(), (c[0] as num).toDouble()),
     ],
     summit: GeoPoint(r.summitLat, r.summitLon),
+    updatedAt: r.updatedAt,
   );
 }
 

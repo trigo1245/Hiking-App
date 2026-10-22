@@ -44,8 +44,26 @@ class CourseMap extends ConsumerStatefulWidget {
   ConsumerState<CourseMap> createState() => _CourseMapState();
 }
 
+/// 코스 표시(정상 이름표, 들머리 점, 정복자 사진)를 보여 주는 확대 범위.
+/// - 이보다 멀리(부산 전체 정도)서는 표시끼리 겹쳐서 선만 보여 준다.
+/// - 이보다 가까이(한 코스를 크게 볼 때)는 표시가 길과 내 위치를 가려서 선만 보여 준다.
+/// 선택한 코스는 확대 정도와 관계없이 표시한다.
+const courseMarkerMinZoom = 12.5;
+const courseMarkerMaxZoom = 15.0;
+
+bool showCourseMarkersAt(double zoom) =>
+    zoom >= courseMarkerMinZoom && zoom <= courseMarkerMaxZoom;
+
 class _CourseMapState extends ConsumerState<CourseMap> {
   final _hitNotifier = LayerHitNotifier<String>(null);
+
+  /// 지금 확대 정도에서 코스 표시를 보여 줄지 (지도를 움직일 때마다 갱신)
+  bool _showMarkers = showCourseMarkersAt(11);
+
+  void _onCameraChanged(MapCamera camera) {
+    final show = showCourseMarkersAt(camera.zoom);
+    if (show != _showMarkers) setState(() => _showMarkers = show);
+  }
 
   @override
   void dispose() {
@@ -68,7 +86,11 @@ class _CourseMapState extends ConsumerState<CourseMap> {
       ...widget.courses.where((c) => c.id != selected),
       ...widget.courses.where((c) => c.id == selected),
     ];
-    final summits = {for (final c in widget.courses) c.mountainName: c.summit};
+    // 표시를 그릴 코스: 알맞은 확대 범위면 전부, 아니면 선택한 코스만
+    final marked = _showMarkers
+        ? ordered
+        : ordered.where((c) => c.id == selected).toList();
+    final summits = {for (final c in marked) c.mountainName: c.summit};
     final me = widget.myLocation;
 
     return FlutterMap(
@@ -79,6 +101,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
         minZoom: 6,
         maxZoom: 18,
         onTap: (_, _) => widget.onMapTap(),
+        onPositionChanged: (camera, _) => _onCameraChanged(camera),
       ),
       children: [
         if (ref.watch(mapTilesEnabledProvider))
@@ -116,7 +139,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                 alignment: Alignment.topCenter,
                 child: _SummitLabel(name: name),
               ),
-            for (final c in ordered)
+            for (final c in marked)
               Marker(
                 point: toLatLng(c.start),
                 width: 28,
@@ -127,7 +150,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                 ),
               ),
             // 정복자 프로필 사진: 코스 선의 가운데에 둔다 (기획서 4.3)
-            for (final c in ordered)
+            for (final c in marked)
               if (widget.conquerors[c.id] case final conqueror?)
                 Marker(
                   point: toLatLng(c.path[c.path.length ~/ 2]),

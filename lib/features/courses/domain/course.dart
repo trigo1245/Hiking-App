@@ -19,6 +19,7 @@ class Course {
     required this.summit,
     this.officialTimeMin,
     this.officialDifficulty,
+    this.updatedAt,
   });
 
   final String id;
@@ -38,6 +39,9 @@ class Course {
   final List<GeoPoint> path;
   final GeoPoint summit;
 
+  /// 서버에서 마지막으로 고친 시각 (바뀌었을 때만 내려받기에 쓴다)
+  final DateTime? updatedAt;
+
   GeoPoint get start => path.first;
 
   /// "승학산 동아대 코스"
@@ -53,4 +57,24 @@ List<Course> searchCourses(List<Course> courses, String query) {
     for (final c in courses)
       if (normalize('${c.mountainName}${c.name}${c.startName}').contains(q)) c,
   ];
+}
+
+/// 코스 목록의 "버전": 코스 수와 마지막 수정 시각.
+/// 서버와 기기의 버전이 같으면 코스를 다시 내려받지 않는다.
+class CatalogVersion {
+  const CatalogVersion({required this.count, this.latestUpdate});
+
+  final int count;
+  final DateTime? latestUpdate;
+
+  bool sameAs(CatalogVersion other) {
+    if (count != other.count) return false;
+    final a = latestUpdate;
+    final b = other.latestUpdate;
+    if (a == null || b == null) return a == b;
+    return a.isAtSameMomentAs(b);
+  }
+
+  @override
+  String toString() => 'CatalogVersion($count, $latestUpdate)';
 }

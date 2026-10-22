@@ -1,0 +1,529 @@
+{
+  "_설명": "자동 생성 코스 (dart run tool/auto_courses.dart). 직접 고치지 말고 잘못된 산은 courses.json에 직접 정의하면 자동 생성에서 빠진다.",
+  "mountains": [
+    {
+      "id": "auto-개좌산",
+      "name": "개좌산",
+      "region": "부산 해운대구",
+      "height_m": 450.0,
+      "summit": {
+        "name": "개좌산",
+        "lat": 35.2503943,
+        "lon": 129.1455249
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-거문산",
+      "name": "거문산",
+      "region": "부산 기장군",
+      "height_m": 543.0,
+      "summit": {
+        "name": "거문산",
+        "lat": 35.2983816,
+        "lon": 129.1502272
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-구덕산",
+      "name": "구덕산",
+      "region": "부산 사하구",
+      "height_m": 542.1,
+      "summit": {
+        "name": "구덕산",
+        "lat": 35.1231354,
+        "lon": 128.9995753
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-금련산",
+      "name": "금련산",
+      "region": "부산 연제구",
+      "height_m": 415.0,
+      "summit": {
+        "name": "금련산",
+        "lat": 35.161433,
+        "lon": 129.0952584
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-달음산",
+      "name": "달음산",
+      "region": "부산 기장군",
+      "height_m": 587.0,
+      "summit": {
+        "name": "달음산",
+        "lat": 35.3078051,
+        "lon": 129.2109706
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-배산",
+      "name": "배산",
+      "region": "부산 연제구",
+      "height_m": 256.4,
+      "summit": {
+        "name": "배산",
+        "lat": 35.1802904,
+        "lon": 129.0960194
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-백양산",
+      "name": "백양산",
+      "region": "부산 부산진구",
+      "height_m": 641.3,
+      "summit": {
+        "name": "백양산",
+        "lat": 35.1833054,
+        "lon": 129.0218495
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-봉래산",
+      "name": "봉래산",
+      "region": "부산 영도구",
+      "height_m": 396.0,
+      "summit": {
+        "name": "봉래산",
+        "lat": 35.0825399,
+        "lon": 129.0551734
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-봉오리산",
+      "name": "봉오리산",
+      "region": "부산 남구",
+      "height_m": 173.3,
+      "summit": {
+        "name": "봉오리산",
+        "lat": 35.1140528,
+        "lon": 129.1049389
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-봉화산",
+      "name": "봉화산",
+      "region": "부산 강서구",
+      "height_m": 329.1,
+      "summit": {
+        "name": "봉화산",
+        "lat": 35.121094,
+        "lon": 128.8707455
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-아미산",
+      "name": "아미산",
+      "region": "부산 사하구",
+      "height_m": 214.0,
+      "summit": {
+        "name": "아미산",
+        "lat": 35.0657,
+        "lon": 128.96851
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-아홉산",
+      "name": "아홉산",
+      "region": "부산 금정구",
+      "height_m": 344.1,
+      "summit": {
+        "name": "아홉산",
+        "lat": 35.2518559,
+        "lon": 129.1355894
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-옥녀봉",
+      "name": "옥녀봉",
+      "region": "부산 사하구",
+      "height_m": 240.0,
+      "summit": {
+        "name": "옥녀봉",
+        "lat": 35.0969321,
+        "lon": 129.0036172
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-옥봉산",
+      "name": "옥봉산",
+      "region": "부산 동래구",
+      "height_m": 175.2,
+      "summit": {
+        "name": "옥봉산",
+        "lat": 35.21004,
+        "lon": 129.11025
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-윤산",
+      "name": "윤산",
+      "region": "부산 금정구",
+      "height_m": null,
+      "summit": {
+        "name": "윤산",
+        "lat": 35.2298278,
+        "lon": 129.1035378
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-일광산",
+      "name": "일광산",
+      "region": "부산 기장군",
+      "height_m": 388.0,
+      "summit": {
+        "name": "일광산",
+        "lat": 35.2691117,
+        "lon": 129.2068643
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-장군산",
+      "name": "장군산",
+      "region": "부산 서구",
+      "height_m": 152.1,
+      "summit": {
+        "name": "장군산",
+        "lat": 35.0767806,
+        "lon": 129.0114056
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-장산",
+      "name": "장산",
+      "region": "부산 해운대구",
+      "height_m": 634.0,
+      "summit": {
+        "name": "장산",
+        "lat": 35.1943616,
+        "lon": 129.1450072
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-천마산",
+      "name": "천마산",
+      "region": "부산 서구",
+      "height_m": 326.1,
+      "summit": {
+        "name": "천마산",
+        "lat": 35.0889083,
+        "lon": 129.0137
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-철마산",
+      "name": "철마산",
+      "region": "부산 기장군",
+      "height_m": 605.4,
+      "summit": {
+        "name": "철마산",
+        "lat": 35.3096784,
+        "lon": 129.1359151
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-홍곡산",
+      "name": "홍곡산",
+      "region": "부산 남구",
+      "height_m": 122.5,
+      "summit": {
+        "name": "홍곡산",
+        "lat": 35.1183083,
+        "lon": 129.0880556
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    },
+    {
+      "id": "auto-황령산",
+      "name": "황령산",
+      "region": "부산 부산진구",
+      "height_m": 427.0,
+      "summit": {
+        "name": "황령산",
+        "lat": 35.1573354,
+        "lon": 129.0819088
+      },
+      "source": "OpenStreetMap 봉우리 (ODbL)"
+    }
+  ],
+  "courses": [
+    {
+      "id": "auto-개좌산-1",
+      "mountain": "auto-개좌산",
+      "name": "철마면 코스",
+      "file": "data/trails/courses/auto/auto-개좌산-1.geojson"
+    },
+    {
+      "id": "auto-개좌산-2",
+      "mountain": "auto-개좌산",
+      "name": "반송동 코스",
+      "file": "data/trails/courses/auto/auto-개좌산-2.geojson"
+    },
+    {
+      "id": "auto-거문산-1",
+      "mountain": "auto-거문산",
+      "name": "철마면 코스",
+      "file": "data/trails/courses/auto/auto-거문산-1.geojson"
+    },
+    {
+      "id": "auto-거문산-2",
+      "mountain": "auto-거문산",
+      "name": "철마면 코스 2",
+      "file": "data/trails/courses/auto/auto-거문산-2.geojson"
+    },
+    {
+      "id": "auto-구덕산-1",
+      "mountain": "auto-구덕산",
+      "name": "엄궁동 코스",
+      "file": "data/trails/courses/auto/auto-구덕산-1.geojson"
+    },
+    {
+      "id": "auto-구덕산-2",
+      "mountain": "auto-구덕산",
+      "name": "괴정동 코스",
+      "file": "data/trails/courses/auto/auto-구덕산-2.geojson"
+    },
+    {
+      "id": "auto-금련산-1",
+      "mountain": "auto-금련산",
+      "name": "대연동 코스",
+      "file": "data/trails/courses/auto/auto-금련산-1.geojson"
+    },
+    {
+      "id": "auto-금련산-2",
+      "mountain": "auto-금련산",
+      "name": "연산동 코스",
+      "file": "data/trails/courses/auto/auto-금련산-2.geojson"
+    },
+    {
+      "id": "auto-달음산-1",
+      "mountain": "auto-달음산",
+      "name": "정관읍 코스",
+      "file": "data/trails/courses/auto/auto-달음산-1.geojson"
+    },
+    {
+      "id": "auto-달음산-2",
+      "mountain": "auto-달음산",
+      "name": "일광읍 코스",
+      "file": "data/trails/courses/auto/auto-달음산-2.geojson"
+    },
+    {
+      "id": "auto-배산-1",
+      "mountain": "auto-배산",
+      "name": "연산동 코스",
+      "file": "data/trails/courses/auto/auto-배산-1.geojson"
+    },
+    {
+      "id": "auto-배산-2",
+      "mountain": "auto-배산",
+      "name": "연산동 코스 2",
+      "file": "data/trails/courses/auto/auto-배산-2.geojson"
+    },
+    {
+      "id": "auto-백양산-1",
+      "mountain": "auto-백양산",
+      "name": "모라동 코스",
+      "file": "data/trails/courses/auto/auto-백양산-1.geojson"
+    },
+    {
+      "id": "auto-백양산-2",
+      "mountain": "auto-백양산",
+      "name": "구포동 코스",
+      "file": "data/trails/courses/auto/auto-백양산-2.geojson"
+    },
+    {
+      "id": "auto-봉래산-1",
+      "mountain": "auto-봉래산",
+      "name": "동삼동 코스",
+      "file": "data/trails/courses/auto/auto-봉래산-1.geojson"
+    },
+    {
+      "id": "auto-봉래산-2",
+      "mountain": "auto-봉래산",
+      "name": "봉래동4가 코스",
+      "file": "data/trails/courses/auto/auto-봉래산-2.geojson"
+    },
+    {
+      "id": "auto-봉오리산-1",
+      "mountain": "auto-봉오리산",
+      "name": "용호동 코스",
+      "file": "data/trails/courses/auto/auto-봉오리산-1.geojson"
+    },
+    {
+      "id": "auto-봉오리산-2",
+      "mountain": "auto-봉오리산",
+      "name": "용당동 코스",
+      "file": "data/trails/courses/auto/auto-봉오리산-2.geojson"
+    },
+    {
+      "id": "auto-봉화산-1",
+      "mountain": "auto-봉화산",
+      "name": "생곡동 코스",
+      "file": "data/trails/courses/auto/auto-봉화산-1.geojson"
+    },
+    {
+      "id": "auto-봉화산-2",
+      "mountain": "auto-봉화산",
+      "name": "송정동 코스",
+      "file": "data/trails/courses/auto/auto-봉화산-2.geojson"
+    },
+    {
+      "id": "auto-아미산-1",
+      "mountain": "auto-아미산",
+      "name": "장림동 코스",
+      "file": "data/trails/courses/auto/auto-아미산-1.geojson"
+    },
+    {
+      "id": "auto-아미산-2",
+      "mountain": "auto-아미산",
+      "name": "장림동 코스 2",
+      "file": "data/trails/courses/auto/auto-아미산-2.geojson"
+    },
+    {
+      "id": "auto-아홉산-1",
+      "mountain": "auto-아홉산",
+      "name": "철마면 코스",
+      "file": "data/trails/courses/auto/auto-아홉산-1.geojson"
+    },
+    {
+      "id": "auto-아홉산-2",
+      "mountain": "auto-아홉산",
+      "name": "철마면 코스 2",
+      "file": "data/trails/courses/auto/auto-아홉산-2.geojson"
+    },
+    {
+      "id": "auto-옥녀봉-1",
+      "mountain": "auto-옥녀봉",
+      "name": "서대신동2가 코스",
+      "file": "data/trails/courses/auto/auto-옥녀봉-1.geojson"
+    },
+    {
+      "id": "auto-옥봉산-1",
+      "mountain": "auto-옥봉산",
+      "name": "금사동 코스",
+      "file": "data/trails/courses/auto/auto-옥봉산-1.geojson"
+    },
+    {
+      "id": "auto-옥봉산-2",
+      "mountain": "auto-옥봉산",
+      "name": "반여동 코스",
+      "file": "data/trails/courses/auto/auto-옥봉산-2.geojson"
+    },
+    {
+      "id": "auto-윤산-1",
+      "mountain": "auto-윤산",
+      "name": "오륜동 코스",
+      "file": "data/trails/courses/auto/auto-윤산-1.geojson"
+    },
+    {
+      "id": "auto-윤산-2",
+      "mountain": "auto-윤산",
+      "name": "금사동 코스",
+      "file": "data/trails/courses/auto/auto-윤산-2.geojson"
+    },
+    {
+      "id": "auto-일광산-1",
+      "mountain": "auto-일광산",
+      "name": "기장읍 코스",
+      "file": "data/trails/courses/auto/auto-일광산-1.geojson"
+    },
+    {
+      "id": "auto-일광산-2",
+      "mountain": "auto-일광산",
+      "name": "일광읍 코스",
+      "file": "data/trails/courses/auto/auto-일광산-2.geojson"
+    },
+    {
+      "id": "auto-장군산-1",
+      "mountain": "auto-장군산",
+      "name": "암남동 코스",
+      "file": "data/trails/courses/auto/auto-장군산-1.geojson"
+    },
+    {
+      "id": "auto-장군산-2",
+      "mountain": "auto-장군산",
+      "name": "암남동 코스 2",
+      "file": "data/trails/courses/auto/auto-장군산-2.geojson"
+    },
+    {
+      "id": "auto-장산-1",
+      "mountain": "auto-장산",
+      "name": "재송동 코스",
+      "file": "data/trails/courses/auto/auto-장산-1.geojson"
+    },
+    {
+      "id": "auto-장산-2",
+      "mountain": "auto-장산",
+      "name": "우동 코스",
+      "file": "data/trails/courses/auto/auto-장산-2.geojson"
+    },
+    {
+      "id": "auto-천마산-1",
+      "mountain": "auto-천마산",
+      "name": "초장동 코스",
+      "file": "data/trails/courses/auto/auto-천마산-1.geojson"
+    },
+    {
+      "id": "auto-천마산-2",
+      "mountain": "auto-천마산",
+      "name": "남부민동 코스",
+      "file": "data/trails/courses/auto/auto-천마산-2.geojson"
+    },
+    {
+      "id": "auto-철마산-1",
+      "mountain": "auto-철마산",
+      "name": "철마면 코스",
+      "file": "data/trails/courses/auto/auto-철마산-1.geojson"
+    },
+    {
+      "id": "auto-철마산-2",
+      "mountain": "auto-철마산",
+      "name": "철마면 코스 2",
+      "file": "data/trails/courses/auto/auto-철마산-2.geojson"
+    },
+    {
+      "id": "auto-홍곡산-1",
+      "mountain": "auto-홍곡산",
+      "name": "대연동 코스",
+      "file": "data/trails/courses/auto/auto-홍곡산-1.geojson"
+    },
+    {
+      "id": "auto-홍곡산-2",
+      "mountain": "auto-홍곡산",
+      "name": "용당동 코스",
+      "file": "data/trails/courses/auto/auto-홍곡산-2.geojson"
+    },
+    {
+      "id": "auto-황령산-1",
+      "mountain": "auto-황령산",
+      "name": "연산동 코스",
+      "file": "data/trails/courses/auto/auto-황령산-1.geojson"
+    },
+    {
+      "id": "auto-황령산-2",
+      "mountain": "auto-황령산",
+      "name": "망미동 코스",
+      "file": "data/trails/courses/auto/auto-황령산-2.geojson"
+    }
+  ]
+}
