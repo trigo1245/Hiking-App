@@ -17,11 +17,14 @@ import '../../subscription/data/subscription_remote.dart';
 import '../../subscription/domain/subscription.dart';
 import '../data/gpx_sharer.dart';
 import '../../courses/domain/course.dart';
+import '../../courses/presentation/competition_providers.dart';
 import '../domain/activity_analysis.dart';
+import '../domain/activity_deletion.dart';
 import '../domain/activity_summary.dart';
 import '../domain/gpx_writer.dart';
 import 'activities_providers.dart';
 import 'activity_detail_providers.dart';
+import 'delete_activity_sheet.dart';
 import 'elevation_chart.dart';
 
 /// 기록 상세: 지도 위 내 경로, 수치 전체, 완주한 코스, GPX 내보내기, 다시 올리기.
@@ -79,6 +82,8 @@ class ActivityDetailScreen extends ConsumerWidget {
               const _PremiumTeaser(),
             const SizedBox(height: AppSpacing.xxxl),
             _UploadRow(summary: value.summary),
+            const SizedBox(height: AppSpacing.xl),
+            _DeleteRow(detail: value),
           ],
         ),
         AsyncError() => const Center(
@@ -663,6 +668,75 @@ class _UploadRow extends ConsumerWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// 잘못 기록된 산행을 지운다. 주의사항을 확인하고 한 번 더 눌러야 지워진다.
+/// 서버에서 먼저 지우고, 성공해야 이 기기에서도 지운다. (인터넷이 없으면 지우지 않는다)
+class _DeleteRow extends ConsumerStatefulWidget {
+  const _DeleteRow({required this.detail});
+
+  final ActivityDetail detail;
+
+  @override
+  ConsumerState<_DeleteRow> createState() => _DeleteRowState();
+}
+
+class _DeleteRowState extends ConsumerState<_DeleteRow> {
+  bool _busy = false;
+
+  Future<void> _delete() async {
+    final detail = widget.detail;
+    final confirmed = await showDeleteActivitySheet(
+      context,
+      title: detail.summary.title,
+      notices: deletionNotices(
+        summary: detail.summary,
+        completedCourses: [for (final (c, _) in detail.completions) c.fullName],
+        attemptedCourses: [
+          for (final (c, p) in detail.attempts) (c.fullName, p.progress),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final id = detail.summary.id;
+    final actions = ref.read(uploadActionsProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    void say(String text) => messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text(text)));
+
+    setState(() => _busy = true);
+    try {
+      await actions.deleteFromServer(id);
+    } catch (e) {
+      debugPrint('[delete] $e');
+      if (mounted) setState(() => _busy = false);
+      say('지우지 못했어요. 인터넷에 연결된 뒤 다시 시도해 주세요');
+      return;
+    }
+    // 완주 기록이 지워졌으니 지도의 정복자를 다시 받는다.
+    ref.invalidate(conquerorsProvider);
+    if (mounted) context.pop();
+    await actions.deleteFromDevice(id);
+    say('기록을 지웠어요');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Pressable(
+        onPressed: _busy ? null : _delete,
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.sm),
+          child: Text(
+            _busy ? '지우는 중…' : '이 기록 지우기',
+            style: AppTypography.body.copyWith(color: AppColors.danger),
+          ),
+        ),
+      ),
     );
   }
 }

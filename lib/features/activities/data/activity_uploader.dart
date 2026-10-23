@@ -65,7 +65,7 @@ class ActivityUploader {
       if (!force && summary.uploadStatus == UploadStatus.done) return true;
 
       final points = await _recording.loadPoints(activityId);
-      final path = '$userId/$activityId.gpx';
+      final path = gpxPathFor(userId, activityId);
       await _remote.uploadGpx(
         path: path,
         gpx: buildGpx(title: summary.title, points: points),

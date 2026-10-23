@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -29,6 +30,10 @@ abstract interface class ActivityRemote {
 
   /// tracks 버킷의 [path]에 있는 GPX를 받는다.
   Future<String> downloadGpx(String path);
+
+  /// 기록을 서버에서 지운다. 요약 행을 지우면 완주·진행률 기록도 함께 지워진다(cascade).
+  /// 서버에 없는 기록이면 아무 일도 하지 않는다. 인터넷이 없으면 오류를 던진다.
+  Future<void> deleteActivity(String activityId, {required String gpxPath});
 }
 
 /// 서버가 요청을 받고 거절한 오류인지. (아니면 네트워크 문제로 본다)
@@ -109,6 +114,21 @@ class SupabaseActivityRemote implements ActivityRemote {
   }
 
   @override
+  Future<void> deleteActivity(
+    String activityId, {
+    required String gpxPath,
+  }) async {
+    // 행을 먼저 지운다. (다른 기기가 목록에서 다시 받아 가지 않도록)
+    await _client.from('activities').delete().eq('id', activityId);
+    try {
+      await _client.storage.from('tracks').remove([gpxPath]);
+    } catch (e) {
+      // 파일만 남는 것은 문제가 되지 않는다. (아무도 가리키지 않는 파일)
+      debugPrint('[delete] GPX 파일을 지우지 못했어요: $e');
+    }
+  }
+
+  @override
   Future<String> downloadGpx(String path) async {
     final bytes = await _client.storage.from('tracks').download(path);
     return utf8.decode(bytes);
@@ -135,6 +155,10 @@ ActivitySummary activitySummaryFromServer(Map<String, dynamic> r) {
     uploadStatus: UploadStatus.done,
   );
 }
+
+/// tracks 버킷 안의 GPX 경로 (CLAUDE.md 7장: {user_id}/{activity_id}.gpx)
+String gpxPathFor(String userId, String activityId) =>
+    '$userId/$activityId.gpx';
 
 /// 서버 activities 테이블 한 행. (CLAUDE.md 7장)
 Map<String, Object?> activityRow(

@@ -64,6 +64,10 @@ class ActivitiesRepository {
     return {for (final r in rows) r.read(_db.activities.id)!};
   }
 
+  /// 기록 하나를 이 기기에서 지운다. 위치 점도 함께 지워진다(cascade).
+  Future<void> deleteById(String activityId) =>
+      (_db.delete(_db.activities)..where((a) => a.id.equals(activityId))).go();
+
   /// [userId]의 기록 중 제목이 [prefix]로 시작하는 것을 지운다 (시연용 기록 정리용).
   /// 위치 점은 외래 키(cascade)로 함께 지워진다. 지운 개수를 돌려준다.
   Future<int> deleteByTitlePrefix(String userId, String prefix) {

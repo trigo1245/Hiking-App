@@ -12,6 +12,9 @@ enum AppButtonVariant {
 
   /// 보조 행동 (회색 배경)
   secondary,
+
+  /// 되돌릴 수 없는 행동 (삭제 등)
+  danger,
 }
 
 /// 꽉 찬 너비, 높이 56의 기본 버튼.
@@ -41,6 +44,7 @@ class AppButton extends StatelessWidget {
         AppColors.backgroundGrouped,
         AppColors.textPrimary,
       ),
+      AppButtonVariant.danger => (AppColors.danger, AppColors.onPrimary),
     };
 
     return Pressable(

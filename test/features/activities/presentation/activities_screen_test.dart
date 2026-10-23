@@ -200,6 +200,87 @@ void main() {
     expect(find.text('업로드 완료'), findsOneWidget);
   });
 
+  group('기록 지우기', () {
+    /// 올라간 기록 하나를 만들고 그 기록 상세를 연다.
+    Future<(FakeActivityRemote, String)> openUploadedDetail(
+      WidgetTester tester,
+    ) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final db = testDatabase();
+      final remote = FakeActivityRemote();
+      final id = await seedFinished(db);
+      await pumpApp(
+        tester,
+        authRepository: signedIn(),
+        database: db,
+        remote: remote,
+        clock: clock,
+      );
+      await settleUploads(tester);
+      await openRecordsTab(tester);
+      await tester.tap(find.text('금정산 고당봉'));
+      await settleUploads(tester);
+      return (remote, id);
+    }
+
+    testWidgets('주의사항을 확인하고 한 번 더 눌러야 서버와 기기에서 지워진다', (tester) async {
+      final (remote, id) = await openUploadedDetail(tester);
+
+      await tester.tap(find.text('이 기록 지우기'));
+      await tester.pumpAndSettle();
+      expect(find.text('이 기록을 지울까요?'), findsOneWidget);
+      expect(find.text('되돌릴 수 없어요'), findsOneWidget);
+      expect(find.text('서버에서도 지워요'), findsOneWidget);
+
+      // 확인 체크 전에는 삭제 버튼이 눌리지 않는다.
+      await tester.tap(find.text('삭제하기'));
+      await tester.pumpAndSettle();
+      expect(find.text('이 기록을 지울까요?'), findsOneWidget);
+      expect(remote.deleted, isEmpty);
+
+      await tester.tap(find.text('위 내용을 확인했어요'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제하기'));
+      await settleUploads(tester);
+
+      expect(remote.deleted, [id]);
+      expect(remote.rows, isEmpty);
+      expect(find.text('기록을 지웠어요'), findsOneWidget);
+      expect(find.text('아직 등산 기록이 없어요'), findsOneWidget);
+    });
+
+    testWidgets('취소하면 아무것도 지우지 않는다', (tester) async {
+      final (remote, _) = await openUploadedDetail(tester);
+
+      await tester.tap(find.text('이 기록 지우기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('취소'));
+      await tester.pumpAndSettle();
+
+      expect(remote.deleted, isEmpty);
+      expect(find.text('이 기록 지우기'), findsOneWidget);
+    });
+
+    testWidgets('인터넷이 없으면 지우지 않고 다시 시도하라고 알린다 (기기에서도 그대로)', (tester) async {
+      final (remote, _) = await openUploadedDetail(tester);
+      remote.failWith = Exception('Failed host lookup');
+
+      await tester.tap(find.text('이 기록 지우기'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('위 내용을 확인했어요'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('삭제하기'));
+      await settleUploads(tester);
+
+      expect(find.text('지우지 못했어요. 인터넷에 연결된 뒤 다시 시도해 주세요'), findsOneWidget);
+      // 기록 상세에 그대로 있다.
+      expect(find.text('이 기록 지우기'), findsOneWidget);
+      expect(remote.rows, hasLength(1));
+    });
+  });
+
   testWidgets('기록이 없으면 다음 행동을 안내한다', (tester) async {
     await pumpApp(tester, authRepository: signedIn(), clock: clock);
     await openRecordsTab(tester);

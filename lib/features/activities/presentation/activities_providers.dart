@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/activities_repository.dart';
 import '../data/activity_downloader.dart';
+import '../data/activity_remote.dart';
 import '../data/activity_uploader.dart';
 import '../domain/activity_summary.dart';
 
@@ -35,6 +36,20 @@ class UploadActions {
     if (userId == null) return;
     await _ref.read(activityUploaderProvider).uploadPending(userId: userId);
   }
+
+  /// 기록을 서버에서 지운다. 실패하면(인터넷 없음 등) 오류를 던지고, 이때는 기기에서도 지우지 않는다.
+  /// (기기에서만 지우면 "기기 간 동기화"가 서버에서 다시 받아 오기 때문)
+  Future<void> deleteFromServer(String activityId) async {
+    final userId = _userId;
+    if (userId == null) throw StateError('로그인이 필요해요');
+    await _ref
+        .read(activityRemoteProvider)
+        .deleteActivity(activityId, gpxPath: gpxPathFor(userId, activityId));
+  }
+
+  /// 기록을 이 기기에서 지운다. [deleteFromServer]가 성공한 뒤에 부른다.
+  Future<void> deleteFromDevice(String activityId) =>
+      _ref.read(activitiesRepositoryProvider).deleteById(activityId);
 
   /// 서버에 있지만 이 기기에 없는 내 기록을 받는다 (다른 기기·재설치).
   Future<void> downloadMissing() async {

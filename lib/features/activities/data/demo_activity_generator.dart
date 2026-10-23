@@ -165,7 +165,10 @@ class DemoActivityGenerator {
     final carIndex = carUntil == null
         ? -1
         : ((path.length - 1) * carUntil).round();
-    final w = _Writer(_recording, await _recording.start(start, userId: userId));
+    final w = _Writer(
+      _recording,
+      await _recording.start(start, userId: userId),
+    );
 
     // 오르막: 후반으로 갈수록 조금씩 느려진다 (피로도 분석 확인용)
     // 40% 지점에서 3분 쉬어 간다 (휴식 구간 표시 확인용)
@@ -198,7 +201,10 @@ class DemoActivityGenerator {
       for (var i = 0; i <= 150; i++)
         GeoPoint(from.lat + i * 10 / 111320, from.lon),
     ];
-    final w = _Writer(_recording, await _recording.start(start, userId: userId));
+    final w = _Writer(
+      _recording,
+      await _recording.start(start, userId: userId),
+    );
     for (final p in [...path, ...path.reversed.skip(1)]) {
       await w.add(p, 22 + math.sin(p.lat * 4000) * 2);
       w.wait(const Duration(seconds: 9));

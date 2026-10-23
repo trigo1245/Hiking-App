@@ -45,6 +45,22 @@ class FakeActivityRemote implements ActivityRemote {
     this.attempts[activityId] = attempts;
   }
 
+  /// 지운 기록 ID
+  final deleted = <String>[];
+
+  @override
+  Future<void> deleteActivity(
+    String activityId, {
+    required String gpxPath,
+  }) async {
+    if (failWith case final error?) throw error;
+    deleted.add(activityId);
+    rows.remove(activityId);
+    gpxFiles.remove(gpxPath);
+    completions.remove(activityId);
+    attempts.remove(activityId);
+  }
+
   /// 받기에 실패할 GPX 경로 (일부만 실패하는 경우 확인용)
   final brokenGpx = <String>{};
 
