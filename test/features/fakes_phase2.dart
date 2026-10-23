@@ -46,10 +46,7 @@ class FakeReviewRemote implements ReviewRemote {
 
     return ReviewSummary(
       count: reviews.length,
-      averages: {
-        for (final a in ReviewAspect.values)
-          a: ?avg(a),
-      },
+      averages: {for (final a in ReviewAspect.values) a: ?avg(a)},
     );
   }
 

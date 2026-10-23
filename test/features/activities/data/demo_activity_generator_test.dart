@@ -63,8 +63,10 @@ void main() {
     final beomeosa = courses.first;
     final ascents = [
       for (final i in [0, 6, 7])
-        CourseMatcher.match(beomeosa, await recording.loadPoints(ids[i]))!
-            .ascent,
+        CourseMatcher.match(
+          beomeosa,
+          await recording.loadPoints(ids[i]),
+        )!.ascent,
     ];
     expect(ascents[0], greaterThan(ascents[1]));
     expect(ascents[1], greaterThan(ascents[2]));

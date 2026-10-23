@@ -1,3 +1,4 @@
+import '../../courses/domain/review.dart';
 import 'activity_summary.dart';
 
 /// 기록을 지우기 전에 알려 줄 주의사항 한 가지
@@ -39,9 +40,13 @@ List<DeletionNotice> deletionNotices({
     for (final (name, progress) in attemptedCourses)
       DeletionNotice(
         '$name 진행률(${(progress * 100).round()}%) 기록이 사라져요',
-        '이 기록으로 얻은 리뷰 작성 자격이 없어질 수 있어요.',
+        // 40% 이상이어야 리뷰 자격이 생기므로, 그 미만이면 자격 이야기는 하지 않는다.
+        progress >= reviewMinProgress
+            ? '이 기록으로 얻은 리뷰 작성 자격이 없어질 수 있어요.'
+            : '코스 상세의 "내 최고 진행률"에서 빠질 수 있어요.',
       ),
-    if (completedCourses.isNotEmpty || attemptedCourses.isNotEmpty)
+    if (completedCourses.isNotEmpty ||
+        attemptedCourses.any((a) => a.$2 >= reviewMinProgress))
       const DeletionNotice(
         '이미 쓴 리뷰는 남아요',
         '리뷰도 지우려면 코스 상세에서 "내 리뷰 고치기"로 들어가 지워 주세요.',

@@ -39,6 +39,17 @@ void main() {
     expect(titles(n), isNot(contains('서버에서도 지워요')));
   });
 
+  test('40% 미만 진행률은 리뷰 자격 이야기 없이 진행률이 빠진다고만 알린다', () {
+    final n = deletionNotices(
+      summary: summary(UploadStatus.done),
+      completedCourses: const [],
+      attemptedCourses: const [('승학산 구덕문화공원 코스', 0.31)],
+    );
+    final notice = n.firstWhere((x) => x.title.contains('31%'));
+    expect(notice.detail, contains('내 최고 진행률'));
+    expect(titles(n), isNot(contains('이미 쓴 리뷰는 남아요')));
+  });
+
   test('완주·진행률 기록이 있으면 랭킹·리뷰 자격 변화와 남는 리뷰를 알린다', () {
     final n = deletionNotices(
       summary: summary(UploadStatus.done),
