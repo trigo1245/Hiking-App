@@ -6,11 +6,23 @@ import '../domain/competition.dart';
 
 /// 랭킹·정복자를 서버에서 받는 창구. 계산은 서버 DB 함수가 한다(조작 방지).
 abstract interface class CompetitionRemote {
+  /// 코스 상세용: 상위 10명 + 내 순위, 순위에 오른 전체 인원.
   /// [season]이 null이면 역대 기록(명예의 전당)
-  Future<List<RankingEntry>> fetchRanking(
+  Future<RankingPage> fetchRanking(
     String courseId,
     RankingKind kind, {
     Season? season,
+  });
+
+  /// 전체 순위 화면용: [offset]번째부터 [limit]명. 볼 수 있는 범위는 서버가 정한다
+  /// (구독자 전체, 일반 사용자 10명 + 내 순위). [query]로 닉네임#태그를 찾는다.
+  Future<RankingPage> fetchRankingPage(
+    String courseId,
+    RankingKind kind, {
+    Season? season,
+    int offset = 0,
+    int limit = 30,
+    String? query,
   });
 
   Future<CourseStats> fetchStats(String courseId);
@@ -27,7 +39,7 @@ class SupabaseCompetitionRemote implements CompetitionRemote {
   final SupabaseClient _client;
 
   @override
-  Future<List<RankingEntry>> fetchRanking(
+  Future<RankingPage> fetchRanking(
     String courseId,
     RankingKind kind, {
     Season? season,
@@ -40,17 +52,48 @@ class SupabaseCompetitionRemote implements CompetitionRemote {
         'p_season': season?.id,
       },
     );
-    return [
-      for (final r in rows.cast<Map<String, dynamic>>())
-        RankingEntry(
-          rank: r['rank_no'] as int,
-          nickname: r['nickname'] as String,
-          nicknameTag: r['nickname_tag'] as String,
-          avatarUrl: r['avatar_url'] as String?,
-          value: r['score'] as int,
-          isMe: r['is_me'] as bool,
-        ),
-    ];
+    return _page(rows);
+  }
+
+  @override
+  Future<RankingPage> fetchRankingPage(
+    String courseId,
+    RankingKind kind, {
+    Season? season,
+    int offset = 0,
+    int limit = 30,
+    String? query,
+  }) async {
+    final rows = await _client.rpc<List<dynamic>>(
+      'get_course_ranking_page',
+      params: {
+        'p_course_id': courseId,
+        'p_kind': kind.name,
+        'p_season': season?.id,
+        'p_offset': offset,
+        'p_limit': limit,
+        'p_query': query,
+      },
+    );
+    return _page(rows);
+  }
+
+  static RankingPage _page(List<dynamic> rows) {
+    final list = rows.cast<Map<String, dynamic>>();
+    return RankingPage(
+      total: list.isEmpty ? 0 : list.first['total_count'] as int,
+      entries: [
+        for (final r in list)
+          RankingEntry(
+            rank: r['rank_no'] as int,
+            nickname: r['nickname'] as String,
+            nicknameTag: r['nickname_tag'] as String,
+            avatarUrl: r['avatar_url'] as String?,
+            value: r['score'] as int,
+            isMe: r['is_me'] as bool,
+          ),
+      ],
+    );
   }
 
   @override

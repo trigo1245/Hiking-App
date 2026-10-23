@@ -28,6 +28,23 @@ class CourseCompletion {
   Duration get ascent => reachedSummitAt.difference(startedAt);
 }
 
+/// 정상까지 가지 않은 산행이 코스를 얼마나 따라갔는지
+class CourseProgress {
+  const CourseProgress({
+    required this.courseId,
+    required this.progress,
+    required this.startedAt,
+  });
+
+  final String courseId;
+
+  /// 들머리에서 코스를 따라 간 비율 (0~1)
+  final double progress;
+
+  /// 들머리를 처음 지난 시각
+  final DateTime startedAt;
+}
+
 /// 기록이 등록된 코스를 완주했는지 판정한다. (CLAUDE.md 6-2장 "코스 매칭")
 abstract final class CourseMatcher {
   /// 코스 선에서 이 거리 안이면 "겹친다"
@@ -48,11 +65,65 @@ abstract final class CourseMatcher {
   /// 겹침 비율을 잴 때 코스 선 위에 찍는 점 간격
   static const _sampleStepM = 10.0;
 
+  /// 진행률을 남기는 최소 비율. 이보다 적으면 그 코스에 간 것으로 보지 않는다.
+  static const minProgress = 0.1;
+
   /// [track]으로 완주한 코스들
   static List<CourseCompletion> matchAll(
     Iterable<Course> courses,
     List<TrackPoint> track,
   ) => [for (final course in courses) ?match(course, track)];
+
+  /// 완주하지 못한 코스 중 [minProgress] 이상 다녀온 코스들의 진행률
+  static List<CourseProgress> progressAll(
+    Iterable<Course> courses,
+    List<TrackPoint> track,
+  ) => [
+    for (final course in courses)
+      if (match(course, track) == null)
+        if (progress(course, track) case final p?
+            when p.progress >= minProgress)
+          p,
+  ];
+
+  /// 들머리 100m 안에서 출발해 코스를 어디까지 따라갔는지 잰다.
+  ///
+  /// 코스 선 위에 10m마다 점을 찍고, 들머리부터 앞으로 가며 경로에서 30m 안에 있는
+  /// 가장 먼 점을 찾는다. 단, 들머리부터 그 점까지 80% 이상을 따라갔어야 한다
+  /// (완주 판정과 같은 기준이라, 길을 벗어났다가 다른 길로 정상 근처에 간 경우는 짧게 잡힌다).
+  /// 들머리를 지나지 않았으면 null.
+  static CourseProgress? progress(Course course, List<TrackPoint> track) {
+    final good = [
+      for (final p in track)
+        if (p.accuracy <= maxAccuracyM) p,
+    ];
+    if (good.length < 2 || course.path.length < 2) return null;
+    final startIndex = good.indexWhere(
+      (p) =>
+          _distance(GeoPoint(p.latitude, p.longitude), course.start) <=
+          startRadiusM,
+    );
+    if (startIndex < 0 || startIndex >= good.length - 1) return null;
+    final after = [
+      for (final p in good.sublist(startIndex))
+        GeoPoint(p.latitude, p.longitude),
+    ];
+
+    final samples = _sampleAlong(course.path, _sampleStepM);
+    var covered = 0;
+    var furthest = 0;
+    for (var i = 0; i < samples.length; i++) {
+      if (_distanceToPolyline(samples[i], after) > overlapRadiusM) continue;
+      covered++;
+      if (covered / (i + 1) >= minOverlapRatio) furthest = i;
+    }
+    if (furthest == 0) return null;
+    return CourseProgress(
+      courseId: course.id,
+      progress: furthest / (samples.length - 1),
+      startedAt: good[startIndex].recordedAt,
+    );
+  }
 
   /// [track]이 [course]를 완주했으면 결과를, 아니면 null을 돌려준다.
   ///

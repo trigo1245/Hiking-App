@@ -73,11 +73,19 @@ class ActivityUploader {
       await _remote.upsertActivity(
         activityRow(summary, userId: userId, gpxPath: path),
       );
-      // 속도 이상 기록은 완주로 인정하지 않는다. (서버도 한 번 더 확인한다)
-      final completions = summary.isFlagged
-          ? const <CourseCompletion>[]
-          : CourseMatcher.matchAll(await _loadCourses(), points);
-      await _remote.recordCompletions(activityId, completions);
+      // 속도 이상 기록은 완주·진행률을 인정하지 않는다. (서버도 한 번 더 확인한다)
+      final courses = summary.isFlagged
+          ? const <Course>[]
+          : await _loadCourses();
+      await _remote.recordCompletions(
+        activityId,
+        CourseMatcher.matchAll(courses, points),
+      );
+      // 정상까지 가지 않은 코스는 몇 %까지 갔는지 남긴다. (리뷰 자격, 기록 표시)
+      await _remote.recordAttempts(
+        activityId,
+        CourseMatcher.progressAll(courses, points),
+      );
       await _activities.setUploadStatus(
         activityId,
         UploadStatus.done,

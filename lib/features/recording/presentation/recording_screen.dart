@@ -13,6 +13,7 @@ import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/confirm_sheet.dart';
 import '../../../core/widgets/metric_text.dart';
 import 'recording_controller.dart';
+import 'recording_map.dart';
 
 /// 기록 중 화면: 기록 시간(가장 크게), 거리, 현재 고도, 누적 상승고도.
 class RecordingScreen extends ConsumerStatefulWidget {
@@ -128,7 +129,13 @@ class _RecordingScreenState extends ConsumerState<RecordingScreen> {
                   ],
                 ),
                 const SizedBox(height: AppSpacing.xxl),
-                const Expanded(child: _MapPlaceholder()),
+                Expanded(
+                  child: RecordingMap(
+                    track: state.track,
+                    position: state.position,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.md),
               ],
             ),
           ),
@@ -188,24 +195,6 @@ class _StatusLine extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm),
         Text(text, style: AppTypography.body.copyWith(color: color)),
       ],
-    );
-  }
-}
-
-/// 지도는 이후 단계에서 넣는다. 지금은 자리만 잡아 둔다.
-class _MapPlaceholder extends StatelessWidget {
-  const _MapPlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: AppColors.backgroundGrouped,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: const Text('지도는 준비 중이에요', style: AppTypography.caption),
     );
   }
 }

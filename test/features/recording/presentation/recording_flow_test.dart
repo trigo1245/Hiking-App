@@ -4,6 +4,7 @@ import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
+import 'package:hiking_app/features/recording/presentation/recording_map.dart';
 
 import '../../../helpers/gpx.dart';
 import '../../../helpers/pump_app.dart';
@@ -31,7 +32,8 @@ void main() {
     await tester.tap(find.text('등산 기록 시작'));
     await tester.pumpAndSettle();
     expect(find.text('위치를 찾고 있어요'), findsOneWidget);
-    expect(find.text('지도는 준비 중이에요'), findsOneWidget);
+    // 기록 화면에 지도가 있다 (내 위치·걸은 경로·코스 선)
+    expect(find.byType(RecordingMap), findsOneWidget);
 
     for (final sample in readGpx('test_data/synthetic_climb.gpx')) {
       location.emit(sample);

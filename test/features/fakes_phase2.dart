@@ -10,23 +10,59 @@ class FakeReviewRemote implements ReviewRemote {
   final saved = <(String, Map<ReviewAspect, int>, String?)>[];
   int deletes = 0;
 
+  /// 내가 이 코스를 가장 멀리 간 비율 (서버 course_attempts 대신)
+  double? bestProgress;
+
+  /// 리뷰 목록 요청 기록: "정렬 offset limit"
+  final requests = <String>[];
+
   @override
-  Future<List<CourseReview>> fetchReviews(String courseId) async =>
-      List.of(reviews);
+  Future<ReviewPage> fetchReviews(
+    String courseId, {
+    ReviewSort sort = ReviewSort.recent,
+    int offset = 0,
+    int limit = 30,
+  }) async {
+    requests.add('${sort.name} $offset $limit');
+    final sorted = [...reviews];
+    if (sort == ReviewSort.completions) {
+      sorted.sort((a, b) => b.completionCount.compareTo(a.completionCount));
+    }
+    return ReviewPage(
+      reviews: sorted.skip(offset).take(limit).toList(),
+      total: reviews.length,
+    );
+  }
 
   @override
   Future<ReviewSummary> fetchSummary(String courseId) async {
     if (reviews.isEmpty) return const ReviewSummary(count: 0);
+    double? avg(ReviewAspect a) {
+      final scores = [for (final r in reviews) ?r.scores[a]];
+      return scores.isEmpty
+          ? null
+          : scores.reduce((x, y) => x + y) / scores.length;
+    }
+
     return ReviewSummary(
       count: reviews.length,
       averages: {
         for (final a in ReviewAspect.values)
-          a:
-              reviews.map((r) => r.scores[a]!).reduce((x, y) => x + y) /
-              reviews.length,
+          a: ?avg(a),
       },
     );
   }
+
+  @override
+  Future<MyReview?> fetchMyReview(String courseId) async {
+    final mine = reviews.where((r) => r.isMine).firstOrNull;
+    return mine == null
+        ? null
+        : MyReview(scores: mine.scores, comment: mine.comment);
+  }
+
+  @override
+  Future<double?> fetchMyBestProgress(String courseId) async => bestProgress;
 
   @override
   Future<void> saveMyReview(
@@ -107,11 +143,19 @@ CourseReview review(
   int score, {
   String? comment,
   bool isMine = false,
+  int completions = 1,
+  double? bestProgress,
 }) => CourseReview(
   nickname: name,
   nicknameTag: '0001',
-  scores: {for (final a in ReviewAspect.values) a: score},
+  scores: {
+    for (final a in ReviewAspect.values)
+      // 완등하지 않은 사람은 조망 점수가 없다.
+      if (completions > 0 || a != ReviewAspect.view) a: score,
+  },
   comment: comment,
   updatedAt: DateTime(2026, 10, 1),
   isMine: isMine,
+  completionCount: completions,
+  bestProgress: bestProgress,
 );

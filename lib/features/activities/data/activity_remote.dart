@@ -21,6 +21,9 @@ abstract interface class ActivityRemote {
     List<CourseCompletion> completions,
   );
 
+  /// 정상까지 가지 않은 코스의 진행률을 저장한다. 같은 기록의 이전 결과는 바뀐다.
+  Future<void> recordAttempts(String activityId, List<CourseProgress> attempts);
+
   /// 서버에 올라간 내 기록 요약 전체 (다른 기기에서 기록을 받을 때). RLS로 본인 행만 온다.
   Future<List<Map<String, dynamic>>> fetchMyActivities();
 
@@ -71,6 +74,27 @@ class SupabaseActivityRemote implements ActivityRemote {
               'course_id': c.courseId,
               'ascent_s': c.ascent.inSeconds,
               'completed_at': c.reachedSummitAt.toUtc().toIso8601String(),
+            },
+        ],
+      },
+    );
+  }
+
+  @override
+  Future<void> recordAttempts(
+    String activityId,
+    List<CourseProgress> attempts,
+  ) async {
+    await _client.rpc(
+      'record_course_attempts',
+      params: {
+        'p_activity_id': activityId,
+        'p_attempts': [
+          for (final a in attempts)
+            {
+              'course_id': a.courseId,
+              'progress': a.progress,
+              'attempted_at': a.startedAt.toUtc().toIso8601String(),
             },
         ],
       },

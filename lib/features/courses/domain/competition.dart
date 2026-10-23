@@ -103,3 +103,13 @@ class MyCompletion {
   final Duration ascent;
   final DateTime completedAt;
 }
+
+/// 랭킹 한 묶음: 받은 줄들과 전체 인원 (나눠 받을 때 끝을 알기 위해)
+class RankingPage {
+  const RankingPage({required this.entries, required this.total});
+
+  final List<RankingEntry> entries;
+
+  /// 조건(시즌·검색어)에 맞는 전체 인원. 코스 상세에서는 순위에 오른 전체 인원.
+  final int total;
+}

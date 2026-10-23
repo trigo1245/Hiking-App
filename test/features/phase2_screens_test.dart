@@ -236,7 +236,7 @@ void main() {
       await settle(tester);
       await push(tester, AppRoutes.course('a'));
 
-      expect(find.text('프리미엄 · 전체 순위를 보고 있어요'), findsOneWidget);
+      expect(find.text('전체 순위 보기 (0명)'), findsOneWidget);
     });
   });
 
@@ -245,9 +245,11 @@ void main() {
       WidgetTester tester, {
       required int myCount,
       List<dynamic> existing = const [],
+      double? bestProgress,
     }) async {
       tallScreen(tester);
       final reviews = FakeReviewRemote()
+        ..bestProgress = bestProgress
         ..reviews.addAll(existing.cast())
         ..reviews.addAll([
           review('고당봉지킴이', 4, comment: '정상 조망이 정말 좋아요.'),
@@ -273,7 +275,7 @@ void main() {
       expect(find.text('2개'), findsOneWidget);
       expect(find.text('3.0 · 보통'), findsNWidgets(4));
       expect(find.text('정상 조망이 정말 좋아요.'), findsOneWidget);
-      expect(find.text('이 코스를 완주하면 리뷰를 쓸 수 있어요'), findsOneWidget);
+      expect(find.text('이 코스를 40% 이상 다녀오면 리뷰를 쓸 수 있어요'), findsOneWidget);
       expect(find.text('리뷰 쓰기'), findsNothing);
     });
 
@@ -282,7 +284,7 @@ void main() {
 
       await tester.tap(find.text('리뷰 쓰기'));
       await settle(tester);
-      expect(find.text('네 항목을 모두 골라 주세요'), findsOneWidget);
+      expect(find.text('모든 항목을 골라 주세요'), findsOneWidget);
 
       for (final aspect in ReviewAspect.values) {
         await tester.tap(find.bySemanticsLabel('${aspect.label} 4점'));
@@ -304,6 +306,114 @@ void main() {
 
       expect(reviews.deletes, 1);
       expect(find.text('김세민#0369 (나)'), findsNothing);
+    });
+
+    testWidgets('완등하지 않았어도 40% 이상 다녀왔으면 조망을 뺀 항목으로 리뷰를 쓴다', (tester) async {
+      final reviews = await openCourse(tester, myCount: 0, bestProgress: 0.62);
+      expect(find.text('내 최고 진행률 62%'), findsOneWidget);
+
+      await tester.tap(find.text('리뷰 쓰기'));
+      await settle(tester);
+      expect(find.text('조망은 정상까지 다녀온 분만 평가해요'), findsOneWidget);
+      expect(find.bySemanticsLabel('조망 4점'), findsNothing);
+
+      for (final aspect in ReviewAspect.values) {
+        if (aspect == ReviewAspect.view) continue;
+        await tester.tap(find.bySemanticsLabel('${aspect.label} 3점'));
+      }
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('저장하기'));
+      await settle(tester);
+
+      expect(reviews.saved.single.$2.keys, isNot(contains(ReviewAspect.view)));
+    });
+
+    testWidgets('40%보다 적게 다녀왔으면 아직 리뷰를 쓸 수 없다', (tester) async {
+      await openCourse(tester, myCount: 0, bestProgress: 0.3);
+      expect(find.text('리뷰 쓰기'), findsNothing);
+      expect(find.text('이 코스를 40% 이상 다녀오면 리뷰를 쓸 수 있어요'), findsOneWidget);
+    });
+
+    testWidgets('후기에 완등 횟수, 완등이 없으면 가장 멀리 간 비율을 보여 준다', (tester) async {
+      await openCourse(
+        tester,
+        myCount: 0,
+        existing: [review('중도하산러', 3, completions: 0, bestProgress: 0.62)],
+      );
+      expect(find.text('62%까지 다녀옴'), findsOneWidget);
+      expect(find.text('완등 1회'), findsNWidgets(2));
+    });
+
+    testWidgets('코스 상세에는 최신 리뷰 3개만, 나머지는 리뷰 전체 화면에서 본다', (tester) async {
+      final reviews = await openCourse(
+        tester,
+        myCount: 0,
+        existing: [
+          review('산타는다람쥐', 5, completions: 3),
+          review('억새바람', 4, completions: 7),
+          review('새벽등산러', 2, completions: 0, bestProgress: 0.5),
+        ],
+      );
+      // 기본 리뷰 2개 + 3개 = 5개 중 3개만 보인다.
+      expect(find.textContaining('완등 '), findsNWidgets(2));
+      expect(find.text('리뷰 전체 보기 (5개)'), findsOneWidget);
+
+      await tester.tap(find.text('리뷰 전체 보기 (5개)'));
+      await settle(tester);
+      expect(find.text('리뷰 5개'), findsOneWidget);
+      expect(find.text('주말산꾼#0001'), findsOneWidget);
+
+      await tester.tap(find.text('완등 많은 순'));
+      await settle(tester);
+      expect(reviews.requests.last, 'completions 0 30');
+      // 완등 7회가 맨 위
+      final first = tester.getTopLeft(find.text('억새바람#0001')).dy;
+      final second = tester.getTopLeft(find.text('산타는다람쥐#0001')).dy;
+      expect(first, lessThan(second));
+    });
+  });
+
+  group('전체 순위 (프리미엄)', () {
+    testWidgets('상세에는 10명만, 전체 순위 화면에서 30명씩 받고 내 순위로 이동한다', (tester) async {
+      tallScreen(tester);
+      final competition = FakeCompetitionRemote()
+        ..rankings[(RankingKind.most, false)] = [
+          for (var r = 1; r <= 45; r++)
+            entry(r, r == 40 ? '김세민' : '등산러$r', 50 - r, isMe: r == 40),
+        ];
+      await pumpApp(
+        tester,
+        authRepository: signedIn(),
+        courseRemote: FakeCourseRemote([testCourse(id: 'a')]),
+        subscription: FakeSubscriptionRemote(active: true),
+        competition: competition,
+        clock: clock,
+      );
+      await settle(tester);
+      await push(tester, AppRoutes.course('a'));
+
+      // 상세: 상위 10명 + 내 순위
+      expect(find.text('등산러10#1010'), findsOneWidget);
+      expect(find.text('등산러11#1011'), findsNothing);
+      expect(find.text('김세민#1040 (나)'), findsOneWidget);
+      await tester.tap(find.text('전체 순위 보기 (45명)'));
+      await settle(tester);
+
+      expect(competition.pageRequests, ['0 30 ']);
+      expect(find.text('45명'), findsOneWidget);
+      expect(find.textContaining('무리한 속도 경쟁은 사고로'), findsOneWidget);
+
+      await tester.tap(find.text('내 순위'));
+      await settle(tester);
+      expect(competition.pageRequests, ['0 30 ', '30 30 ']);
+      expect(find.text('김세민#1040 (나)'), findsOneWidget);
+
+      await tester.enterText(find.byType(TextField), '등산러4');
+      await tester.pump(const Duration(milliseconds: 500));
+      await settle(tester);
+      expect(competition.pageRequests.last, '0 30 등산러4');
+      // 등산러4, 등산러41~45
+      expect(find.text('"등산러4" 6명'), findsOneWidget);
     });
   });
 }

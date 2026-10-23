@@ -3,6 +3,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 import '../domain/track_point.dart';
+import 'location_hub.dart';
 
 enum LocationAccess {
   granted,
@@ -40,6 +41,12 @@ abstract interface class LocationService {
 }
 
 class GeolocatorLocationService implements LocationService {
+  /// 기록용·지도용 위치 통로를 한 줄로 관리한다. (location_hub.dart 설명 참고)
+  late final LocationHub _hub = LocationHub(
+    openRecording: _openRecordingStream,
+    openMap: _openMapStream,
+  );
+
   @override
   Future<LocationAccess> requestAccess() async {
     if (!await Geolocator.isLocationServiceEnabled()) {
@@ -74,7 +81,13 @@ class GeolocatorLocationService implements LocationService {
   }
 
   @override
-  Stream<LocationSample> watchPositions() {
+  Stream<LocationSample> watchPositions() => _hub.watchRecording();
+
+  @override
+  Stream<LocationSample> watchMapPosition() => _hub.watchMap();
+
+  /// 기록용 통로: 상단 고정 알림과 함께 화면이 꺼져도 위치를 받는다.
+  Stream<LocationSample> _openRecordingStream() {
     final settings = AndroidSettings(
       // Google Play 서비스의 통합 위치 대신 GPS를 직접 쓴다.
       // 통합 위치는 "Google 위치 정확도"가 꺼져 있으면 GPS가 켜져 있어도 오류를 낸다.
@@ -111,8 +124,8 @@ class GeolocatorLocationService implements LocationService {
         LocationAccuracyStatus.precise;
   }
 
-  @override
-  Stream<LocationSample> watchMapPosition() {
+  /// 지도용 통로: 알림 없이 화면이 켜져 있을 때만 받는다.
+  Stream<LocationSample> _openMapStream() {
     final settings = AndroidSettings(
       forceLocationManager: true,
       accuracy: LocationAccuracy.high,

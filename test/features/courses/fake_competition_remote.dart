@@ -10,15 +10,51 @@ class FakeCompetitionRemote implements CompetitionRemote {
   Object? failWith;
   final requests = <String>[];
 
+  /// 전체 인원을 따로 정하고 싶을 때 (없으면 랭킹 줄 수)
+  int? total;
+
+  /// 전체 순위 화면 요청 기록: "offset limit 검색어"
+  final pageRequests = <String>[];
+
   @override
-  Future<List<RankingEntry>> fetchRanking(
+  Future<RankingPage> fetchRanking(
     String courseId,
     RankingKind kind, {
     Season? season,
   }) async {
     requests.add('$courseId ${kind.name} ${season?.id ?? 'alltime'}');
     if (failWith case final error?) throw error;
-    return rankings[(kind, season == null)] ?? const [];
+    final all = rankings[(kind, season == null)] ?? const <RankingEntry>[];
+    // 서버처럼 상위 10명 + 내 순위만 돌려준다.
+    return RankingPage(
+      entries: [
+        for (final (i, e) in all.indexed)
+          if (i < 10 || e.isMe) e,
+      ],
+      total: total ?? all.length,
+    );
+  }
+
+  @override
+  Future<RankingPage> fetchRankingPage(
+    String courseId,
+    RankingKind kind, {
+    Season? season,
+    int offset = 0,
+    int limit = 30,
+    String? query,
+  }) async {
+    pageRequests.add('$offset $limit ${query ?? ''}');
+    if (failWith case final error?) throw error;
+    final all = [
+      for (final e
+          in rankings[(kind, season == null)] ?? const <RankingEntry>[])
+        if (query == null || query.isEmpty || e.displayName.contains(query)) e,
+    ];
+    return RankingPage(
+      entries: all.skip(offset).take(limit).toList(),
+      total: all.length,
+    );
   }
 
   @override

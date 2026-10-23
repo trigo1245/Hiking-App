@@ -19,6 +19,7 @@ import '../../../core/widgets/user_avatar.dart';
 import '../../recording/presentation/start_recording.dart';
 import '../../subscription/data/subscription_remote.dart';
 import '../data/course_repository.dart';
+import '../data/review_remote.dart';
 import '../domain/competition.dart';
 import '../domain/course.dart';
 import '../domain/course_estimate.dart';
@@ -109,9 +110,11 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                   query: (courseId: course.id, kind: _kind, allTime: _allTime),
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                const _RankingScopeNote(),
+                _RankingScopeNote(
+                  query: (courseId: course.id, kind: _kind, allTime: _allTime),
+                ),
                 const SizedBox(height: AppSpacing.xxl),
-                const _SafetyNotice(),
+                const SafetyNoticeCard(),
                 const SizedBox(height: AppSpacing.xxxl),
                 CourseReviewsSection(courseId: course.id),
               ],
@@ -219,9 +222,16 @@ class _StatsCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final stats = ref.watch(courseStatsProvider(courseId));
+    final progress = ref.watch(myBestProgressProvider(courseId)).value;
+    // 완등은 없지만 중간까지 다녀온 기록이 있으면 함께 보여 준다.
+    final progressLine = switch ((stats.value?.myCount, progress)) {
+      (0, final p?) => '내 최고 진행률 ${(p * 100).round()}%',
+      _ => null,
+    };
     final List<String> lines = switch (stats) {
-      AsyncData(:final value) when value.completionCount == 0 => const [
+      AsyncData(:final value) when value.completionCount == 0 => [
         '아직 완주 기록이 없어요. 첫 완주에 도전해 보세요.',
+        ?progressLine,
       ],
       AsyncData(:final value) => [
         '완주 기록 ${value.completionCount}회 · '
@@ -229,6 +239,7 @@ class _StatsCard extends ConsumerWidget {
         if (value.myCount > 0)
           '내 완주 ${value.myCount}회 · 최고 '
               '${formatClock(value.myBestAscent ?? Duration.zero)}',
+        ?progressLine,
       ],
       AsyncError() => const ['인터넷에 연결되면 완주 기록을 볼 수 있어요'],
       _ => const [],
@@ -504,7 +515,7 @@ class _RankingList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final ranking = ref.watch(courseRankingProvider(query));
     return switch (ranking) {
-      AsyncData(:final value) when value.isEmpty => Padding(
+      AsyncData(:final value) when value.entries.isEmpty => Padding(
         padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
         child: Text(
           query.allTime ? '아직 이 코스를 완주한 사람이 없어요' : '이번 시즌 첫 정복자가 되어 보세요',
@@ -513,14 +524,16 @@ class _RankingList extends ConsumerWidget {
       ),
       AsyncData(:final value) => Column(
         children: [
-          for (final (i, entry) in value.indexed) ...[
+          for (final (i, entry) in value.entries.indexed) ...[
             // 상위 10명 밖의 "내 순위"는 한 칸 띄워서 보여 준다.
-            if (i > 0 && entry.rank > value[i - 1].rank + 1 && entry.isMe)
+            if (i > 0 &&
+                entry.rank > value.entries[i - 1].rank + 1 &&
+                entry.isMe)
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: AppSpacing.xs),
                 child: Text('···', style: AppTypography.caption),
               ),
-            _RankingRow(entry: entry, kind: query.kind),
+            RankingRow(entry: entry, kind: query.kind),
           ],
         ],
       ),
@@ -553,8 +566,8 @@ class _RankingList extends ConsumerWidget {
   }
 }
 
-class _RankingRow extends StatelessWidget {
-  const _RankingRow({required this.entry, required this.kind});
+class RankingRow extends StatelessWidget {
+  const RankingRow({super.key, required this.entry, required this.kind});
 
   final RankingEntry entry;
   final RankingKind kind;
@@ -606,8 +619,8 @@ class _RankingRow extends StatelessWidget {
   }
 }
 
-class _SafetyNotice extends StatelessWidget {
-  const _SafetyNotice();
+class SafetyNoticeCard extends StatelessWidget {
+  const SafetyNoticeCard({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -640,17 +653,28 @@ class _SafetyNotice extends StatelessWidget {
   }
 }
 
-/// 랭킹을 어디까지 보는지 알려 준다. 구독자는 전체, 일반 사용자는 상위 10명 + 내 순위.
+/// 코스 상세에는 누구나 상위 10명 + 내 순위만 보여 준다. (리뷰까지 금방 내려갈 수 있게)
+/// 구독자는 "전체 순위 보기"로 별도 화면에서 나눠 받아 본다.
 /// (실제로 몇 줄을 받는지는 서버 DB 함수가 구독 여부로 정한다)
 class _RankingScopeNote extends ConsumerWidget {
-  const _RankingScopeNote();
+  const _RankingScopeNote({required this.query});
+
+  final RankingQuery query;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (ref.watch(isPremiumProvider)) {
-      return Text(
-        '프리미엄 · 전체 순위를 보고 있어요',
-        style: AppTypography.caption.copyWith(color: AppColors.primary),
+      final total = ref.watch(courseRankingProvider(query)).value?.total;
+      return AppButton(
+        label: total == null ? '전체 순위 보기' : '전체 순위 보기 ($total명)',
+        variant: AppButtonVariant.secondary,
+        onPressed: () => context.push(
+          AppRoutes.ranking(
+            query.courseId,
+            kind: query.kind,
+            allTime: query.allTime,
+          ),
+        ),
       );
     }
     return Pressable(

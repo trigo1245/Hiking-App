@@ -190,7 +190,7 @@ class _CourseMapState extends ConsumerState<CourseMap> {
                 point: LatLng(me.latitude, me.longitude),
                 width: 22,
                 height: 22,
-                child: const _MyLocationDot(),
+                child: const MyLocationDot(),
               ),
             ],
           ),
@@ -269,8 +269,8 @@ class StartDot extends StatelessWidget {
   }
 }
 
-class _MyLocationDot extends StatelessWidget {
-  const _MyLocationDot();
+class MyLocationDot extends StatelessWidget {
+  const MyLocationDot({super.key});
 
   @override
   Widget build(BuildContext context) {

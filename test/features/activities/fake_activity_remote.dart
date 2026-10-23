@@ -33,6 +33,18 @@ class FakeActivityRemote implements ActivityRemote {
     this.completions[activityId] = completions;
   }
 
+  /// 기록 ID → 보낸 진행률
+  final attempts = <String, List<CourseProgress>>{};
+
+  @override
+  Future<void> recordAttempts(
+    String activityId,
+    List<CourseProgress> attempts,
+  ) async {
+    if (failWith case final error?) throw error;
+    this.attempts[activityId] = attempts;
+  }
+
   /// 받기에 실패할 GPX 경로 (일부만 실패하는 경우 확인용)
   final brokenGpx = <String>{};
 

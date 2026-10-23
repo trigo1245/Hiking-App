@@ -15,6 +15,7 @@ class ActivityDetail {
     required this.summary,
     required this.points,
     required this.completions,
+    this.attempts = const [],
   });
 
   final ActivitySummary summary;
@@ -22,6 +23,9 @@ class ActivityDetail {
 
   /// 이 기록으로 완주한 코스 (기기에 저장된 코스로 다시 판정한다)
   final List<(Course, CourseCompletion)> completions;
+
+  /// 정상까지 가지 않은 코스와 진행률 (완주한 코스는 빠진다)
+  final List<(Course, CourseProgress)> attempts;
 }
 
 final activityDetailProvider = FutureProvider.autoDispose
@@ -31,17 +35,21 @@ final activityDetailProvider = FutureProvider.autoDispose
       ref.watch(myActivitiesProvider);
       final summary = await recording.loadSummary(id);
       final points = await recording.loadPoints(id);
-      final courses = ref.watch(coursesProvider).value ?? const <Course>[];
+      final courses = summary.isFlagged
+          ? const <Course>[]
+          : ref.watch(coursesProvider).value ?? const <Course>[];
+      final byId = {for (final c in courses) c.id: c};
       return ActivityDetail(
         summary: summary,
         points: points,
-        completions: summary.isFlagged
-            ? const []
-            : [
-                for (final c in courses)
-                  if (CourseMatcher.match(c, points) case final result?)
-                    (c, result),
-              ],
+        completions: [
+          for (final c in courses)
+            if (CourseMatcher.match(c, points) case final result?) (c, result),
+        ],
+        attempts: [
+          for (final p in CourseMatcher.progressAll(courses, points))
+            (byId[p.courseId]!, p),
+        ],
       );
     });
 

@@ -8,7 +8,9 @@ import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/my_info_screen.dart';
 import '../features/courses/presentation/course_detail_screen.dart';
+import '../features/courses/domain/competition.dart';
 import '../features/courses/presentation/course_reviews_section.dart';
+import '../features/courses/presentation/full_ranking_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/recording/data/location_service.dart';
 import '../features/recording/presentation/location_permission_screen.dart';
@@ -80,6 +82,21 @@ final routerProvider = Provider<GoRouter>((ref) {
             path: 'review',
             builder: (context, state) =>
                 WriteReviewScreen(courseId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'ranking',
+            builder: (context, state) => FullRankingScreen(
+              courseId: state.pathParameters['id']!,
+              initialKind: RankingKind.values.byName(
+                state.uri.queryParameters['kind'] ?? RankingKind.most.name,
+              ),
+              initialAllTime: state.uri.queryParameters['alltime'] == 'true',
+            ),
+          ),
+          GoRoute(
+            path: 'reviews',
+            builder: (context, state) =>
+                AllReviewsScreen(courseId: state.pathParameters['id']!),
           ),
         ],
       ),

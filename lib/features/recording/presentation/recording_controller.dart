@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:latlong2/latlong.dart';
 
 import '../../../core/utils/clock.dart';
 import '../../auth/presentation/auth_providers.dart';
@@ -19,6 +20,8 @@ class RecordingState {
     this.currentAltitude,
     this.hasFix = false,
     this.signalLost = false,
+    this.track = const [],
+    this.position,
   });
 
   /// null이면 기록 중이 아님
@@ -32,6 +35,12 @@ class RecordingState {
   /// 위치 수집 중 오류가 났는지 (GPS 꺼짐, 권한 해제 등)
   final bool signalLost;
 
+  /// 지금까지 걸은 경로 (정확도가 좋은 점만). 기록 화면 지도에 선으로 그린다.
+  final List<LatLng> track;
+
+  /// 마지막으로 받은 내 위치 (정확도와 관계없이)
+  final LocationSample? position;
+
   bool get isActive => session != null;
   bool get isPaused => session?.status == RecordingStatus.paused;
 
@@ -41,12 +50,16 @@ class RecordingState {
     double? currentAltitude,
     bool? hasFix,
     bool? signalLost,
+    List<LatLng>? track,
+    LocationSample? position,
   }) => RecordingState(
     session: session ?? this.session,
     stats: stats ?? this.stats,
     currentAltitude: currentAltitude ?? this.currentAltitude,
     hasFix: hasFix ?? this.hasFix,
     signalLost: signalLost ?? this.signalLost,
+    track: track ?? this.track,
+    position: position ?? this.position,
   );
 }
 
@@ -103,6 +116,8 @@ class RecordingController extends Notifier<RecordingState> {
       session: await _repository.resume(session.activityId, _now()),
       stats: state.stats,
       currentAltitude: state.currentAltitude,
+      track: state.track,
+      position: state.position,
     );
     _listen();
   }
@@ -137,6 +152,11 @@ class RecordingController extends Notifier<RecordingState> {
       session: unfinished.session,
       stats: _calculator.stats,
       currentAltitude: unfinished.points.lastOrNull?.altitude,
+      track: [
+        for (final p in unfinished.points)
+          if (p.accuracy <= TrackStatsCalculator.maxAccuracyM)
+            LatLng(p.latitude, p.longitude),
+      ],
     );
   }
 
@@ -166,6 +186,10 @@ class RecordingController extends Notifier<RecordingState> {
       currentAltitude: sample.altitude,
       hasFix: true,
       signalLost: false,
+      position: sample,
+      track: sample.accuracy <= TrackStatsCalculator.maxAccuracyM
+          ? [...state.track, LatLng(sample.latitude, sample.longitude)]
+          : null,
     );
   }
 

@@ -12,9 +12,9 @@ final currentSeasonProvider = Provider<Season>(
 /// 랭킹 조회 조건
 typedef RankingQuery = ({String courseId, RankingKind kind, bool allTime});
 
-/// 코스 랭킹. 화면을 벗어나면 버리고, 다시 들어오면 새로 받는다.
+/// 코스 상세의 랭킹 (상위 10명 + 내 순위, 전체 인원). 화면을 벗어나면 버리고, 다시 들어오면 새로 받는다.
 final courseRankingProvider = FutureProvider.autoDispose
-    .family<List<RankingEntry>, RankingQuery>((ref, q) {
+    .family<RankingPage, RankingQuery>((ref, q) {
       return ref
           .watch(competitionRemoteProvider)
           .fetchRanking(

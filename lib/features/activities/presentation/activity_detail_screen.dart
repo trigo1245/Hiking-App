@@ -16,6 +16,7 @@ import '../../../core/widgets/skeleton_box.dart';
 import '../../subscription/data/subscription_remote.dart';
 import '../../subscription/domain/subscription.dart';
 import '../data/gpx_sharer.dart';
+import '../../courses/domain/course.dart';
 import '../domain/activity_analysis.dart';
 import '../domain/activity_summary.dart';
 import '../domain/gpx_writer.dart';
@@ -208,19 +209,21 @@ class _Completions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('완주한 코스', style: AppTypography.subtitle),
+        const Text('다녀온 코스', style: AppTypography.subtitle),
         const SizedBox(height: AppSpacing.md),
         if (detail.summary.isFlagged)
           Text(
             '이동 속도가 비정상적으로 빠른 구간이 있어 완주로 인정하지 않았어요.',
             style: AppTypography.body.copyWith(color: AppColors.textSecondary),
           )
-        else if (detail.completions.isEmpty)
+        else if (detail.completions.isEmpty && detail.attempts.isEmpty)
           Text(
             '등록된 코스와 일치하지 않아 개인 기록으로만 저장됐어요.',
             style: AppTypography.body.copyWith(color: AppColors.textSecondary),
           )
-        else
+        else ...[
+          for (final (course, progress) in detail.attempts)
+            _AttemptCard(course: course, progress: progress.progress),
           for (final (course, result) in detail.completions)
             Pressable(
               onPressed: () => context.push(AppRoutes.course(course.id)),
@@ -253,7 +256,77 @@ class _Completions extends StatelessWidget {
                 ),
               ),
             ),
+        ],
       ],
+    );
+  }
+}
+
+/// 정상까지 가지 않은 코스: 몇 %까지 갔는지 막대로 보여 준다.
+class _AttemptCard extends StatelessWidget {
+  const _AttemptCard({required this.course, required this.progress});
+
+  final Course course;
+  final double progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final percent = (progress * 100).round();
+    return Pressable(
+      onPressed: () => context.push(AppRoutes.course(course.id)),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.input),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(course.fullName, style: AppTypography.body),
+                ),
+                Text(
+                  '$percent%까지',
+                  style: AppTypography.body.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            LayoutBuilder(
+              builder: (context, c) => Stack(
+                children: [
+                  Container(
+                    height: AppSpacing.sm,
+                    decoration: BoxDecoration(
+                      color: AppColors.divider,
+                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                    ),
+                  ),
+                  Container(
+                    width: c.maxWidth * progress,
+                    height: AppSpacing.sm,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary,
+                      borderRadius: BorderRadius.circular(AppSpacing.xs),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              '정상 전에 돌아섰어요. 무리하지 않은 것도 좋은 판단이에요.',
+              style: AppTypography.caption,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

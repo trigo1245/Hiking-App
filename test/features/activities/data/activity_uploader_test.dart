@@ -100,6 +100,30 @@ void main() {
     expect(sent.single.ascent.inMinutes, closeTo(44, 2));
   });
 
+  test('정상 전에 돌아온 기록이면 완주 대신 코스 진행률을 보낸다', () async {
+    final beomeosa = loadCourse('geumjeongsan-beomeosa');
+    courses = [beomeosa];
+    final half = beomeosa.path.sublist(0, beomeosa.path.length ~/ 2);
+    final id = await finishedFromPoints(walk([...half, ...half.reversed]));
+
+    expect(await uploader.upload(id, userId: 'u1'), isTrue);
+
+    expect(remote.completions[id], isEmpty);
+    final sent = remote.attempts[id]!;
+    expect(sent.single.courseId, 'geumjeongsan-beomeosa');
+    expect(sent.single.progress, inInclusiveRange(0.3, 0.7));
+  });
+
+  test('완주한 기록은 진행률을 따로 보내지 않는다', () async {
+    final beomeosa = loadCourse('geumjeongsan-beomeosa');
+    courses = [beomeosa];
+    final id = await finishedFromPoints(walk(beomeosa.path));
+
+    await uploader.upload(id, userId: 'u1');
+
+    expect(remote.attempts[id], isEmpty);
+  });
+
   test('코스와 관계없는 기록이면 빈 결과를 보낸다 (이전 결과를 지우기 위해)', () async {
     courses = [loadCourse('geumjeongsan-beomeosa')];
     final id = await finishedActivity();
