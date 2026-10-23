@@ -64,6 +64,17 @@ class ActivitiesRepository {
     return {for (final r in rows) r.read(_db.activities.id)!};
   }
 
+  /// [userId]의 기록 중 제목이 [prefix]로 시작하는 것을 지운다 (시연용 기록 정리용).
+  /// 위치 점은 외래 키(cascade)로 함께 지워진다. 지운 개수를 돌려준다.
+  Future<int> deleteByTitlePrefix(String userId, String prefix) {
+    return (_db.delete(_db.activities)..where(
+          (a) =>
+              a.title.like('${prefix.replaceAll('%', r'\%')}%') &
+              (a.userId.equals(userId) | a.userId.isNull()),
+        ))
+        .go();
+  }
+
   /// 서버에서 받은 기록을 끝난 기록·업로드 완료 상태로 저장한다. 요약과 점을 한 번에 넣는다.
   Future<void> insertDownloaded(
     ActivitySummary s, {

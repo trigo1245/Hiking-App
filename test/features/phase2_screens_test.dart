@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hiking_app/app/routes.dart';
 import 'package:hiking_app/core/database/app_database.dart';
+import 'package:hiking_app/features/activities/data/activities_repository.dart';
 import 'package:hiking_app/features/activities/data/demo_activity_generator.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/courses/domain/competition.dart';
@@ -66,8 +67,10 @@ void main() {
     final db = testDatabase();
     late List<String> ids;
     await tester.runAsync(() async {
-      ids = await DemoActivityGenerator(RecordingRepository(db))
-          .createDemoHikes(courses: [beomeosa()], userId: 'u1', now: clock());
+      ids = await DemoActivityGenerator(
+        RecordingRepository(db),
+        ActivitiesRepository(db),
+      ).createDemoHikes(courses: demoCourses(), userId: 'u1', now: clock());
     });
     return (db, ids.last);
   }

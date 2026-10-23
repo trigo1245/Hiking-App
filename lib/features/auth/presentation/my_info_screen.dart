@@ -152,7 +152,8 @@ class _PremiumCard extends ConsumerWidget {
   }
 }
 
-/// 개발용: 실제 코스를 따라 걸은 것 같은 시연용 기록을 만든다.
+/// 개발용: 이 기기의 시연용 기록을 지우고, 여러 상황(완주·중도 하산·속도 이상·개인 산책)을
+/// 확인할 수 있는 시연용 기록 8개를 새로 만든다. 서버 쪽 시연용 데이터는 supabase/seed/demo_data.sql.
 class _DemoDataButton extends ConsumerStatefulWidget {
   const _DemoDataButton();
 
@@ -180,8 +181,8 @@ class _DemoDataButtonState extends ConsumerState<_DemoDataButton> {
       // 일반 기록처럼 서버에 올리고 코스 완주도 판정한다.
       await ref.read(uploadActionsProvider).uploadPending();
       message = ids.isEmpty
-          ? '코스를 아직 받지 못했어요. 홈 지도에 코스가 보이면 다시 눌러 주세요'
-          : '시연용 기록 ${ids.length}개를 만들었어요. 기록 탭에서 볼 수 있어요';
+          ? '금정산·승학산 코스를 아직 받지 못했어요. 홈 지도에 코스가 보이면 다시 눌러 주세요'
+          : '시연용 기록을 ${ids.length}개 새로 만들었어요. 기록 탭에서 볼 수 있어요';
     } catch (e) {
       debugPrint('[demo] $e');
       message = '시연용 기록을 만들지 못했어요';
@@ -201,7 +202,7 @@ class _DemoDataButtonState extends ConsumerState<_DemoDataButton> {
         const Text('개발용 (개발 빌드에서만 보여요)', style: AppTypography.caption),
         const SizedBox(height: AppSpacing.sm),
         AppButton(
-          label: _busy ? '만드는 중…' : '시연용 등산 기록 3개 만들기',
+          label: _busy ? '만드는 중…' : '시연용 기록 다시 만들기 (8개)',
           variant: AppButtonVariant.secondary,
           onPressed: _busy ? null : _create,
         ),

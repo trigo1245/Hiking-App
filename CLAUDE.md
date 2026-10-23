@@ -239,6 +239,10 @@ supabase/         # SQL 마이그레이션
 ### 시연용 데이터
 - 개발용 Supabase 프로젝트에만 넣는다. 시연용 행은 `is_demo = true`로 표시해 한 번에 지울 수 있게 한다.
 - 팀원의 실제 계정에 시연용 완주 기록을 넣을 수 있다. 이 기록도 `is_demo = true`로 둔다.
+- 시연용 데이터는 두 군데서 만든다. **순서: ① `supabase/seed/demo_data.sql` 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기"**
+  - ① 서버: 기존 시연용 데이터(시연용 사용자, `is_demo` 행, 내 계정의 리뷰와 "시연용…" 기록)를 모두 지우고, 시연용 사용자 45명의 완주·진행률·리뷰를 다시 넣는다. 직접 만든 코스 4개에 서로 다른 상황(많은 인원·동점·내가 정복자·이번 시즌 비어 있음·리뷰 없음 등)을 둔다.
+  - ② 앱(`DemoActivityGenerator`): 이 기기의 "시연용…" 기록을 지우고, 실제 코스를 따라 걸은 것 같은 기록 8개(완주, 62%·30% 중도 하산, 속도 이상, 코스 밖 산책, 일시정지)를 만들어 일반 기록처럼 올린다. 제목은 "시연용"으로 시작한다.
+  - ①이 서버의 "시연용…" 기록을 지우므로 ①을 먼저 한다. Storage의 GPX 파일은 SQL로 지울 수 없어 남는다.
 
 ---
 
@@ -270,7 +274,7 @@ subscriptions      : user_id(기본키), plan, started_at, expires_at, canceled_
 course_attempts    : activity_id, user_id, course_id(activity_id와 조합 유일), progress(0~1), attempted_at, is_demo
                      (정상까지 가지 않은 코스의 진행률. course_reviews.view는 완주자만 매기므로 null 허용)
 ```
-- 코스 데이터는 `tool/export_courses_sql.dart`가 만든 `supabase/seed/courses.sql`로 넣는다. 시연용 데이터는 `supabase/seed/demo_*.sql`로 넣는다.
+- 코스 데이터는 `tool/export_courses_sql.dart`가 만든 `supabase/seed/courses.sql`로 넣는다. 시연용 데이터는 `supabase/seed/demo_data.sql`로 넣는다(6-2장 "시연용 데이터").
 - PostGIS 확장을 켜 두고 코스 경로를 geometry로 저장한다. (서버 재검증·공간 검색에 사용)
 - 다른 사용자의 행은 테이블을 직접 열지 않고, 랭킹·리뷰용 함수(RPC)나 뷰로 6-2장의 공개 항목만 돌려준다.
 

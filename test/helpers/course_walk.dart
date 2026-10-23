@@ -80,3 +80,27 @@ List<TrackPoint> walk(
 /// 점을 북쪽으로 [meters]만큼 옮긴다.
 GeoPoint shiftNorth(GeoPoint p, double meters) =>
     GeoPoint(p.lat + meters / 111320, p.lon);
+
+/// 시연용 기록 생성기가 쓰는 실제 코스 4개 (산 이름·코스 이름까지 채운다)
+List<Course> demoCourses() {
+  Course named(String id, String mountain, String name) {
+    final c = loadCourse(id);
+    return Course(
+      id: id,
+      mountainName: mountain,
+      name: name,
+      startName: '',
+      endName: '',
+      distanceM: 0,
+      path: c.path,
+      summit: c.summit,
+    );
+  }
+
+  return [
+    named('geumjeongsan-beomeosa', '금정산', '범어사 코스'),
+    named('geumjeongsan-sanseong', '금정산', '산성마을 코스'),
+    named('seunghaksan-donga', '승학산', '동아대 코스'),
+    named('seunghaksan-gudeok', '승학산', '구덕문화공원 코스'),
+  ];
+}
