@@ -60,6 +60,7 @@
 | 지도 | flutter_map + latlong2 (내 위치 점은 직접 그린다. flutter_map_location_marker는 권한 요청 흐름이 겹쳐 쓰지 않음) |
 | 지도 타일 | OpenStreetMap 기본 타일 (과제 시연용) |
 | 기타 | uuid, path_provider, permission_handler (12.x 고정: 13.x는 compileSdk 37이 필요해 현재 빌드 도구와 맞지 않음) |
+| 알림 | flutter_local_notifications (기록 중 알림 내용 갱신용. Android 빌드에 core library desugaring 필요) |
 | 폰트 | Pretendard (OFL 라이선스, assets에 포함) |
 
 - 지도 화면에는 타일 제공처의 출처 표시(예: "© OpenStreetMap contributors")를 항상 보여 준다.
@@ -143,6 +144,8 @@ supabase/         # SQL 마이그레이션
 
 ### 위치 수집
 - 포그라운드 서비스 + 상단 고정 알림("등산 기록 중이에요")으로 화면이 꺼져도 기록한다.
+  - 알림에는 기록 시간(알림이 스스로 1초마다 올림), 거리, 현재 고도, 오른 높이를 보여 주고 위치를 받을 때마다 고친다. 일시정지·종료하면 지운다.
+  - 알림은 geolocator가 띄운 것을 `flutter_local_notifications`로 **같은 번호(75415)·채널(`geolocator_channel_01`)**로 다시 올려 덮어쓴다(`recording/data/recording_notifier.dart`). 기록 유지 서비스는 그대로 geolocator가 맡는다. geolocator를 업데이트하면 이 두 값이 그대로인지 확인한다.
 - 권한: 위치(정밀) → 알림(Android 13+) 순으로 요청한다. 포그라운드 서비스는 앱이 화면에 떠 있을 때 시작하므로, 1단계에서는 백그라운드 위치("항상 허용") 권한을 요청하지 않는다.
 - Manifest에 `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_LOCATION`, `POST_NOTIFICATIONS` 등 필요한 권한을 선언한다.
 - 권한 거부 시 이유를 설명하는 화면과 설정으로 이동하는 버튼을 제공한다.

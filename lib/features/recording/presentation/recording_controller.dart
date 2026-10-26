@@ -7,7 +7,9 @@ import 'package:latlong2/latlong.dart';
 import '../../../core/utils/clock.dart';
 import '../../auth/presentation/auth_providers.dart';
 import '../data/location_service.dart';
+import '../data/recording_notifier.dart';
 import '../data/recording_repository.dart';
+import '../domain/recording_notification.dart';
 import '../domain/recording_session.dart';
 import '../domain/track_point.dart';
 import '../domain/track_stats.dart';
@@ -74,6 +76,7 @@ class RecordingController extends Notifier<RecordingState> {
 
   RecordingRepository get _repository => ref.read(recordingRepositoryProvider);
   LocationService get _location => ref.read(locationServiceProvider);
+  RecordingNotifier get _notifier => ref.read(recordingNotifierProvider);
   DateTime _now() => ref.read(clockProvider)();
 
   @override
@@ -104,6 +107,8 @@ class RecordingController extends Notifier<RecordingState> {
     final session = state.session;
     if (session == null || session.status != RecordingStatus.recording) return;
     await _stopListening();
+    // 일시정지 중에는 위치를 받지 않으므로(기록 유지 서비스도 멈춘다) 알림도 지운다.
+    unawaited(_notifier.cancel());
     state = state.copyWith(
       session: await _repository.pause(session.activityId, _now()),
     );
@@ -127,6 +132,7 @@ class RecordingController extends Notifier<RecordingState> {
     final session = state.session;
     if (session == null) return null;
     await _stopListening();
+    unawaited(_notifier.cancel());
 
     await _repository.finish(
       session.activityId,
@@ -190,6 +196,19 @@ class RecordingController extends Notifier<RecordingState> {
       track: sample.accuracy <= TrackStatsCalculator.maxAccuracyM
           ? [...state.track, LatLng(sample.latitude, sample.longitude)]
           : null,
+    );
+    // 상단 고정 알림에 거리·고도를 보여 준다. 시간은 알림이 스스로 흘러가게 한다.
+    final now = _now();
+    unawaited(
+      _notifier.show(
+        RecordingNotificationContent.of(
+          active: session.activeDuration(now),
+          now: now,
+          distanceM: _calculator.stats.distanceM,
+          elevationGainM: _calculator.stats.elevationGainM,
+          altitudeM: sample.altitude,
+        ),
+      ),
     );
   }
 

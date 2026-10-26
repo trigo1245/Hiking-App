@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:hiking_app/features/recording/data/location_service.dart';
+import 'package:hiking_app/features/recording/data/recording_notifier.dart';
+import 'package:hiking_app/features/recording/domain/recording_notification.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
 
 /// 테스트에서 위치를 직접 보내는 가짜 위치 서비스.
@@ -49,4 +51,17 @@ class FakeLocationService implements LocationService {
 
   @override
   Future<void> openLocationSettings() async => opened.add('location');
+}
+
+/// 알림 대신 보낸 내용을 기억하는 가짜
+class FakeRecordingNotifier implements RecordingNotifier {
+  final shown = <RecordingNotificationContent>[];
+  int cancels = 0;
+
+  @override
+  Future<void> show(RecordingNotificationContent content) async =>
+      shown.add(content);
+
+  @override
+  Future<void> cancel() async => cancels++;
 }

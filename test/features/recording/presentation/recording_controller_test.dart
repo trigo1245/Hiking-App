@@ -5,6 +5,7 @@ import 'package:hiking_app/core/utils/clock.dart';
 import 'package:hiking_app/features/auth/domain/app_user.dart';
 import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
+import 'package:hiking_app/features/recording/data/recording_notifier.dart';
 import 'package:hiking_app/features/recording/data/recording_repository.dart';
 import 'package:hiking_app/features/recording/domain/recording_session.dart';
 import 'package:hiking_app/features/recording/domain/track_point.dart';
@@ -17,6 +18,7 @@ import '../fake_location_service.dart';
 
 void main() {
   late FakeLocationService location;
+  late FakeRecordingNotifier notifier;
   late AppDatabase db;
   late ProviderContainer container;
   var now = DateTime(2026, 10, 13, 9);
@@ -28,6 +30,7 @@ void main() {
   setUp(() {
     now = DateTime(2026, 10, 13, 9);
     location = FakeLocationService();
+    notifier = FakeRecordingNotifier();
     db = testDatabase();
     container = ProviderContainer(
       overrides: [
@@ -38,6 +41,7 @@ void main() {
         ),
         appDatabaseProvider.overrideWithValue(db),
         locationServiceProvider.overrideWithValue(location),
+        recordingNotifierProvider.overrideWithValue(notifier),
         clockProvider.overrideWithValue(() => now),
       ],
     );
@@ -80,6 +84,25 @@ void main() {
         .read(recordingRepositoryProvider)
         .loadPoints(id);
     expect(saved, hasLength(51));
+  });
+
+  test('위치를 받을 때마다 상단 알림에 거리·고도를 갱신하고, 일시정지·종료하면 지운다', () async {
+    await controller().start();
+    expect(notifier.shown, isEmpty);
+
+    now = now.add(const Duration(minutes: 5));
+    await emitAll(readGpx('test_data/synthetic_climb.gpx'));
+    expect(notifier.shown, hasLength(51));
+    final last = notifier.shown.last;
+    expect(last.body, '0.56 km · 현재 200 m · 오른 높이 100 m');
+    // 알림 시계는 기록 시작 시각부터 센다.
+    expect(last.chronometerBase, DateTime(2026, 10, 13, 9));
+
+    await controller().pause();
+    expect(notifier.cancels, 1);
+    await controller().resume();
+    await controller().finish();
+    expect(notifier.cancels, 2);
   });
 
   test('일시정지하면 위치 수집을 멈추고, 다시 시작하면 새 구간으로 이어 간다', () async {
