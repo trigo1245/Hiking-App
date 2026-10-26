@@ -6,6 +6,7 @@ import 'package:hiking_app/app/app.dart';
 import 'package:hiking_app/core/database/app_database.dart';
 import 'package:hiking_app/core/map/map_tiles.dart';
 import 'package:hiking_app/core/utils/clock.dart';
+import 'package:hiking_app/features/achievements/data/achievement_remote.dart';
 import 'package:hiking_app/features/activities/data/activity_remote.dart';
 import 'package:hiking_app/features/activities/data/gpx_sharer.dart';
 import 'package:hiking_app/features/auth/data/auth_repository.dart';
@@ -18,6 +19,7 @@ import 'package:hiking_app/features/recording/data/location_service.dart';
 import 'package:hiking_app/features/recording/data/recording_notifier.dart';
 import 'package:hiking_app/features/subscription/data/subscription_remote.dart';
 
+import '../features/achievements/fake_achievement_remote.dart';
 import '../features/activities/fake_activity_remote.dart';
 import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
@@ -51,6 +53,7 @@ Future<void> pumpApp(
   ReviewRemote? reviews,
   SubscriptionRemote? subscription,
   GpxSharer? gpxSharer,
+  AchievementRemote? achievements,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -80,6 +83,9 @@ Future<void> pumpApp(
         ),
         gpxSharerProvider.overrideWithValue(gpxSharer ?? FakeGpxSharer()),
         recordingNotifierProvider.overrideWithValue(FakeRecordingNotifier()),
+        achievementRemoteProvider.overrideWithValue(
+          achievements ?? FakeAchievementRemote(),
+        ),
         // 위젯 테스트에서는 지도 타일을 인터넷에서 받지 않는다.
         mapTilesEnabledProvider.overrideWithValue(false),
         if (clock != null) clockProvider.overrideWithValue(clock),

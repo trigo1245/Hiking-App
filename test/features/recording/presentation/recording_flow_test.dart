@@ -12,6 +12,17 @@ import '../../activities/fake_activity_remote.dart';
 import '../../auth/fake_auth_repository.dart';
 import '../fake_location_service.dart';
 
+/// 저장 전후 업적 비교(DB 읽기)와 업로드는 실제 비동기 작업이라, 가짜 시간 밖에서 조금씩 기다린다.
+Future<void> waitForSave(WidgetTester tester) async {
+  for (var i = 0; i < 10; i++) {
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 50)),
+    );
+    await tester.pump();
+  }
+  await tester.pumpAndSettle();
+}
+
 void main() {
   FakeAuthRepository signedIn() => FakeAuthRepository(
     user: const AppUser(id: 'u1', provider: SocialProvider.kakao),
@@ -68,6 +79,12 @@ void main() {
 
     await tester.enterText(find.byType(TextField), '관악산 연주대');
     await tester.tap(find.text('저장하기'));
+    await waitForSave(tester);
+
+    // 첫 기록이라 "첫 걸음" 배지를 얻는다.
+    expect(find.text('새 배지를 얻었어요'), findsOneWidget);
+    expect(find.text('첫 걸음'), findsOneWidget);
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
 
     expect(find.text('기록을 저장했어요'), findsOneWidget);
@@ -126,6 +143,9 @@ void main() {
 
     // 저장하고 홈으로 돌아오면, 방금 끝낸 기록을 다시 묻지 않는다.
     await tester.tap(find.text('저장하기'));
+    await waitForSave(tester);
+    // 첫 기록이라 새 배지 카드가 뜬다.
+    await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
     expect(find.text('등산 기록 시작'), findsOneWidget);
     expect(find.text('끝나지 않은 기록이 있어요'), findsNothing);

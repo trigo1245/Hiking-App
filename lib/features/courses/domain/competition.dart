@@ -16,10 +16,20 @@ class Season {
     return Season(kst.year, kst.month <= 6 ? 1 : 2);
   }
 
+  /// 서버 형태(예: 2026-H2)를 읽는다.
+  factory Season.parse(String id) =>
+      Season(int.parse(id.substring(0, 4)), int.parse(id.substring(6)));
+
   final int year;
 
   /// 1 = 상반기, 2 = 하반기
   final int half;
+
+  /// 시즌이 끝나는 순간 (한국 시간 7월 1일 0시 / 다음 해 1월 1일 0시)
+  DateTime get end => DateTime.utc(
+    half == 1 ? year : year + 1,
+    half == 1 ? 7 : 1,
+  ).subtract(const Duration(hours: 9));
 
   /// 서버에 저장하는 형태. 예: 2026-H2
   String get id => '$year-H$half';

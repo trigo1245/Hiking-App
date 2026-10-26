@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261025000000_ranking_pages_attempts.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261026000000_my_lead_runs.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -13,6 +13,8 @@
 -- │   리뷰 35개(전체 보기 나눠 받기, 완등 많은 순), 중도 하산 후기 5개(조망 없음, "N%까지 다녀옴")
 -- ├ 승학산 동아대: 6명, 김세민이 최다완등 정복자(지도에 사진), 최단시간은 다른 사람,
 -- │   지난 시즌 기록(명예의 전당에만), 리뷰 정확히 3개(전체 보기 버튼 없음) 중 하나는 김세민 것(고치기·지우기)
+-- │   업적: 김세민이 7월 27일부터 이번 시즌 최다완등 1위를 계속 지킨다(1위 지키기 90일),
+-- │   지난 시즌(상반기)에는 두 분야 모두 1위로 끝났다(시즌 정복 배지 2개, 두 개의 왕관, 첫 정복 2개)
 -- ├ 금정산 산성마을: 이번 시즌 완주 없음("첫 정복자가 되어 보세요"), 명예의 전당만 있음,
 -- │   김세민은 앱 기록으로 62% 진행 → 조망을 뺀 리뷰 쓰기, 다른 사람 중도 하산 후기
 -- └ 승학산 구덕문화공원: 완주 2명, 리뷰 없음, 김세민은 앱 기록으로 30% 진행 → 아직 리뷰 못 씀
@@ -185,6 +187,26 @@ cross join demo_course c
 cross join generate_series(1, 4) as g
 cross join lateral (
   select timestamptz '2026-07-12 08:00:00+09' + g * interval '15 days' as at
+) as t
+where c.slug = 'seunghaksan-donga';
+
+-- 승학산 동아대 · 김세민 지난 시즌 2번. 다른 사람(6~8번, 1번씩)보다 많고 빠르다
+-- → 상반기 최다완등·최단시간 1위로 시즌 종료 (업적의 시즌 정복 기록)
+insert into public.course_completions
+  (user_id, course_id, ascent_s, completed_at, season, is_demo)
+select
+  me.id,
+  c.id,
+  case when g = 1 then 760 else 1300 end,
+  t.at,
+  public.season_of(t.at),
+  true
+from demo_me me
+cross join demo_course c
+cross join generate_series(1, 2) as g
+cross join lateral (
+  select case when g = 1 then timestamptz '2026-04-19 08:00:00+09'
+    else timestamptz '2026-05-24 08:00:00+09' end as at
 ) as t
 where c.slug = 'seunghaksan-donga';
 

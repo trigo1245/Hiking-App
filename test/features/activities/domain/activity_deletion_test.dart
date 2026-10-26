@@ -26,7 +26,12 @@ void main() {
       completedCourses: const [],
       attemptedCourses: const [],
     );
-    expect(titles(n), ['되돌릴 수 없어요', '서버에서도 지워요', '통계와 분석에서 빠져요']);
+    expect(titles(n), [
+      '되돌릴 수 없어요',
+      '서버에서도 지워요',
+      '통계와 분석에서 빠져요',
+      '배지가 사라질 수 있어요',
+    ]);
   });
 
   test('아직 올리지 않은 기록이면 이 휴대폰에서만 지워진다고 알린다', () {
@@ -63,6 +68,7 @@ void main() {
       '금정산 산성마을 코스 진행률(62%) 기록이 사라져요',
       '이미 쓴 리뷰는 남아요',
       '통계와 분석에서 빠져요',
+      '배지가 사라질 수 있어요',
     ]);
     expect(n[2].detail, contains('정복자'));
     expect(n[3].detail, contains('리뷰 작성 자격'));

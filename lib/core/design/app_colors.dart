@@ -21,6 +21,25 @@ abstract final class AppColors {
   /// primary 위에 올라가는 글자색
   static const onPrimary = Color(0xFFFFFFFF);
 
+  /// 업적 배지 단계 색 (3단계 동·은·금, 2단계 동·금, 1단계 금)
+  static const badgeBronze = Color(0xFFC9895A);
+  static const badgeSilver = Color(0xFFA3AEBA);
+  static const badgeGold = Color(0xFFF0B429);
+
+  /// 시즌 정복 배지: 백금 바탕에 무지갯빛(프리즘) 그라데이션을 얹는다.
+  static const badgePlatinum = Color(0xFFE3E8EE);
+  static const badgePrism = [
+    Color(0xFFFFBFDD),
+    Color(0xFFBCD4FF),
+    Color(0xFFB8EED5),
+    Color(0xFFFFE89E),
+    Color(0xFFD6C2FF),
+    Color(0xFFFFBFDD),
+  ];
+
+  /// 아직 얻지 못한 배지
+  static const badgeLocked = Color(0xFFD1D6DB);
+
   /// 카카오 로그인 버튼 (카카오 로그인 디자인 가이드 지정 색)
   static const kakaoContainer = Color(0xFFFEE500);
   static const kakaoLabel = Color(0xD9000000);

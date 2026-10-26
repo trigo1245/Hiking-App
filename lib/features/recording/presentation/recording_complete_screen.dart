@@ -11,6 +11,9 @@ import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/metric_text.dart';
 import '../../../core/widgets/skeleton_box.dart';
+import '../../achievements/domain/achievements.dart';
+import '../../achievements/presentation/achievements_providers.dart';
+import '../../achievements/presentation/new_badges_sheet.dart';
 import '../../activities/domain/activity_summary.dart';
 import '../../activities/presentation/activities_providers.dart';
 import '../data/recording_repository.dart';
@@ -50,9 +53,42 @@ class _RecordingCompleteScreenState
     await ref
         .read(recordingRepositoryProvider)
         .updateTitle(summary.id, title.isEmpty ? summary.title : title);
-    // 저장하면 바로 서버 업로드를 시도한다. 기다리지 않고 홈으로 넘어간다.
+    // 새 배지 확인: 이 기록이 없을 때와 있을 때의 업적을 비교한다.
+    final checker = ref.read(achievementCheckerProvider);
+    final server = await checker.fetchServer(
+      timeout: const Duration(seconds: 4),
+    );
+    final (before, after) = await checker.deviceBeforeAfter(summary.id, server);
+    // 저장하면 바로 서버 업로드를 시도한다.
     // 실패하면 "업로드 대기"로 남고, 앱을 다시 열 때 자동으로 재시도한다.
-    unawaited(ref.read(uploadActionsProvider).upload(summary.id));
+    final uploaded = ref
+        .read(uploadActionsProvider)
+        .upload(summary.id)
+        .catchError((_) => false);
+    final gainedNow = Achievements.gained(before, after);
+
+    // 완등·정복 배지는 업로드와 코스 완주 판정이 끝나야 알 수 있다.
+    Future<List<EarnedBadge>> gainedLater() async {
+      if (!await uploaded) return const [];
+      final shown = {for (final e in gainedNow) e.key};
+      return [
+        for (final e in Achievements.gained(before, await checker.refreshed()))
+          if (!shown.contains(e.key)) e,
+      ];
+    }
+
+    if (!mounted) return;
+    if (gainedNow.isNotEmpty) {
+      await showNewBadges(context, initial: gainedNow, later: gainedLater());
+    } else {
+      // 바로 알 수 있는 새 배지가 없으면 업로드를 잠깐 기다려 완등·정복 배지만 확인한다.
+      final later = await gainedLater()
+          .timeout(const Duration(seconds: 10))
+          .catchError((_) => const <EarnedBadge>[]);
+      if (later.isNotEmpty && mounted) {
+        await showNewBadges(context, initial: later);
+      }
+    }
     if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('기록을 저장했어요')));
@@ -112,7 +148,7 @@ class _RecordingCompleteScreenState
         ),
         bottomNavigationBar: BottomActionBar(
           child: AppButton(
-            label: '저장하기',
+            label: _saving ? '저장하는 중…' : '저장하기',
             onPressed: data == null || _saving ? null : () => _save(data),
           ),
         ),

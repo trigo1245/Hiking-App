@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/achievements/presentation/achievements_screen.dart';
 import '../features/activities/presentation/activities_screen.dart';
 import '../features/activities/presentation/activity_detail_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
@@ -104,6 +105,10 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/activity/:id',
         builder: (context, state) =>
             ActivityDetailScreen(activityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.achievements,
+        builder: (context, state) => const AchievementsScreen(),
       ),
       GoRoute(
         path: AppRoutes.premium,

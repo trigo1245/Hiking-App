@@ -10,6 +10,7 @@ import '../../../core/utils/clock.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/skeleton_box.dart';
+import '../../achievements/presentation/achievements_screen.dart';
 import '../../activities/data/demo_activity_generator.dart';
 import '../../activities/presentation/activities_providers.dart';
 import '../../subscription/data/subscription_remote.dart';
@@ -69,6 +70,8 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
             style: AppTypography.body.copyWith(color: AppColors.textSecondary),
           ),
           const SizedBox(height: AppSpacing.xxl),
+          const AchievementsCard(),
+          const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
           const SizedBox(height: AppSpacing.xxl),
           // 시연·테스트용 기능은 개발 빌드에서만 보인다.

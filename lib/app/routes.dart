@@ -29,6 +29,9 @@ abstract final class AppRoutes {
   /// 기록 상세 (기록 탭에서 카드를 누르면 열린다)
   static String activity(String activityId) => '/activity/$activityId';
 
+  /// 업적 (내 정보에서 진입)
+  static const achievements = '/achievements';
+
   /// 프리미엄 구독
   static const premium = '/premium';
   static String locationPermission(LocationAccess access) =>
