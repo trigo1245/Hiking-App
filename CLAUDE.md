@@ -116,7 +116,7 @@ supabase/         # SQL 마이그레이션
 6. **내 정보**: 프로필 사진, 닉네임#태그, 닉네임 변경(2단계), 로그아웃, 로그 파일 내보내기(테스트용)
 7. **로그인**: 카카오로 시작 / 구글로 시작. 익명 로그인과 계정 연동(linkIdentity)은 하지 않는다. 카카오 계정과 구글 계정은 각각 별개의 사용자다.
    - 두 방법 모두 브라우저에서 로그인하고 딥링크로 돌아온다. 구글은 로그아웃 후 다른 계정으로 들어갈 수 있게 매번 계정 선택 화면을 띄운다(`prompt=select_account`).
-   - Google Cloud OAuth 동의 화면은 "프로덕션(게시)" 상태로 둔다. "테스트" 상태면 테스트 사용자로 등록한 Gmail만 로그인된다. 기본 범위(이메일·프로필)만 써서 구글 심사는 필요 없다.
+   - Google Cloud OAuth 동의 화면은 **"테스트" 상태로 둔다.** 구글로 로그인할 사람의 Gmail을 대상(Audience) → 테스트 사용자에 추가해야 한다(최대 100명). 프로덕션으로 게시하려면 홈페이지·개인정보처리방침 URL이 필요해서 하지 않는다. 카카오 로그인은 이 제한이 없다.
    - 딥링크 `com.hikingapp.hikingapp://login-callback`은 `lib/core/config/env.dart`, `AndroidManifest.xml`, Supabase Redirect URLs 세 곳이 같아야 한다.
 
 ### 2단계
