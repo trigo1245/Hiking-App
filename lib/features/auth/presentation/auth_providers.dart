@@ -12,7 +12,6 @@ import '../domain/profile.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return SupabaseAuthRepository(
     auth: ref.watch(supabaseClientProvider).auth,
-    googleWebClientId: Env.googleWebClientId,
     redirectUrl: Env.authRedirectUrl,
   );
 });

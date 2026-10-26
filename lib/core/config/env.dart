@@ -6,12 +6,7 @@ abstract final class Env {
     'SUPABASE_PUBLISHABLE_KEY',
   );
 
-  /// Google Cloud의 "웹 애플리케이션" 유형 OAuth 클라이언트 ID.
-  static const googleWebClientId = String.fromEnvironment(
-    'GOOGLE_WEB_CLIENT_ID',
-  );
-
-  /// 브라우저 로그인(카카오) 후 앱으로 돌아오는 딥링크.
+  /// 브라우저 로그인(카카오·구글) 후 앱으로 돌아오는 딥링크.
   /// AndroidManifest.xml, Supabase Redirect URLs와 글자 하나까지 같아야 한다.
   static const authRedirectUrl = 'com.hikingapp.hikingapp://login-callback';
 }

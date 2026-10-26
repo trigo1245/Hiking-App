@@ -56,7 +56,7 @@
 | 위치 | geolocator (Android 포그라운드 서비스 알림 설정 사용) |
 | 기기 내부 DB | drift (SQLite) |
 | 백엔드 | Supabase (Auth, PostgreSQL, Storage) — supabase_flutter |
-| 로그인 | google_sign_in (구글 네이티브 로그인), 카카오는 Supabase OAuth(브라우저) |
+| 로그인 | 카카오·구글 모두 Supabase OAuth(브라우저). 구글 네이티브 로그인(google_sign_in)은 빌드한 컴퓨터마다 서명(SHA-1) 등록이 필요해서 쓰지 않는다 |
 | 지도 | flutter_map + latlong2 (내 위치 점은 직접 그린다. flutter_map_location_marker는 권한 요청 흐름이 겹쳐 쓰지 않음) |
 | 지도 타일 | OpenStreetMap 기본 타일 (과제 시연용) |
 | 기타 | uuid, path_provider, permission_handler (12.x 고정: 13.x는 compileSdk 37이 필요해 현재 빌드 도구와 맞지 않음) |
@@ -115,6 +115,8 @@ supabase/         # SQL 마이그레이션
 5. **기록 상세**: 실제 이동 경로 지도(기기에 저장한 GPS 점), 수치 전체, 다녀온 코스(완주한 코스는 등정 시간, 정상 전에 돌아온 코스는 진행률 막대), GPX 내보내기(공유) 버튼, 재업로드 버튼, 맨 아래 "이 기록 지우기"(잘못 기록된 산행용, 6장 "기록 지우기")
 6. **내 정보**: 프로필 사진, 닉네임#태그, 닉네임 변경(2단계), 로그아웃, 로그 파일 내보내기(테스트용)
 7. **로그인**: 카카오로 시작 / 구글로 시작. 익명 로그인과 계정 연동(linkIdentity)은 하지 않는다. 카카오 계정과 구글 계정은 각각 별개의 사용자다.
+   - 두 방법 모두 브라우저에서 로그인하고 딥링크로 돌아온다. 구글은 로그아웃 후 다른 계정으로 들어갈 수 있게 매번 계정 선택 화면을 띄운다(`prompt=select_account`).
+   - Google Cloud OAuth 동의 화면은 "프로덕션(게시)" 상태로 둔다. "테스트" 상태면 테스트 사용자로 등록한 Gmail만 로그인된다. 기본 범위(이메일·프로필)만 써서 구글 심사는 필요 없다.
    - 딥링크 `com.hikingapp.hikingapp://login-callback`은 `lib/core/config/env.dart`, `AndroidManifest.xml`, Supabase Redirect URLs 세 곳이 같아야 한다.
 
 ### 2단계
