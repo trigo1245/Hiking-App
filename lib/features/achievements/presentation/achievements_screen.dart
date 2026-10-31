@@ -80,8 +80,8 @@ class AchievementsScreen extends ConsumerWidget {
                 ),
               )
             else
-              for (final s in value.seasons)
-                _SeasonRow(badge: s, courseName: names[s.courseId]),
+              for (final g in value.seasonGroups)
+                _SeasonRow(group: g, names: names),
           ],
         ),
         AsyncValue(:final error?) => _ErrorView(
@@ -252,17 +252,19 @@ class _BadgeTile extends StatelessWidget {
   }
 }
 
+/// 시즌·분야 한 줄. 1위로 끝낸 코스가 여러 개면 아래에 모두 적는다.
 class _SeasonRow extends StatelessWidget {
-  const _SeasonRow({required this.badge, required this.courseName});
+  const _SeasonRow({required this.group, required this.names});
 
-  final SeasonBadge badge;
-  final String? courseName;
+  final SeasonConquest group;
+  final Map<String, String> names;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.md),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const BadgeMedal.season(size: 52),
           const SizedBox(width: AppSpacing.lg),
@@ -270,19 +272,22 @@ class _SeasonRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                const SizedBox(height: AppSpacing.xs),
                 Text(
-                  seasonBadgeTitle(badge),
+                  seasonConquestTitle(group.season, group.kind),
                   style: AppTypography.body.copyWith(
                     fontWeight: FontWeight.w600,
                   ),
                 ),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  seasonBadgeSubtitle(badge, courseName),
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
+                for (final id in group.courseIds) ...[
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    names[id] ?? '코스',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -454,11 +459,15 @@ String earnedBadgeTitle(EarnedBadge e) {
       : '${def.name} · ${def.tierOf(e.level).label}';
 }
 
-String seasonBadgeTitle(SeasonBadge s) => '${s.season.label} 정복자';
+/// 시즌 정복 이름. 예: "최다완등 정복자 · 2026 상반기"
+String seasonConquestTitle(Season season, RankingKind kind) =>
+    '${kind == RankingKind.most ? '최다완등' : '최단시간'} 정복자 · ${season.label}';
 
+String seasonBadgeTitle(SeasonBadge s) => seasonConquestTitle(s.season, s.kind);
+
+/// 시즌 정복 배지 한 개의 부제: 코스 이름
 String seasonBadgeSubtitle(SeasonBadge s, String? courseName) =>
-    '${courseName ?? '코스'} · '
-    '${s.kind == RankingKind.most ? '최다완등' : '최단시간'} 1위';
+    courseName ?? '코스';
 
 /// 내 정보의 업적 카드: 얻은 수와 최근 배지 3개. 누르면 업적 화면.
 class AchievementsCard extends ConsumerWidget {

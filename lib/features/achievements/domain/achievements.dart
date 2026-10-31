@@ -340,6 +340,19 @@ class SeasonBadge {
   String get key => 'season:$courseId:${season.id}:${kind.name}';
 }
 
+/// 업적 화면의 시즌 정복 기록 한 줄: 한 시즌·한 분야에서 1위로 끝낸 코스들
+class SeasonConquest {
+  const SeasonConquest({
+    required this.season,
+    required this.kind,
+    required this.courseIds,
+  });
+
+  final Season season;
+  final RankingKind kind;
+  final List<String> courseIds;
+}
+
 /// 얻은 배지 한 단계 (새 배지 카드·최근 배지에 쓴다)
 class EarnedBadge {
   const EarnedBadge({
@@ -389,6 +402,28 @@ class Achievements {
     for (final s in seasons)
       EarnedBadge(key: s.key, achievedAt: s.achievedAt, season: s),
   ]..sort((a, b) => b.achievedAt.compareTo(a.achievedAt));
+
+  /// 시즌 정복 기록을 시즌·분야별로 묶는다. 최근 시즌부터, 같은 시즌은 최다완등 먼저.
+  List<SeasonConquest> get seasonGroups {
+    final groups = <String, SeasonConquest>{};
+    final sorted = [...seasons]
+      ..sort((a, b) {
+        final bySeason = b.achievedAt.compareTo(a.achievedAt);
+        if (bySeason != 0) return bySeason;
+        final byKind = a.kind.index.compareTo(b.kind.index);
+        return byKind != 0 ? byKind : a.courseId.compareTo(b.courseId);
+      });
+    for (final s in sorted) {
+      groups
+          .putIfAbsent(
+            '${s.season.id}:${s.kind.name}',
+            () => SeasonConquest(season: s.season, kind: s.kind, courseIds: []),
+          )
+          .courseIds
+          .add(s.courseId);
+    }
+    return groups.values.toList();
+  }
 
   /// [before]에는 없고 [after]에 새로 생긴 배지.
   /// 한쪽이라도 서버 자료를 받지 못한 배지는 비교하지 않는다(받지 못해 생긴 차이를 새 배지로 보지 않도록).

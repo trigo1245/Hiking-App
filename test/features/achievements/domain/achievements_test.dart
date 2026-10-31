@@ -274,6 +274,32 @@ void main() {
     });
   });
 
+  test('시즌 정복 기록은 시즌·분야별로 묶고, 1위로 끝낸 코스를 모두 담는다', () {
+    LeadRun last(String course, String scope, RankingKind kind) => LeadRun(
+      courseId: course,
+      scope: scope,
+      kind: kind,
+      startedAt: DateTime(2025, 8, 1),
+      endedAt: Season.parse(scope).end,
+      seasonFinal: true,
+    );
+    final a = calc(
+      runs: [
+        last('c1', '2025-H2', RankingKind.most),
+        last('c1', '2026-H1', RankingKind.fastest),
+        last('c2', '2026-H1', RankingKind.most),
+        last('c1', '2026-H1', RankingKind.most),
+      ],
+    );
+    final groups = a.seasonGroups;
+    expect(
+      [for (final g in groups) '${g.season.id} ${g.kind.name} ${g.courseIds}'],
+      ['2026-H1 most [c1, c2]', '2026-H1 fastest [c1]', '2025-H2 most [c1]'],
+    );
+    // 배지 개수는 코스마다 센다.
+    expect(a.seasons, hasLength(4));
+  });
+
   test('전체 배지 수: 14종, 단계까지 31개', () {
     expect(Badges.all, hasLength(14));
     expect(Badges.totalLevels, 31);

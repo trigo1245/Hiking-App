@@ -101,8 +101,8 @@ void main() {
     for (final group in BadgeGroup.values) {
       expect(find.text(group.label), findsOneWidget);
     }
-    expect(find.text('2026 상반기 정복자'), findsOneWidget);
-    expect(find.text('금정산 범어사 코스 · 최다완등 1위'), findsOneWidget);
+    expect(find.text('최다완등 정복자 · 2026 상반기'), findsOneWidget);
+    expect(find.text('금정산 범어사 코스'), findsOneWidget);
 
     await tester.tap(find.text('정상에 서다'));
     await tester.pumpAndSettle();
