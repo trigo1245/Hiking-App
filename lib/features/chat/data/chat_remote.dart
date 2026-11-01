@@ -282,11 +282,3 @@ final clubChatRoomIdProvider = FutureProvider.autoDispose
       (ref, clubId) => ref.watch(chatRemoteProvider).clubRoomId(clubId),
       retry: (_, _) => null,
     );
-
-/// 동호회 상세의 채팅 미리보기 (최근 3개)
-final chatPreviewProvider = FutureProvider.autoDispose
-    .family<List<ChatMessage>, String>(
-      (ref, roomId) =>
-          ref.watch(chatRemoteProvider).fetchMessages(roomId, limit: 3),
-      retry: (_, _) => null,
-    );

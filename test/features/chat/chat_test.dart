@@ -177,10 +177,19 @@ void main() {
       expect(find.text('요청을 수락했어요. 이제 대화할 수 있어요'), findsOneWidget);
 
       await tester.enterText(find.byType(TextField), '아침 일찍 출발해요');
+      // "요청을 수락했어요" 알림이 보내기 버튼을 가리지 않게 치운다.
+      tester
+          .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger).first)
+          .removeCurrentSnackBar();
       await tester.pump();
       await tester.tap(find.byTooltip('보내기'));
       await settle(tester);
       expect(find.text('아침 일찍 출발해요'), findsOneWidget);
+      // 보냈으면 입력칸이 비고, 글은 말풍선에만 있다.
+      expect(
+        tester.widget<TextField>(find.byType(TextField)).controller?.text,
+        isEmpty,
+      );
     });
 
     testWidgets('새 메시지 신호가 오면 바로 보이고, 내 메시지는 길게 눌러 지운다', (tester) async {
@@ -213,7 +222,7 @@ void main() {
       expect(find.text('삭제된 메시지예요'), findsOneWidget);
     });
 
-    testWidgets('동호회 상세의 채팅 칸에서 최근 메시지를 보고 채팅방을 연다', (tester) async {
+    testWidgets('동호회 탭 위쪽 채팅 아이콘을 누르면 바로 채팅방이 열린다', (tester) async {
       final clubs = FakeClubRemote();
       final clubId = clubs.addClub('금정산 새벽산행', mine: true);
       final chats = FakeChatRemote();
@@ -233,11 +242,8 @@ void main() {
       await open(tester, chats, clubs: clubs);
       await tester.tap(find.text('동호회').last);
       await settle(tester);
-      await tester.tap(find.text('채팅'));
-      await settle(tester);
-
-      expect(find.text('회원1: 이번 주 토요일 5시 범어사!'), findsOneWidget);
-      await tester.tap(find.text('채팅방 열기'));
+      expect(find.text('채팅'), findsNothing); // 동호회 상세 안의 채팅 칸은 없앴다
+      await tester.tap(find.byTooltip('동호회 채팅'));
       await settle(tester);
       expect(find.text('이번 주 토요일 5시 범어사!'), findsOneWidget);
       expect(find.text('회원1#0001'), findsOneWidget);

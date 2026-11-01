@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../features/chat/data/chat_remote.dart';
 import '../core/design/design.dart';
 import 'background_syncer.dart';
 
@@ -26,6 +27,11 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // 안 읽은 메시지가 있으면 탭 아이콘에 빨간 점: 동호회 채팅은 동호회 탭, 1:1 메시지·요청은 내 정보 탭
+    final badges = ref.watch(chatBadgesProvider).value;
+    final clubUnread = (badges?.clubUnread ?? 0) > 0;
+    final directUnread =
+        (badges?.directUnread ?? 0) + (badges?.pendingRequests ?? 0) > 0;
     return Scaffold(
       // 하단 탭 화면이 떠 있는 동안 기록 업로드·코스 받기를 한다.
       body: BackgroundSyncer(child: navigationShell),
@@ -36,25 +42,37 @@ class AppShell extends ConsumerWidget {
         child: BottomNavigationBar(
           currentIndex: navigationShell.currentIndex,
           onTap: (i) => _onTap(ref, i),
-          items: const [
-            BottomNavigationBarItem(
+          items: [
+            const BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),
               activeIcon: Icon(Icons.home_rounded),
               label: '홈',
             ),
-            BottomNavigationBarItem(
+            const BottomNavigationBarItem(
               icon: Icon(Icons.list_alt_outlined),
               activeIcon: Icon(Icons.list_alt_rounded),
               label: '기록',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.groups_outlined),
-              activeIcon: Icon(Icons.groups_rounded),
+              icon: _Dot(
+                visible: clubUnread,
+                child: const Icon(Icons.groups_outlined),
+              ),
+              activeIcon: _Dot(
+                visible: clubUnread,
+                child: const Icon(Icons.groups_rounded),
+              ),
               label: '동호회',
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.person_outline_rounded),
-              activeIcon: Icon(Icons.person_rounded),
+              icon: _Dot(
+                visible: directUnread,
+                child: const Icon(Icons.person_outline_rounded),
+              ),
+              activeIcon: _Dot(
+                visible: directUnread,
+                child: const Icon(Icons.person_rounded),
+              ),
               label: '내 정보',
             ),
           ],
@@ -62,4 +80,20 @@ class AppShell extends ConsumerWidget {
       ),
     );
   }
+}
+
+/// 탭 아이콘 오른쪽 위의 작은 빨간 점
+class _Dot extends StatelessWidget {
+  const _Dot({required this.visible, required this.child});
+
+  final bool visible;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) => Badge(
+    isLabelVisible: visible,
+    smallSize: 8,
+    backgroundColor: AppColors.danger,
+    child: child,
+  );
 }

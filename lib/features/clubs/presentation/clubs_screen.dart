@@ -10,6 +10,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../courses/domain/competition.dart';
+import '../../chat/presentation/club_chat_button.dart';
 import '../data/club_remote.dart';
 import '../domain/club.dart';
 import 'club_avatar.dart';
@@ -31,8 +32,13 @@ class _ClubsScreenState extends ConsumerState<ClubsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final myClubId = ref.watch(myClubStatusProvider).value?.clubId;
     return Scaffold(
-      appBar: AppBar(title: const Text('동호회')),
+      appBar: AppBar(
+        title: const Text('동호회'),
+        // 소속 동호회가 있으면 [내 클럽]·[클럽 랭킹] 어디서든 채팅방으로 바로 간다.
+        actions: [if (myClubId != null) ClubChatButton(clubId: myClubId)],
+      ),
       body: Column(
         children: [
           Padding(

@@ -106,7 +106,7 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
 }
 
 /// 다른 사람이 바꿨을 수 있는 값을 다시 받는다. 지금 화면에 없는 값은 받지 않는다(autoDispose).
-/// - [chats]: 안 읽은 수, 1:1 메시지 목록, 동호회 채팅 미리보기
+/// - [chats]: 안 읽은 수(동호회 채팅 아이콘·탭의 빨간 점 포함), 1:1 메시지 목록
 /// - [clubs]: 내 소속·가입 신청 상태, 동호회 상세, 가입 신청 목록, 공지, 일정·참석, 회원 목록
 void refreshSharedData(
   WidgetRef ref, {
@@ -116,8 +116,7 @@ void refreshSharedData(
   if (chats) {
     ref
       ..invalidate(chatBadgesProvider)
-      ..invalidate(directChatsProvider)
-      ..invalidate(chatPreviewProvider);
+      ..invalidate(directChatsProvider);
   }
   if (clubs) {
     ref
