@@ -477,7 +477,7 @@ mileage_ledger     : id, user_id, amount(적립 +, 사용 -), reason, label, sou
 - 지금은 1명이 작업하므로 `main`에 바로 커밋·push한다.
   - 팀원이 함께 작업하기 시작하면 `main`에 직접 커밋하지 않고 기능마다 브랜치(`feat/recording-screen`, `fix/upload-retry`)를 만든 뒤, Pull Request로 다른 팀원이 확인하고 합친다.
 - 커밋 메시지: `feat: 기록 화면 추가`, `fix: 업로드 재시도 오류 수정`, `docs: ...`, `refactor: ...`, `test: ...`
-- **절대 커밋하지 않는 것**: `env.json`(Supabase URL·키), 서명 키(`*.jks`, `key.properties`). `.gitignore`에 등록되어 있는지 확인한다.
+- **절대 커밋하지 않는 것**: `env.json`(Supabase URL·키), 서명 키(`*.jks`, `key.properties`), 팀원 이메일 같은 개인정보가 들어간 시연용 SQL(`*.local.sql`, 예: `supabase/seed/demo_team.local.sql`). `.gitignore`에 등록되어 있는지 확인한다.
 - 비밀 값은 `env.json`에 두고 `flutter run --dart-define-from-file=env.json`으로 주입한다. 팀원용 예시 파일 `env.example.json`만 커밋한다.
 - 브이월드 API 키는 개발 도구용 `tool_env.json`(커밋 안 함)에만 둔다. 앱과 `env.json`에는 넣지 않는다.
 - 구글 Client Secret, 카카오 REST 키·Client Secret은 Supabase 대시보드에만 넣는다. `service_role`·`sb_secret_` 키는 어디에도 두지 않는다.

@@ -69,3 +69,6 @@ data/trails/raw/vworld/busan.geojson
 
 # 안드로이드 빌드 결과물
 /android/build/
+
+# 개인정보(팀원 이메일 등)가 들어간 로컬 전용 SQL
+*.local.sql
