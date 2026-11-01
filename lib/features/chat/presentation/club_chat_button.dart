@@ -6,6 +6,7 @@ import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
 import '../../../core/utils/error_message.dart';
 import '../data/chat_remote.dart';
+import 'chat_bubble_icon.dart';
 
 /// 동호회 채팅방 버튼 (상단 제목 줄 오른쪽, 회원에게만 둔다). 안 읽은 메시지 수를 빨간 표시로 보여 준다.
 /// 채팅방 id는 누를 때 받는다 (처음 열면 서버가 방을 만든다).
@@ -56,7 +57,7 @@ class _ClubChatButtonState extends ConsumerState<ClubChatButton> {
         isLabelVisible: unread > 0,
         backgroundColor: AppColors.danger,
         label: Text(unread > 99 ? '99+' : '$unread'),
-        child: const Icon(Icons.chat_bubble_outline_rounded),
+        child: const ChatBubbleIcon(),
       ),
     );
   }

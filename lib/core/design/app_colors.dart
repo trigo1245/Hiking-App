@@ -40,6 +40,12 @@ abstract final class AppColors {
   /// 아직 얻지 못한 배지
   static const badgeLocked = Color(0xFFD1D6DB);
 
+  /// 동호회 채팅 아이콘 (말풍선): 가운데가 밝고 가장자리가 하늘색인 둥근 풍선, 진한 청록 점 3개
+  static const chatBubbleCenter = Color(0xFFEFF6FB);
+  static const chatBubbleEdge = Color(0xFFBDDFE8);
+  static const chatDotTop = Color(0xFF1D4B60);
+  static const chatDotBottom = Color(0xFF4D8297);
+
   /// 카카오 로그인 버튼 (카카오 로그인 디자인 가이드 지정 색)
   static const kakaoContainer = Color(0xFFFEE500);
   static const kakaoLabel = Color(0xD9000000);
