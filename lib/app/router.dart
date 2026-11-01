@@ -28,6 +28,7 @@ import '../features/clubs/presentation/club_requests_screen.dart';
 import '../features/clubs/presentation/clubs_screen.dart';
 import '../features/chat/presentation/chat_list_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
+import '../features/mileage/presentation/mileage_screen.dart';
 import '../features/shop/presentation/order_screen.dart';
 import '../features/shop/presentation/orders_screen.dart';
 import '../features/shop/presentation/product_detail_screen.dart';
@@ -196,6 +197,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.orders,
         builder: (context, state) => const OrdersScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.mileage,
+        builder: (context, state) => const MileageScreen(),
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>

@@ -1,13 +1,17 @@
 import 'dart:async';
 
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../features/achievements/domain/achievements.dart';
+import '../features/achievements/presentation/achievements_providers.dart';
 import '../features/activities/presentation/activities_providers.dart';
 import '../features/chat/data/chat_remote.dart';
 import '../features/clubs/data/club_remote.dart';
 import '../features/courses/data/course_repository.dart';
 import '../features/courses/presentation/competition_providers.dart';
+import '../features/mileage/data/mileage_remote.dart';
+import '../features/mileage/domain/mileage.dart';
 import '../features/subscription/data/subscription_remote.dart';
 
 /// 동호회 화면(가입 신청·공지·일정·회원)을 다시 받는 간격.
@@ -36,6 +40,11 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
   StreamSubscription<void>? _chatSignals;
   Timer? _chatDebounce;
   Timer? _clubTimer;
+  StreamSubscription<void>? _mileageSignals;
+  Timer? _mileageDebounce;
+
+  /// 마지막으로 본 마일리지 잔액. 늘어나면 "+N 마일리지"를 알린다.
+  int? _mileageBalance;
 
   @override
   void initState() {
@@ -43,6 +52,47 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
     WidgetsBinding.instance.addObserver(this);
     _sync();
     _startLive();
+    unawaited(_checkMileage(announce: false));
+    // 업적이 계산될 때마다 얻은 배지를 서버에 알려 마일리지를 받는다(이미 받은 것은 서버가 거른다).
+    ref.listenManual(myAchievementsProvider, (_, next) {
+      final achievements = next.value;
+      if (achievements != null) unawaited(_claimBadges(achievements));
+    }, fireImmediately: true);
+  }
+
+  Future<void> _claimBadges(Achievements achievements) async {
+    try {
+      final got = await ref
+          .read(mileageRemoteProvider)
+          .claimBadges(badgeClaimsOf(achievements));
+      if (got > 0) await _checkMileage();
+    } catch (e) {
+      debugPrint('[mileage] 배지 적립: $e');
+    }
+  }
+
+  /// 잔액을 다시 받아 늘었으면 알린다. 서버 트리거로 적립되면 Realtime 신호로 불린다.
+  Future<void> _checkMileage({bool announce = true}) async {
+    try {
+      final summary = await ref.read(mileageRemoteProvider).fetchSummary();
+      if (!mounted) return;
+      final before = _mileageBalance;
+      _mileageBalance = summary.balance;
+      ref
+        ..invalidate(mileageSummaryProvider)
+        ..invalidate(mileageHistoryProvider);
+      if (announce && before != null && summary.balance > before) {
+        ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+          SnackBar(
+            content: Text(
+              '+${formatMileage(summary.balance - before)} 마일리지를 받았어요',
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[mileage] $e');
+    }
   }
 
   @override
@@ -59,6 +109,7 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
       _refreshChats();
       _refreshClubs();
       _startLive();
+      unawaited(_checkMileage());
     } else if (state == AppLifecycleState.paused) {
       // 화면이 꺼져 있는 동안은 받지 않는다 (전송량 절약). 돌아오면 한 번에 다시 받는다.
       _stopLive();
@@ -83,6 +134,14 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
       _chatDebounce = Timer(const Duration(milliseconds: 300), _refreshChats);
     }, onError: (Object e) => debugPrint('[live] chat: $e'));
     _clubTimer ??= Timer.periodic(clubRefreshInterval, (_) => _refreshClubs());
+    _mileageSignals ??= ref.read(mileageRemoteProvider).watchMine().listen((_) {
+      // 배지 여러 개처럼 한꺼번에 적립돼도 한 번만 알린다.
+      _mileageDebounce?.cancel();
+      _mileageDebounce = Timer(
+        const Duration(milliseconds: 800),
+        () => unawaited(_checkMileage()),
+      );
+    }, onError: (Object e) => debugPrint('[live] mileage: $e'));
   }
 
   void _stopLive() {
@@ -91,6 +150,9 @@ class _BackgroundSyncerState extends ConsumerState<BackgroundSyncer>
     _chatDebounce?.cancel();
     _clubTimer?.cancel();
     _clubTimer = null;
+    _mileageSignals?.cancel();
+    _mileageSignals = null;
+    _mileageDebounce?.cancel();
   }
 
   void _refreshChats() {

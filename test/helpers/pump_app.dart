@@ -24,6 +24,7 @@ import 'package:hiking_app/features/courses/data/course_remote.dart';
 import 'package:hiking_app/features/courses/data/review_remote.dart';
 import 'package:hiking_app/features/recording/data/location_service.dart';
 import 'package:hiking_app/features/recording/data/recording_notifier.dart';
+import 'package:hiking_app/features/mileage/data/mileage_remote.dart';
 import 'package:hiking_app/features/shop/data/shop_remote.dart';
 import 'package:hiking_app/features/subscription/data/subscription_remote.dart';
 
@@ -36,6 +37,7 @@ import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
 import '../features/fakes_phase2.dart';
 import '../features/photo_fakes.dart';
+import '../features/mileage/fake_mileage_remote.dart';
 import '../features/recording/fake_location_service.dart';
 import '../features/shop/fake_shop_remote.dart';
 
@@ -74,6 +76,7 @@ Future<void> pumpApp(
   ClubRemote? clubs,
   ChatRemote? chats,
   ShopRemote? shop,
+  MileageRemote? mileage,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -114,6 +117,9 @@ Future<void> pumpApp(
         clubRemoteProvider.overrideWithValue(clubs ?? FakeClubRemote()),
         chatRemoteProvider.overrideWithValue(chats ?? FakeChatRemote()),
         shopRemoteProvider.overrideWithValue(shop ?? FakeShopRemote()),
+        mileageRemoteProvider.overrideWithValue(
+          mileage ?? FakeMileageRemote(),
+        ),
         profileRemoteProvider.overrideWithValue(
           profiles ?? FakeProfileRemote(),
         ),

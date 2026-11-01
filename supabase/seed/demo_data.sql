@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261102000000_shop_ads.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261103000000_mileage.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -35,6 +35,9 @@
 -- 쇼핑 (8. 쇼핑)
 -- ┌ 상품 13개마다 시연용 사용자들의 주문(배송 완료)과 리뷰(별점·후기, 일부는 후기 없이 별점만)
 -- └ 김세민: 데이하이크 22L 배낭(블루)을 5일 전 주문해 배송 완료, 리뷰는 아직 없음 → 시연에서 바로 리뷰 쓰기
+--
+-- 마일리지 (9. 마일리지)
+-- └ 김세민: 지난 두 달 적립 430. 앱을 열면 배지 마일리지가 하루 한도까지 더해져 약 600(7일권 교환 가능, 30일권은 부족)
 
 begin;
 
@@ -599,6 +602,40 @@ from demo_me me
 join public.products p on p.id = 'dayhike-22'
 left join public.private_profiles pp on pp.user_id = me.id;
 
+------------------------------------------------------------
+-- 9. 마일리지: 김세민의 지난 두 달 적립 내역 430
+--    (앱을 열면 얻은 배지 마일리지가 하루 한도(200)까지 더해져 약 600 → 7일권은 바로, 30일권은 아직)
+--    이 SQL의 다른 insert는 모두 시연용(is_demo)이라 적립 트리거가 마일리지를 주지 않는다.
+------------------------------------------------------------
+delete from public.mileage_ledger
+where is_demo or user_id in (select id from demo_me);
+
+insert into public.mileage_ledger (user_id, amount, reason, label, source_key, created_at, is_demo)
+select me.id, x.amount, x.reason, x.label, 'demo:' || x.k, now() - x.ago, true
+from demo_me me
+cross join lateral (
+  -- 산행 기록 10번 (10씩)
+  select k, 10 as amount, 'activity' as reason, '산행 기록 · 주말 산행' as label,
+    (60 - k * 5) * interval '1 day' as ago
+  from generate_series(1, 10) as k
+  union all
+  -- 코스 완주 8번 (30씩)
+  select 10 + k, 30, 'completion',
+    case when k % 2 = 0 then '코스 완주 · 승학산 동아대 코스' else '코스 완주 · 금정산 범어사 코스' end,
+    (58 - k * 6) * interval '1 day'
+  from generate_series(1, 8) as k
+  union all
+  select 20, 20, 'course_review', '코스 리뷰 · 금정산 범어사 코스', interval '40 days'
+  union all
+  select 21, 20, 'course_review', '코스 리뷰 · 승학산 구덕문화공원 코스', interval '25 days'
+  union all
+  select 22, 20, 'product_review', '상품 리뷰 · 카본 접이식 스틱 (2개)', interval '20 days'
+  union all
+  select 23, 10, 'product_review_photo', '상품 리뷰 사진 · 카본 접이식 스틱 (2개)', interval '20 days'
+  union all
+  select 24, 20, 'product_review', '상품 리뷰 · 헤드랜턴 400루멘', interval '9 days'
+) as x;
+
 commit;
 
 ------------------------------------------------------------
@@ -610,3 +647,4 @@ commit;
 -- delete from auth.users where raw_app_meta_data ->> 'demo' = 'true';
 -- delete from public.product_reviews where is_demo;
 -- delete from public.orders where is_demo;
+-- delete from public.mileage_ledger where is_demo;

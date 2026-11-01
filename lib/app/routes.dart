@@ -16,6 +16,9 @@ abstract final class AppRoutes {
   static const orderDone = '/order-done';
   static const orders = '/me/orders';
 
+  /// 마일리지 (내 정보에서 진입)
+  static const mileage = '/me/mileage';
+
   /// 동호회 탭, 동호회 상세·만들기·정보 수정·가입 신청
   static const clubs = '/clubs';
   static const clubCreate = '/new-club';

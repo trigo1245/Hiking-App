@@ -15,6 +15,8 @@ import '../../../core/widgets/user_avatar.dart';
 import '../../achievements/presentation/achievements_screen.dart';
 import '../../activities/data/demo_activity_generator.dart';
 import '../../activities/presentation/activities_providers.dart';
+import '../../mileage/data/mileage_remote.dart';
+import '../../mileage/domain/mileage.dart';
 import '../../subscription/data/subscription_remote.dart';
 import '../data/profile_remote.dart';
 import '../domain/app_user.dart';
@@ -26,7 +28,7 @@ import '../../chat/data/chat_remote.dart';
 /// 맨 아래에 보여 주는 앱 버전 (pubspec.yaml의 version과 맞춘다)
 const appVersionLabel = '0.1.0';
 
-/// 내 정보 탭: 프로필(누르면 편집), 메시지, 업적, 프리미엄, 주문 내역, 개인정보 관리, 로그아웃.
+/// 내 정보 탭: 프로필(누르면 편집), 메시지, 업적, 프리미엄, 마일리지, 주문 내역, 개인정보 관리, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
   const MyInfoScreen({super.key});
 
@@ -122,6 +124,8 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
           const AchievementsCard(),
           const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
+          const SizedBox(height: AppSpacing.md),
+          const _MileageCard(),
           const SizedBox(height: AppSpacing.md),
           const _OrdersCard(),
           const SizedBox(height: AppSpacing.md),
@@ -239,6 +243,59 @@ class _MessagesCard extends ConsumerWidget {
 
 extension on String {
   String ifEmpty(String fallback) => isEmpty ? fallback : this;
+}
+
+/// 마일리지 카드: 잔액. 누르면 마일리지 화면(교환권·내역).
+class _MileageCard extends ConsumerWidget {
+  const _MileageCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final summary = ref.watch(mileageSummaryProvider).value;
+    return Pressable(
+      onPressed: () async {
+        await context.push(AppRoutes.mileage);
+        ref.invalidate(mileageSummaryProvider);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('마일리지', style: AppTypography.subtitle),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '프리미엄 교환권으로 바꿀 수 있어요',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (summary != null)
+              Text(
+                formatMileage(summary.balance),
+                style: AppTypography.subtitle.copyWith(
+                  color: AppColors.primary,
+                ),
+              ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// 주문 내역 카드 (쇼핑). 누르면 주문 내역 화면.

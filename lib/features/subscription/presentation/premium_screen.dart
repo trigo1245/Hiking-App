@@ -135,7 +135,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
               borderRadius: BorderRadius.circular(AppRadius.input),
             ),
             child: Text(
-              '시연용 결제예요. 실제로 결제되지 않고, 해지하면 남은 기간과 상관없이 바로 끝나요.',
+              '시연용 결제예요. 실제로 결제되지 않고, 해지하면 남은 기간(마일리지로 교환한 기간 포함)과 상관없이 바로 끝나요.',
               style: AppTypography.caption.copyWith(
                 color: AppColors.textSecondary,
               ),
@@ -152,7 +152,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
                     ? null
                     : () => _run(
                         title: '프리미엄을 해지할까요?',
-                        message: '해지하면 바로 일반 사용자로 바뀌어요.',
+                        message: '해지하면 바로 일반 사용자로 바뀌어요. 마일리지로 교환한 기간도 함께 사라져요.',
                         confirmLabel: '해지하기',
                         action: (r) => r.cancel(),
                         done: '프리미엄을 해지했어요',
