@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261026000000_my_lead_runs.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261027000000_photos.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -55,7 +55,7 @@ where is_demo or user_id in (select id from demo_me);
 delete from public.course_attempts where is_demo;
 delete from public.course_completions where is_demo;
 -- 앱에서 만든 시연용 기록. 완주·진행률 기록은 activity_id로 함께 지워진다.
--- (Storage의 GPX 파일은 SQL로 지울 수 없어 남는다. 필요하면 대시보드 Storage > tracks에서 지운다)
+-- (Storage의 GPX·사진 파일은 SQL로 지울 수 없어 남는다. 필요하면 대시보드 Storage에서 지운다)
 delete from public.activities
 where user_id in (select id from demo_me) and title like '시연용%';
 delete from auth.users where raw_app_meta_data ->> 'demo' = 'true';

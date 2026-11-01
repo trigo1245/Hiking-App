@@ -1,3 +1,5 @@
+import '../../../core/photos/photo_item.dart';
+
 /// 리뷰 평가 항목 (기획서 3.2, 실제 소요시간은 완주 기록 평균으로 따로 보여 준다)
 enum ReviewAspect {
   difficulty('난이도', '쉬워요', '어려워요'),
@@ -28,6 +30,7 @@ class CourseReview {
     this.comment,
     this.completionCount = 0,
     this.bestProgress,
+    this.photoUrls = const [],
   });
 
   final String nickname;
@@ -45,6 +48,9 @@ class CourseReview {
 
   /// 작성자가 이 코스를 가장 멀리 간 비율 (완등이 없을 때 보여 준다)
   final double? bestProgress;
+
+  /// 리뷰 사진 공개 주소 (최대 3장)
+  final List<String> photoUrls;
 
   String get displayName => '$nickname#$nicknameTag';
 }
@@ -113,8 +119,9 @@ class ReviewPage {
 
 /// 내가 쓴 리뷰 (고치기 화면에 채워 넣는다)
 class MyReview {
-  const MyReview({required this.scores, this.comment});
+  const MyReview({required this.scores, this.comment, this.photos = const []});
 
   final Map<ReviewAspect, int> scores;
   final String? comment;
+  final List<PhotoItem> photos;
 }

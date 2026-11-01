@@ -5,11 +5,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/app/app.dart';
 import 'package:hiking_app/core/database/app_database.dart';
 import 'package:hiking_app/core/map/map_tiles.dart';
+import 'package:hiking_app/core/photos/photo_picker.dart';
 import 'package:hiking_app/core/utils/clock.dart';
 import 'package:hiking_app/features/achievements/data/achievement_remote.dart';
+import 'package:hiking_app/features/activities/data/activity_photo_remote.dart';
 import 'package:hiking_app/features/activities/data/activity_remote.dart';
 import 'package:hiking_app/features/activities/data/gpx_sharer.dart';
 import 'package:hiking_app/features/auth/data/auth_repository.dart';
+import 'package:hiking_app/features/auth/data/avatar_remote.dart';
 import 'package:hiking_app/features/auth/domain/profile.dart';
 import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
 import 'package:hiking_app/features/courses/data/competition_remote.dart';
@@ -24,6 +27,7 @@ import '../features/activities/fake_activity_remote.dart';
 import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
 import '../features/fakes_phase2.dart';
+import '../features/photo_fakes.dart';
 import '../features/recording/fake_location_service.dart';
 
 /// 테스트용 메모리 DB. 테스트가 끝나면 닫힌다.
@@ -54,6 +58,9 @@ Future<void> pumpApp(
   SubscriptionRemote? subscription,
   GpxSharer? gpxSharer,
   AchievementRemote? achievements,
+  PhotoPicker? photoPicker,
+  ActivityPhotoRemote? activityPhotos,
+  AvatarRemote? avatars,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -86,6 +93,11 @@ Future<void> pumpApp(
         achievementRemoteProvider.overrideWithValue(
           achievements ?? FakeAchievementRemote(),
         ),
+        photoPickerProvider.overrideWithValue(photoPicker ?? FakePhotoPicker()),
+        activityPhotoRemoteProvider.overrideWithValue(
+          activityPhotos ?? FakeActivityPhotoRemote(),
+        ),
+        avatarRemoteProvider.overrideWithValue(avatars ?? FakeAvatarRemote()),
         // 위젯 테스트에서는 지도 타일을 인터넷에서 받지 않는다.
         mapTilesEnabledProvider.overrideWithValue(false),
         if (clock != null) clockProvider.overrideWithValue(clock),

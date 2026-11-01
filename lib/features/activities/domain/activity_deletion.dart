@@ -12,10 +12,12 @@ class DeletionNotice {
 /// 이 기록을 지우면 생기는 일을 정리한다. (순수 Dart, 단위 테스트 대상)
 /// - [completedCourses]: 이 기록으로 완주한 코스 이름
 /// - [attemptedCourses]: 이 기록으로 정상 전까지 다녀온 코스 이름과 진행률
+/// - [photoCount]: 이 기록에 붙인 사진 수
 List<DeletionNotice> deletionNotices({
   required ActivitySummary summary,
   required List<String> completedCourses,
   required List<(String, double)> attemptedCourses,
+  int photoCount = 0,
 }) {
   final onServer = summary.uploadStatus != UploadStatus.pending;
   return [
@@ -50,6 +52,11 @@ List<DeletionNotice> deletionNotices({
       const DeletionNotice(
         '이미 쓴 리뷰는 남아요',
         '리뷰도 지우려면 코스 상세에서 "내 리뷰 고치기"로 들어가 지워 주세요.',
+      ),
+    if (photoCount > 0)
+      DeletionNotice(
+        '사진 $photoCount장도 함께 지워져요',
+        '이 기록에 붙인 사진은 서버에서도 지워져 다시 볼 수 없어요.',
       ),
     const DeletionNotice(
       '통계와 분석에서 빠져요',

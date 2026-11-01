@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:hiking_app/core/photos/photo_item.dart';
 import 'package:hiking_app/features/activities/data/gpx_sharer.dart';
 import 'package:hiking_app/features/courses/data/review_remote.dart';
 import 'package:hiking_app/features/courses/domain/review.dart';
@@ -55,7 +57,11 @@ class FakeReviewRemote implements ReviewRemote {
     final mine = reviews.where((r) => r.isMine).firstOrNull;
     return mine == null
         ? null
-        : MyReview(scores: mine.scores, comment: mine.comment);
+        : MyReview(
+            scores: mine.scores,
+            comment: mine.comment,
+            photos: [...myPhotos],
+          );
   }
 
   @override
@@ -87,7 +93,21 @@ class FakeReviewRemote implements ReviewRemote {
   Future<void> deleteMyReview(String courseId) async {
     deletes++;
     reviews.removeWhere((r) => r.isMine);
+    myPhotos.clear();
   }
+
+  /// 내 리뷰 사진 (서버 review_photos 대신)
+  final myPhotos = <PhotoItem>[];
+
+  @override
+  Future<void> addReviewPhoto(String courseId, Uint8List jpeg) async {
+    final n = myPhotos.length + 1;
+    myPhotos.add(PhotoItem(id: 'r$n', path: 'u1/$courseId/r$n.jpg', url: ''));
+  }
+
+  @override
+  Future<void> deleteReviewPhoto(PhotoItem photo) async =>
+      myPhotos.removeWhere((p) => p.id == photo.id);
 }
 
 /// 서버 대신 구독 상태를 기억하는 가짜

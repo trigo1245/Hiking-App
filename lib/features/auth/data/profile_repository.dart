@@ -11,7 +11,7 @@ class ProfileRepository {
   Future<Profile?> fetchProfile(String userId) async {
     final row = await _client
         .from('profiles')
-        .select('id, nickname')
+        .select()
         .eq('id', userId)
         .maybeSingle();
     return row == null ? null : Profile.fromJson(row);

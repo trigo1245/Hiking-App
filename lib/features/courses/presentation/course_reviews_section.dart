@@ -1,9 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
+import '../../../core/photos/photo_picker.dart';
+import '../../../core/photos/photo_spec.dart';
+import '../../../core/photos/photo_widgets.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/pressable.dart';
@@ -389,6 +394,18 @@ class ReviewTile extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
             Text(comment, style: AppTypography.body),
           ],
+          if (review.photoUrls.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.md),
+            PhotoStrip(
+              size: 72,
+              images: [for (final u in review.photoUrls) NetworkImage(u)],
+              onTap: (i) => openPhotoViewer(
+                context,
+                images: [for (final u in review.photoUrls) NetworkImage(u)],
+                initial: i,
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -411,6 +428,47 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
   bool _loadedMine = false;
   bool _busy = false;
 
+  /// 이미 올린 사진 중 남겨 둘 것, 뺄 것, 새로 고른 사진(저장할 때 올린다)
+  final _kept = <PhotoItem>[];
+  final _removed = <PhotoItem>[];
+  final _added = <Uint8List>[];
+
+  int get _photoCount => _kept.length + _added.length;
+
+  List<ImageProvider> get _photoImages => [
+    for (final p in _kept) NetworkImage(p.url),
+    for (final b in _added) MemoryImage(b),
+  ];
+
+  Future<void> _pickPhotos() async {
+    const spec = PhotoSpec.review;
+    final choice = await showPhotoSourceSheet(context);
+    if (choice == null || !mounted) return;
+    try {
+      final photos = await ref
+          .read(photoPickerProvider)
+          .pick(
+            choice == PhotoMenuChoice.camera
+                ? PhotoSource.camera
+                : PhotoSource.gallery,
+            spec,
+            limit: spec.remaining(_photoCount),
+          );
+      if (mounted) setState(() => _added.addAll(photos));
+    } catch (e) {
+      debugPrint('[photo] $e');
+      _snack('사진을 가져오지 못했어요');
+    }
+  }
+
+  void _removePhoto(int i) => setState(() {
+    if (i < _kept.length) {
+      _removed.add(_kept.removeAt(i));
+    } else {
+      _added.removeAt(i - _kept.length);
+    }
+  });
+
   @override
   void dispose() {
     _comment.dispose();
@@ -428,9 +486,26 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
     if (_busy || !_complete) return;
     setState(() => _busy = true);
     try {
-      await ref.read(reviewRemoteProvider).saveMyReview(widget.courseId, {
+      final remote = ref.read(reviewRemoteProvider);
+      await remote.saveMyReview(widget.courseId, {
         for (final a in _aspects) a: _scores[a]!,
       }, _comment.text.trim());
+      // 사진은 리뷰가 저장된 뒤에 붙인다. (사진은 리뷰에 딸려 있다)
+      try {
+        for (final p in [..._removed]) {
+          await remote.deleteReviewPhoto(p);
+          _removed.remove(p);
+        }
+        for (final b in [..._added]) {
+          await remote.addReviewPhoto(widget.courseId, b);
+          _added.remove(b);
+        }
+      } catch (e) {
+        debugPrint('[review] 사진: $e');
+        _refresh();
+        _snack('리뷰는 저장했지만 사진을 다 올리지 못했어요. 다시 저장해 주세요');
+        return;
+      }
       _refresh();
       if (mounted) context.pop();
     } catch (e) {
@@ -479,6 +554,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
       _loadedMine = true;
       _scores.addAll(mine.scores);
       _comment.text = mine.comment ?? '';
+      _kept.addAll(mine.photos);
     }
 
     return Scaffold(
@@ -519,6 +595,36 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
             decoration: const InputDecoration(
               hintText: '다른 등산객에게 도움이 될 이야기를 남겨 주세요',
             ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          Row(
+            children: [
+              const Text('사진 (선택)', style: AppTypography.subtitle),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                '$_photoCount / ${PhotoSpec.review.maxCount}',
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '리뷰 사진은 모든 사람이 볼 수 있어요',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.md),
+          PhotoStrip(
+            images: _photoImages,
+            onAdd: PhotoSpec.review.remaining(_photoCount) > 0 && !_busy
+                ? _pickPhotos
+                : null,
+            onRemove: _busy ? null : _removePhoto,
+            onTap: (i) =>
+                openPhotoViewer(context, images: _photoImages, initial: i),
           ),
           if (mine != null) ...[
             const SizedBox(height: AppSpacing.lg),

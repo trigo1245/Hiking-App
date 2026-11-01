@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:uuid/uuid.dart';
 
+import '../../../core/photos/photo_item.dart';
 import '../../../core/supabase/supabase_setup.dart';
 import '../domain/review.dart';
 
@@ -28,8 +31,18 @@ abstract interface class ReviewRemote {
     Map<ReviewAspect, int> scores,
     String? comment,
   );
+
+  /// 리뷰와 사진을 함께 지운다.
   Future<void> deleteMyReview(String courseId);
+
+  /// 내 리뷰에 사진을 붙인다. 리뷰를 먼저 저장해야 한다. (리뷰 하나에 3장까지, 서버가 검사)
+  Future<void> addReviewPhoto(String courseId, Uint8List jpeg);
+
+  Future<void> deleteReviewPhoto(PhotoItem photo);
 }
+
+/// 리뷰 사진을 담는 공개 버킷. 경로: {user_id}/{course_id}/{사진 id}.jpg
+const reviewPhotoBucket = 'review-photos';
 
 class SupabaseReviewRemote implements ReviewRemote {
   SupabaseReviewRemote(this._client);
@@ -66,10 +79,17 @@ class SupabaseReviewRemote implements ReviewRemote {
             isMine: r['is_mine'] as bool,
             completionCount: (r['completion_count'] as int?) ?? 0,
             bestProgress: (r['best_progress'] as num?)?.toDouble(),
+            photoUrls: [
+              for (final p in (r['photo_paths'] as List?) ?? const [])
+                _photoUrl(p as String),
+            ],
           ),
       ],
     );
   }
+
+  String _photoUrl(String path) =>
+      _client.storage.from(reviewPhotoBucket).getPublicUrl(path);
 
   static Map<ReviewAspect, int> _scores(Map<String, dynamic> r) => {
     for (final a in ReviewAspect.values)
@@ -103,7 +123,24 @@ class SupabaseReviewRemote implements ReviewRemote {
         .eq('user_id', userId)
         .maybeSingle();
     if (row == null) return null;
-    return MyReview(scores: _scores(row), comment: row['comment'] as String?);
+    final photos = await _client
+        .from('review_photos')
+        .select('id, path')
+        .eq('course_id', courseId)
+        .eq('user_id', userId)
+        .order('created_at');
+    return MyReview(
+      scores: _scores(row),
+      comment: row['comment'] as String?,
+      photos: [
+        for (final p in photos)
+          PhotoItem(
+            id: p['id'] as String,
+            path: p['path'] as String,
+            url: _photoUrl(p['path'] as String),
+          ),
+      ],
+    );
   }
 
   @override
@@ -138,10 +175,62 @@ class SupabaseReviewRemote implements ReviewRemote {
 
   @override
   Future<void> deleteMyReview(String courseId) async {
+    final userId = _client.auth.currentUser?.id;
+    // 사진 행은 리뷰와 함께 지워지므로(cascade) 파일 경로를 먼저 받아 둔다.
+    final photos = userId == null
+        ? const <Map<String, dynamic>>[]
+        : await _client
+              .from('review_photos')
+              .select('path')
+              .eq('course_id', courseId)
+              .eq('user_id', userId);
     await _client.rpc<void>(
       'delete_my_review',
       params: {'p_course_id': courseId},
     );
+    if (photos.isEmpty) return;
+    try {
+      await _client.storage.from(reviewPhotoBucket).remove([
+        for (final p in photos) p['path'] as String,
+      ]);
+    } catch (e) {
+      debugPrint('[photo] 리뷰 사진 파일을 지우지 못했어요: $e');
+    }
+  }
+
+  @override
+  Future<void> addReviewPhoto(String courseId, Uint8List jpeg) async {
+    final userId = _client.auth.currentUser!.id;
+    final id = const Uuid().v4();
+    final path = '$userId/$courseId/$id.jpg';
+    await _client.storage
+        .from(reviewPhotoBucket)
+        .uploadBinary(
+          path,
+          jpeg,
+          fileOptions: const FileOptions(contentType: 'image/jpeg'),
+        );
+    try {
+      await _client.from('review_photos').insert({
+        'id': id,
+        'course_id': courseId,
+        'user_id': userId,
+        'path': path,
+      });
+    } catch (_) {
+      await _client.storage.from(reviewPhotoBucket).remove([path]);
+      rethrow;
+    }
+  }
+
+  @override
+  Future<void> deleteReviewPhoto(PhotoItem photo) async {
+    await _client.from('review_photos').delete().eq('id', photo.id);
+    try {
+      await _client.storage.from(reviewPhotoBucket).remove([photo.path]);
+    } catch (e) {
+      debugPrint('[photo] 파일을 지우지 못했어요: $e');
+    }
   }
 }
 

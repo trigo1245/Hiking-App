@@ -7,6 +7,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../core/supabase/supabase_setup.dart';
 import '../../courses/domain/course_matching.dart';
 import '../domain/activity_summary.dart';
+import 'activity_photo_remote.dart';
 
 /// 서버로 기록을 보내는 창구. 테스트에서는 가짜로 바꿔 끼운다.
 abstract interface class ActivityRemote {
@@ -118,13 +119,23 @@ class SupabaseActivityRemote implements ActivityRemote {
     String activityId, {
     required String gpxPath,
   }) async {
+    // 사진 행은 기록 행과 함께 지워지므로(cascade) 파일 경로를 먼저 받아 둔다.
+    final photos = await _client
+        .from('activity_photos')
+        .select('path')
+        .eq('activity_id', activityId);
     // 행을 먼저 지운다. (다른 기기가 목록에서 다시 받아 가지 않도록)
     await _client.from('activities').delete().eq('id', activityId);
     try {
       await _client.storage.from('tracks').remove([gpxPath]);
+      if (photos.isNotEmpty) {
+        await _client.storage.from(activityPhotoBucket).remove([
+          for (final p in photos) p['path'] as String,
+        ]);
+      }
     } catch (e) {
       // 파일만 남는 것은 문제가 되지 않는다. (아무도 가리키지 않는 파일)
-      debugPrint('[delete] GPX 파일을 지우지 못했어요: $e');
+      debugPrint('[delete] GPX·사진 파일을 지우지 못했어요: $e');
     }
   }
 

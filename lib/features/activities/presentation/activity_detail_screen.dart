@@ -15,6 +15,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../subscription/data/subscription_remote.dart';
 import '../../subscription/domain/subscription.dart';
+import '../data/activity_photo_remote.dart';
 import '../data/gpx_sharer.dart';
 import '../../courses/domain/course.dart';
 import '../../courses/presentation/competition_providers.dart';
@@ -23,6 +24,7 @@ import '../domain/activity_deletion.dart';
 import '../domain/activity_summary.dart';
 import '../domain/gpx_writer.dart';
 import 'activities_providers.dart';
+import 'activity_photos_section.dart';
 import 'activity_detail_providers.dart';
 import 'delete_activity_sheet.dart';
 import 'elevation_chart.dart';
@@ -73,6 +75,8 @@ class ActivityDetailScreen extends ConsumerWidget {
             _TrackMap(detail: value),
             const SizedBox(height: AppSpacing.xxl),
             _Metrics(summary: value.summary),
+            const SizedBox(height: AppSpacing.xxxl),
+            ActivityPhotosSection(summary: value.summary),
             const SizedBox(height: AppSpacing.xxxl),
             _Completions(detail: value),
             const SizedBox(height: AppSpacing.xxxl),
@@ -697,6 +701,9 @@ class _DeleteRowState extends ConsumerState<_DeleteRow> {
         attemptedCourses: [
           for (final (c, p) in detail.attempts) (c.fullName, p.progress),
         ],
+        photoCount:
+            ref.read(activityPhotosProvider(detail.summary.id)).value?.length ??
+            0,
       ),
     );
     if (confirmed != true || !mounted) return;
