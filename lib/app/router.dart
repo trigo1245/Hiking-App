@@ -22,6 +22,10 @@ import '../features/recording/presentation/recording_screen.dart';
 import '../features/subscription/presentation/premium_screen.dart';
 import 'app_shell.dart';
 import 'routes.dart';
+import '../features/clubs/presentation/club_detail_screen.dart';
+import '../features/clubs/presentation/club_form_screen.dart';
+import '../features/clubs/presentation/club_requests_screen.dart';
+import '../features/clubs/presentation/clubs_screen.dart';
 
 export 'routes.dart';
 
@@ -109,6 +113,27 @@ final routerProvider = Provider<GoRouter>((ref) {
             ActivityDetailScreen(activityId: state.pathParameters['id']!),
       ),
       GoRoute(
+        path: AppRoutes.clubCreate,
+        builder: (context, state) => const ClubFormScreen(),
+      ),
+      GoRoute(
+        path: '/club/:id',
+        builder: (context, state) =>
+            ClubDetailScreen(clubId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'edit',
+            builder: (context, state) =>
+                ClubFormScreen(clubId: state.pathParameters['id']!),
+          ),
+          GoRoute(
+            path: 'requests',
+            builder: (context, state) =>
+                ClubRequestsScreen(clubId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
         path: AppRoutes.profileEdit,
         builder: (context, state) => const ProfileEditScreen(),
       ),
@@ -142,6 +167,14 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.activities,
                 builder: (context, state) => const ActivitiesScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.clubs,
+                builder: (context, state) => const ClubsScreen(),
               ),
             ],
           ),

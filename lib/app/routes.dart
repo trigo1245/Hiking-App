@@ -8,6 +8,13 @@ abstract final class AppRoutes {
   static const activities = '/activities';
   static const myInfo = '/me';
 
+  /// 동호회 탭, 동호회 상세·만들기·정보 수정·가입 신청
+  static const clubs = '/clubs';
+  static const clubCreate = '/new-club';
+  static String club(String clubId) => '/club/$clubId';
+  static String clubEdit(String clubId) => '/club/$clubId/edit';
+  static String clubRequests(String clubId) => '/club/$clubId/requests';
+
   /// 기록 중 화면 (하단 탭 없이 전체 화면)
   static const recording = '/record';
   static String recordingDone(String activityId) => '/record-done/$activityId';

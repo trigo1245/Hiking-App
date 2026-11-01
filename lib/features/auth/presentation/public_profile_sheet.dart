@@ -9,6 +9,7 @@ import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../data/profile_remote.dart';
+import '../../../core/widgets/pressable.dart';
 
 /// 랭킹·리뷰에서 닉네임#태그를 누르면 그 사람의 공개 프로필(사진·닉네임·주 활동 지역·소개)을 보여 준다.
 /// 개인정보(이름·연락처·주소)는 서버가 돌려주지 않는다.
@@ -85,6 +86,22 @@ class _PublicProfileSheet extends ConsumerWidget {
                     ),
                   ),
                 ],
+              ),
+            ],
+            if (p?.clubId case final clubId?) ...[
+              const SizedBox(height: AppSpacing.sm),
+              Pressable(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  context.push(AppRoutes.club(clubId));
+                },
+                child: Text(
+                  '${p!.clubName} 동호회',
+                  style: AppTypography.body.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
             const SizedBox(height: AppSpacing.xl),

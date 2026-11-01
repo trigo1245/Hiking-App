@@ -128,6 +128,8 @@ class SupabaseCompetitionRemote implements CompetitionRemote {
           nicknameTag: r['nickname_tag'] as String,
           avatarUrl: r['avatar_url'] as String?,
           value: r['score'] as int,
+          clubName: r['club_name'] as String?,
+          clubPhotoUrl: r['club_photo_url'] as String?,
         ),
     ];
   }

@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261028000000_profile_details.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261029000000_clubs.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -18,6 +18,14 @@
 -- ├ 금정산 산성마을: 이번 시즌 완주 없음("첫 정복자가 되어 보세요"), 명예의 전당만 있음,
 -- │   김세민은 앱 기록으로 62% 진행 → 조망을 뺀 리뷰 쓰기, 다른 사람 중도 하산 후기
 -- └ 승학산 구덕문화공원: 완주 2명, 리뷰 없음, 김세민은 앱 기록으로 30% 진행 → 아직 리뷰 못 씀
+--
+-- 동호회 (6. 동호회)
+-- ┌ 금정산 새벽산행: 회원 15명, 이번 시즌 클럽 랭킹 1위
+-- ├ 승학산 노을회: 회원 10명
+-- ├ 해운대 주말반: 회원 8명. 10번 회원이 7~8월에 있다가 금정산 새벽산행으로 옮겼다
+-- │   (옮기기 전 완등은 해운대 주말반 실적에 남는다)
+-- └ 부산대 등산 동아리: 김세민이 클럽장, 회원 5명, 가입 신청 2건 대기, 공지 2개, 일정 2개(다가오는 일정에 참석 투표)
+--   (김세민이 앱에서 직접 만든 동호회에 이미 소속돼 있으면 이 클럽은 건너뛴다)
 
 begin;
 
@@ -59,6 +67,8 @@ delete from public.course_completions where is_demo;
 delete from public.activities
 where user_id in (select id from demo_me) and title like '시연용%';
 delete from auth.users where raw_app_meta_data ->> 'demo' = 'true';
+-- 시연용 동호회 (소속·신청·공지·일정·투표가 함께 지워진다)
+delete from public.clubs where is_demo;
 
 ------------------------------------------------------------
 -- 2. 시연용 사용자 45명 (로그인할 수 없는 계정). 가입 트리거가 프로필(닉네임#태그)을 만든다.
@@ -348,6 +358,96 @@ select c.id, me.id, 2, 2, 5, 3,
 from demo_me me
 cross join demo_course c
 where c.slug = 'seunghaksan-donga';
+
+------------------------------------------------------------
+-- 6. 동호회
+------------------------------------------------------------
+create function pg_temp.demo_club(n integer)
+returns uuid
+language sql
+immutable
+as $ select ('c0000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid $;
+
+insert into public.clubs (id, name, bio, region, leader_id, is_demo, created_at)
+values
+  (pg_temp.demo_club(1), '금정산 새벽산행',
+    '매주 토요일 새벽 5시 범어사에서 출발해요. 정상에서 일출 보고 내려와 아침 먹어요.',
+    '부산 금정구', pg_temp.demo_user(2), true, timestamptz '2026-03-02 09:00:00+09'),
+  (pg_temp.demo_club(2), '승학산 노을회',
+    '퇴근 후 승학산에서 노을 보는 모임이에요. 천천히 걸어요.',
+    '부산 사하구', pg_temp.demo_user(16), true, timestamptz '2026-04-10 09:00:00+09'),
+  (pg_temp.demo_club(3), '해운대 주말반',
+    null, '해운대·기장 일대', pg_temp.demo_user(26), true, timestamptz '2026-05-20 09:00:00+09');
+
+-- 회원 (가입은 6월 1일부터라 이번 시즌 완등이 모두 실적에 들어간다)
+insert into public.club_memberships (club_id, user_id, joined_at, left_at, is_demo)
+select pg_temp.demo_club(1), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+from generate_series(1, 15) as n where n <> 10
+union all
+select pg_temp.demo_club(2), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+from generate_series(16, 25) as n
+union all
+select pg_temp.demo_club(3), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+from generate_series(26, 33) as n
+-- 10번 회원: 해운대 주말반에 있다가(7~8월) 금정산 새벽산행으로 옮겼다
+union all
+select pg_temp.demo_club(3), pg_temp.demo_user(10),
+  timestamptz '2026-07-01 09:00:00+09', timestamptz '2026-09-01 09:00:00+09', true
+union all
+select pg_temp.demo_club(1), pg_temp.demo_user(10),
+  timestamptz '2026-09-01 09:00:00+09', null, true;
+
+-- 김세민이 클럽장인 동아리 (앱에서 만든 동호회에 이미 소속돼 있으면 건너뛴다)
+insert into public.clubs (id, name, bio, region, leader_id, is_demo, created_at)
+select pg_temp.demo_club(4), '부산대 등산 동아리',
+  '부산대 학생·졸업생 등산 모임이에요. 한 달에 두 번 금정산·승학산을 올라요.',
+  '부산 금정구 장전동', me.id, true, timestamptz '2026-06-15 09:00:00+09'
+from demo_me me
+where not exists (
+  select 1 from public.club_memberships m where m.user_id = me.id and m.left_at is null
+);
+
+insert into public.club_memberships (club_id, user_id, joined_at, is_demo)
+select c.id, me.id, timestamptz '2026-06-15 09:00:00+09', true
+from public.clubs c cross join demo_me me
+where c.id = pg_temp.demo_club(4)
+union all
+select c.id, pg_temp.demo_user(n), timestamptz '2026-07-01 09:00:00+09', true
+from public.clubs c cross join generate_series(34, 38) as n
+where c.id = pg_temp.demo_club(4);
+
+-- 가입 신청 대기 2건 (클럽장 김세민이 승인·거절해 본다)
+insert into public.club_join_requests (club_id, user_id, created_at, is_demo)
+select c.id, pg_temp.demo_user(n), now() - (n - 38) * interval '1 day', true
+from public.clubs c cross join generate_series(39, 40) as n
+where c.id = pg_temp.demo_club(4);
+
+insert into public.club_notices (club_id, author_id, body, created_at, is_demo)
+select c.id, c.leader_id, x.body, x.at, true
+from public.clubs c
+cross join (values
+  ('11월 정기 산행은 금정산 범어사 코스예요. 물과 간식 챙겨 오세요!', now() - interval '2 days'),
+  ('동아리 회원은 앱에서 산행을 기록하면 완등이 클럽 실적으로 쌓여요. 이번 시즌 목표는 클럽 랭킹 3위!', now() - interval '20 days')
+) as x(body, at)
+where c.id = pg_temp.demo_club(4);
+
+-- 일정: 다가오는 정기 산행(참석 투표 3명) + 지난 일정
+insert into public.club_events (club_id, title, starts_at, place, memo, created_by, is_demo)
+select c.id, x.title, x.at, x.place, x.memo, c.leader_id, true
+from public.clubs c
+cross join (values
+  ('11월 정기 산행', date_trunc('day', now()) + interval '6 days 8 hours',
+    '범어사 매표소 앞', '범어사 코스로 올라 고당봉에서 점심 먹어요'),
+  ('10월 승학산 억새 산행', date_trunc('day', now()) - interval '14 days' + interval '9 hours',
+    '동아대 승학캠퍼스 정문', null)
+) as x(title, at, place, memo)
+where c.id = pg_temp.demo_club(4);
+
+insert into public.club_event_votes (event_id, user_id, answer, is_demo)
+select e.id, pg_temp.demo_user(n), case when n = 37 then 'not_going' else 'going' end, true
+from public.club_events e
+cross join generate_series(34, 37) as n
+where e.club_id = pg_temp.demo_club(4) and e.title = '11월 정기 산행';
 
 commit;
 

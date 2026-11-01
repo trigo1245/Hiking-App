@@ -9,6 +9,7 @@ import '../../../core/widgets/user_avatar.dart';
 import '../../recording/domain/track_point.dart';
 import '../domain/competition.dart';
 import '../domain/course.dart';
+import '../../clubs/presentation/club_avatar.dart';
 
 /// 처음 지도를 열었을 때의 위치 (부산)
 const busanCenter = LatLng(35.17, 129.03);
@@ -156,17 +157,33 @@ class _CourseMapState extends ConsumerState<CourseMap> {
               if (widget.conquerors[c.id] case final conqueror?)
                 Marker(
                   point: toLatLng(c.path[c.path.length ~/ 2]),
-                  width: 40,
-                  height: 40,
+                  width: 48,
+                  height: 48,
                   child: GestureDetector(
                     onTap: () => widget.onCourseTap(c),
-                    child: UserAvatar(
-                      nickname: conqueror.nickname,
-                      imageUrl: conqueror.avatarUrl,
-                      size: 40,
-                      borderColor: c.id == selected
-                          ? AppColors.primary
-                          : AppColors.background,
+                    child: Stack(
+                      children: [
+                        UserAvatar(
+                          nickname: conqueror.nickname,
+                          imageUrl: conqueror.avatarUrl,
+                          size: 40,
+                          borderColor: c.id == selected
+                              ? AppColors.primary
+                              : AppColors.background,
+                        ),
+                        // 소속 동호회를 작게 함께 보여 준다 (기획서 4.3)
+                        if (conqueror.clubName case final club?)
+                          Positioned(
+                            right: 0,
+                            bottom: 0,
+                            child: ClubAvatar(
+                              name: club,
+                              photoUrl: conqueror.clubPhotoUrl,
+                              size: 20,
+                              borderColor: AppColors.background,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ),

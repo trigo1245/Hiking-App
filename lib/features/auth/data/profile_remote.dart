@@ -55,6 +55,8 @@ class SupabaseProfileRemote implements ProfileRemote {
       bio: r['bio'] as String?,
       region: r['region'] as String?,
       isMe: r['is_me'] as bool? ?? false,
+      clubId: r['club_id'] as String?,
+      clubName: r['club_name'] as String?,
     );
   }
 

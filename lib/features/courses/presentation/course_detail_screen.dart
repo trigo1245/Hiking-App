@@ -509,6 +509,14 @@ class _ConquerorCard extends StatelessWidget {
                 tag: c.nicknameTag,
                 style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
               ),
+              if (c.clubName case final club?)
+                Text(
+                  club,
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
               Text(formatScore(kind, c.value), style: AppTypography.subtitle),
             ],
           ],

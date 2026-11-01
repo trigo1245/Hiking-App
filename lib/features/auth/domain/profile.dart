@@ -48,6 +48,8 @@ class PublicProfile {
     this.bio,
     this.region,
     this.isMe = false,
+    this.clubId,
+    this.clubName,
   });
 
   final String nickname;
@@ -56,4 +58,8 @@ class PublicProfile {
   final String? bio;
   final String? region;
   final bool isMe;
+
+  /// 지금 소속된 동호회 (없으면 null)
+  final String? clubId;
+  final String? clubName;
 }

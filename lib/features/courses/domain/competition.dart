@@ -89,6 +89,8 @@ class Conqueror {
     required this.nicknameTag,
     required this.value,
     this.avatarUrl,
+    this.clubName,
+    this.clubPhotoUrl,
   });
 
   final String courseId;
@@ -97,6 +99,10 @@ class Conqueror {
   final String nicknameTag;
   final String? avatarUrl;
   final int value;
+
+  /// 지금 소속된 동호회 (점수와 무관한 현재 소속 표시, 기획 5.3장)
+  final String? clubName;
+  final String? clubPhotoUrl;
 }
 
 /// 서버에 기록된 내 코스 완주 한 건 (랭킹과 같은 기준, 시연용 완주 포함)

@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../core/design/design.dart';
 import 'background_syncer.dart';
 
-/// 하단 탭(홈 / 기록 / 내 정보)을 가진 바깥 틀.
+/// 하단 탭(홈 / 기록 / 동호회 / 내 정보)을 가진 바깥 틀.
 /// 각 탭의 화면 상태는 [StatefulNavigationShell]이 따로 보관한다.
 class AppShell extends StatelessWidget {
   const AppShell({super.key, required this.navigationShell});
@@ -43,6 +43,11 @@ class AppShell extends StatelessWidget {
               icon: Icon(Icons.list_alt_outlined),
               activeIcon: Icon(Icons.list_alt_rounded),
               label: '기록',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.groups_outlined),
+              activeIcon: Icon(Icons.groups_rounded),
+              label: '동호회',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person_outline_rounded),
