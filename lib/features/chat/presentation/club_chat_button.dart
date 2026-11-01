@@ -50,14 +50,21 @@ class _ClubChatButtonState extends ConsumerState<ClubChatButton> {
   @override
   Widget build(BuildContext context) {
     final unread = ref.watch(chatBadgesProvider).value?.clubUnread ?? 0;
-    return IconButton(
-      tooltip: unread > 0 ? '동호회 채팅 · 새 메시지 $unread' : '동호회 채팅',
-      onPressed: _open,
-      icon: Badge(
-        isLabelVisible: unread > 0,
-        backgroundColor: AppColors.danger,
-        label: Text(unread > 99 ? '99+' : '$unread'),
-        child: const ChatBubbleIcon(),
+    // 아이콘 오른쪽 끝을 화면 내용의 오른쪽 선(좌우 여백 20)에 맞춘다.
+    // (버튼 48 안에 아이콘 24가 가운데라 그대로면 화면 끝에서 12만 떨어진다)
+    return Padding(
+      padding: const EdgeInsets.only(
+        right: AppSpacing.screenHorizontal - AppSpacing.md,
+      ),
+      child: IconButton(
+        tooltip: unread > 0 ? '동호회 채팅 · 새 메시지 $unread' : '동호회 채팅',
+        onPressed: _open,
+        icon: Badge(
+          isLabelVisible: unread > 0,
+          backgroundColor: AppColors.danger,
+          label: Text(unread > 99 ? '99+' : '$unread'),
+          child: const ChatBubbleIcon(),
+        ),
       ),
     );
   }
