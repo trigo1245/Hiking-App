@@ -381,13 +381,13 @@ values
 
 -- 회원 (가입은 6월 1일부터라 이번 시즌 완등이 모두 실적에 들어간다)
 insert into public.club_memberships (club_id, user_id, joined_at, left_at, is_demo)
-select pg_temp.demo_club(1), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+select pg_temp.demo_club(1), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null::timestamptz, true
 from generate_series(1, 15) as n where n <> 10
 union all
-select pg_temp.demo_club(2), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+select pg_temp.demo_club(2), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null::timestamptz, true
 from generate_series(16, 25) as n
 union all
-select pg_temp.demo_club(3), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null, true
+select pg_temp.demo_club(3), pg_temp.demo_user(n), timestamptz '2026-06-01 09:00:00+09', null::timestamptz, true
 from generate_series(26, 33) as n
 -- 10번 회원: 해운대 주말반에 있다가(7~8월) 금정산 새벽산행으로 옮겼다
 union all
@@ -395,7 +395,7 @@ select pg_temp.demo_club(3), pg_temp.demo_user(10),
   timestamptz '2026-07-01 09:00:00+09', timestamptz '2026-09-01 09:00:00+09', true
 union all
 select pg_temp.demo_club(1), pg_temp.demo_user(10),
-  timestamptz '2026-09-01 09:00:00+09', null, true;
+  timestamptz '2026-09-01 09:00:00+09', null::timestamptz, true;
 
 -- 김세민이 클럽장인 동아리 (앱에서 만든 동호회에 이미 소속돼 있으면 건너뛴다)
 insert into public.clubs (id, name, bio, region, leader_id, is_demo, created_at)
