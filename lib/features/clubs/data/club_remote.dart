@@ -33,6 +33,9 @@ abstract interface class ClubRemote {
   Future<void> disbandClub(String clubId);
   Future<void> transferLeader(String clubId, String userId);
 
+  /// 클럽장이 회원을 내보낸다 (탈퇴와 같게 소속을 끝낸다).
+  Future<void> kickMember(String clubId, String userId);
+
   Future<void> requestJoin(String clubId);
   Future<void> cancelJoinRequest();
   Future<List<ClubJoinRequest>> fetchJoinRequests(String clubId);
@@ -58,7 +61,8 @@ abstract interface class ClubRemote {
   Future<void> vote(int eventId, EventAnswer? answer);
   Future<List<EventVote>> fetchEventVotes(int eventId);
 
-  Future<List<ClubRankingEntry>> fetchRanking(Season season);
+  /// [season]이 null이면 명예의 전당 (모든 시즌 합계)
+  Future<List<ClubRankingEntry>> fetchRanking(Season? season);
 }
 
 /// 서버가 거절한 이유(한국어 문구)가 있으면 그대로, 아니면 원인(연결·서버)에 맞는 안내.
@@ -207,6 +211,12 @@ class SupabaseClubRemote implements ClubRemote {
       );
 
   @override
+  Future<void> kickMember(String clubId, String userId) => _client.rpc<void>(
+    'kick_club_member',
+    params: {'p_club_id': clubId, 'p_user_id': userId},
+  );
+
+  @override
   Future<void> requestJoin(String clubId) =>
       _client.rpc<void>('request_club_join', params: {'p_club_id': clubId});
 
@@ -334,8 +344,8 @@ class SupabaseClubRemote implements ClubRemote {
   ];
 
   @override
-  Future<List<ClubRankingEntry>> fetchRanking(Season season) async => [
-    for (final r in await _rows('get_club_ranking', {'p_season': season.id}))
+  Future<List<ClubRankingEntry>> fetchRanking(Season? season) async => [
+    for (final r in await _rows('get_club_ranking', {'p_season': season?.id}))
       ClubRankingEntry(
         rank: r['rank_no'] as int,
         clubId: r['club_id'] as String,
@@ -404,10 +414,16 @@ final eventVotesProvider = FutureProvider.autoDispose
       retry: (_, _) => null,
     );
 
-/// 시즌 id(예: 2026-H2) → 클럽 랭킹
+/// 클럽 랭킹 명예의 전당을 가리키는 id
+const clubHallOfFameId = 'all';
+
+/// 시즌 id(예: 2026-H2) 또는 [clubHallOfFameId] → 클럽 랭킹
 final clubRankingProvider = FutureProvider.autoDispose
     .family<List<ClubRankingEntry>, String>(
-      (ref, seasonId) =>
-          ref.watch(clubRemoteProvider).fetchRanking(Season.parse(seasonId)),
+      (ref, seasonId) => ref
+          .watch(clubRemoteProvider)
+          .fetchRanking(
+            seasonId == clubHallOfFameId ? null : Season.parse(seasonId),
+          ),
       retry: (_, _) => null,
     );

@@ -194,9 +194,16 @@ void main() {
       await tester.tap(find.text('공지 쓰기'));
       await settle(tester);
       await tester.enterText(find.byType(TextField).last, '이번 주는 쉬어요');
+      // 앞의 "회원으로 받았어요" 알림이 버튼을 가리지 않게 치운다.
+      tester
+          .state<ScaffoldMessengerState>(find.byType(ScaffoldMessenger).first)
+          .removeCurrentSnackBar();
+      await tester.pump();
       await tester.tap(find.text('올리기'));
       await settle(tester);
+      expect(find.text('공지를 올렸어요'), findsOneWidget);
       expect(find.text('이번 주는 쉬어요'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing); // 시트가 닫혔다
     });
 
     testWidgets('클럽 랭킹은 누구나 전체를 보고, 내 클럽을 표시한다', (tester) async {
@@ -215,6 +222,44 @@ void main() {
       expect(first, lessThan(last));
     });
 
+    testWidgets('클럽 랭킹은 이번 시즌과 명예의 전당(모든 시즌 합계)으로 본다', (tester) async {
+      final clubs = FakeClubRemote()..addClub('승학산 노을회', completions: 12);
+      await openClubs(tester, clubs);
+      await tester.tap(find.text('클럽 랭킹'));
+      await settle(tester);
+      expect(find.text('지난 시즌'), findsNothing);
+
+      await tester.tap(find.text('명예의 전당'));
+      await settle(tester);
+      expect(find.textContaining('역대 전체'), findsOneWidget);
+      expect(clubs.rankingRequests.last, 'all');
+    });
+
+    testWidgets('클럽장은 회원 옆 메뉴에서 회원을 내보낸다', (tester) async {
+      final clubs = FakeClubRemote()..addClub('금정산 새벽산행', leader: true);
+      await openClubs(tester, clubs);
+      await tester.tap(find.text('회원'));
+      await settle(tester);
+      expect(find.text('회원2#0002'), findsOneWidget);
+
+      await tester.tap(
+        find.descendant(
+          of: find
+              .ancestor(of: find.text('회원2#0002'), matching: find.byType(Row))
+              .first,
+          matching: find.byTooltip('회원 관리'),
+        ),
+      );
+      await settle(tester);
+      await tester.tap(find.text('동호회에서 내보내기'));
+      await settle(tester);
+      expect(find.text('회원2님을 동호회에서 내보낼까요?'), findsOneWidget);
+      await tester.tap(find.text('내보내기'));
+      await settle(tester);
+
+      expect(find.text('회원2님을 내보냈어요'), findsOneWidget);
+      expect(find.text('회원2#0002'), findsNothing);
+    });
     testWidgets('공개 프로필에 소속 동호회가 보인다', (tester) async {
       final clubs = FakeClubRemote();
       final id = clubs.addClub('금정산 새벽산행', mine: true);

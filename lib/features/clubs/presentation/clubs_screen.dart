@@ -266,18 +266,16 @@ class _ClubRanking extends ConsumerStatefulWidget {
 }
 
 class _ClubRankingState extends ConsumerState<_ClubRanking> {
-  bool _previous = false;
+  bool _allTime = false;
 
   @override
   Widget build(BuildContext context) {
     final now = ref.watch(clockProvider)();
     final current = Season.of(now);
-    final season = _previous
-        ? Season.of(current.end.subtract(const Duration(days: 200)))
-        : current;
-    final ranking = ref.watch(clubRankingProvider(season.id));
+    final rankingId = _allTime ? clubHallOfFameId : current.id;
+    final ranking = ref.watch(clubRankingProvider(rankingId));
     return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(clubRankingProvider(season.id)),
+      onRefresh: () async => ref.invalidate(clubRankingProvider(rankingId)),
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.symmetric(
@@ -285,13 +283,15 @@ class _ClubRankingState extends ConsumerState<_ClubRanking> {
         ),
         children: [
           SegmentedTabs<bool>(
-            options: const {false: '이번 시즌', true: '지난 시즌'},
-            selected: _previous,
-            onChanged: (v) => setState(() => _previous = v),
+            options: const {false: '이번 시즌', true: '명예의 전당'},
+            selected: _allTime,
+            onChanged: (v) => setState(() => _allTime = v),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(
-            '${season.label} · 회원이 소속 기간에 완주한 횟수의 합',
+            _allTime
+                ? '역대 전체 · 회원이 소속 기간에 완주한 횟수의 합'
+                : '${current.label} · 회원이 소속 기간에 완주한 횟수의 합',
             style: AppTypography.caption.copyWith(
               color: AppColors.textSecondary,
             ),
@@ -376,7 +376,7 @@ class _ClubRankingState extends ConsumerState<_ClubRanking> {
             AsyncValue(:final error?) => [
               _Retry(
                 message: clubErrorMessage(error),
-                onRetry: () => ref.invalidate(clubRankingProvider(season.id)),
+                onRetry: () => ref.invalidate(clubRankingProvider(rankingId)),
               ),
             ],
             _ => [const SkeletonBox(width: double.infinity, height: 200)],

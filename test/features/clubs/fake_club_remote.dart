@@ -9,6 +9,9 @@ class FakeClubRemote implements ClubRemote {
   String? myClubId;
   String? pendingClubId;
   int photoUploads = 0;
+
+  /// 받은 클럽 랭킹 요청 (시즌 id, 명예의 전당은 all)
+  final rankingRequests = <String>[];
   var _next = 0;
   var _nextId = 0;
 
@@ -184,6 +187,15 @@ class FakeClubRemote implements ClubRemote {
   }
 
   @override
+  Future<void> kickMember(String clubId, String userId) async {
+    final c = _club(clubId);
+    c.members = [
+      for (final m in c.members)
+        if (m.userId != userId) m,
+    ];
+  }
+
+  @override
   Future<void> requestJoin(String clubId) async => pendingClubId = clubId;
 
   @override
@@ -326,7 +338,8 @@ class FakeClubRemote implements ClubRemote {
   }
 
   @override
-  Future<List<ClubRankingEntry>> fetchRanking(Season season) async {
+  Future<List<ClubRankingEntry>> fetchRanking(Season? season) async {
+    rankingRequests.add(season?.id ?? 'all');
     final sorted = [..._clubs.values]
       ..sort((a, b) => b.completions.compareTo(a.completions));
     return [

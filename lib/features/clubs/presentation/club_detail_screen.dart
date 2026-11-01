@@ -737,6 +737,26 @@ class _Members extends ConsumerWidget {
     refreshClub(ref, club.id);
   }
 
+  Future<void> _kick(BuildContext context, WidgetRef ref, ClubMember m) async {
+    final ok = await showConfirmSheet(
+      context,
+      title: '${m.nickname}님을 동호회에서 내보낼까요?',
+      message:
+          '내보내면 바로 공지·일정·채팅을 볼 수 없어요. '
+          '지금까지 이 동호회에서 쌓은 완등은 클럽 실적에 남아요. '
+          '다시 가입 신청할 수는 있어요.',
+      confirmLabel: '내보내기',
+      cancelLabel: '취소',
+    );
+    if (ok != true || !context.mounted) return;
+    await runClubAction(
+      context,
+      () => ref.read(clubRemoteProvider).kickMember(club.id, m.userId),
+      done: '${m.nickname}님을 내보냈어요',
+    );
+    refreshClub(ref, club.id);
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final members = ref.watch(clubMembersProvider(club.id));
@@ -788,11 +808,20 @@ class _Members extends ConsumerWidget {
                     if (leader && !m.isLeader)
                       PopupMenuButton<String>(
                         tooltip: '회원 관리',
-                        onSelected: (_) => _transfer(context, ref, m),
+                        onSelected: (v) => v == 'kick'
+                            ? _kick(context, ref, m)
+                            : _transfer(context, ref, m),
                         itemBuilder: (_) => const [
                           PopupMenuItem(
                             value: 'transfer',
                             child: Text('클럽장 넘기기'),
+                          ),
+                          PopupMenuItem(
+                            value: 'kick',
+                            child: Text(
+                              '동호회에서 내보내기',
+                              style: TextStyle(color: AppColors.danger),
+                            ),
                           ),
                         ],
                       ),
