@@ -221,7 +221,7 @@ class _PrivateInfoScreenState extends ConsumerState<PrivateInfoScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('개인정보 관리')),
       body: switch (info) {
-        AsyncError() when !_loaded => Center(
+        _ when info.hasError && !_loaded => Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

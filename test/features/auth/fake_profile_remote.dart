@@ -29,8 +29,14 @@ class FakeProfileRemote implements ProfileRemote {
     String tag,
   ) async => publicProfiles['$nickname#$tag'];
 
+  /// true면 인터넷이 없거나 서버 준비가 안 된 것처럼 실패한다.
+  bool failPrivate = false;
+
   @override
-  Future<PrivateInfo> fetchPrivateInfo() async => privateInfo;
+  Future<PrivateInfo> fetchPrivateInfo() async {
+    if (failPrivate) throw Exception('offline');
+    return privateInfo;
+  }
 
   @override
   Future<void> savePrivateInfo(PrivateInfo info) async {

@@ -157,6 +157,18 @@ void main() {
       expect(find.textContaining('이름·휴대폰 번호·주소 입력함'), findsOneWidget);
     });
 
+    testWidgets('개인정보를 불러오지 못하면 계속 기다리지 않고 다시 시도 버튼을 보여 준다', (tester) async {
+      await openMyInfo(
+        tester,
+        profiles: FakeProfileRemote()..failPrivate = true,
+      );
+      await tester.tap(find.text('개인정보 관리'));
+      await settle(tester);
+
+      expect(find.text('개인정보를 불러오지 못했어요'), findsOneWidget);
+      expect(find.text('다시 시도'), findsOneWidget);
+    });
+
     testWidgets('기능이 개인정보를 요구하면 이유를 알리고, 필요한 항목을 다 채워야 계속한다', (tester) async {
       tallScreen(tester);
       final remote = FakeProfileRemote()

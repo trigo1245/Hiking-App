@@ -95,9 +95,10 @@ final profileRemoteProvider = Provider<ProfileRemote>((ref) {
   return SupabaseProfileRemote(ref.watch(supabaseClientProvider));
 });
 
-/// 내 개인정보 (내 정보·개인정보 관리 화면)
+/// 내 개인정보 (내 정보·개인정보 관리 화면). 실패하면 자동으로 다시 시도하지 않고 오류를 보여 준다.
 final myPrivateInfoProvider = FutureProvider.autoDispose<PrivateInfo>(
   (ref) => ref.watch(profileRemoteProvider).fetchPrivateInfo(),
+  retry: (_, _) => null,
 );
 
 /// 다른 사용자의 공개 프로필
@@ -105,4 +106,5 @@ final publicProfileProvider = FutureProvider.autoDispose
     .family<PublicProfile?, (String, String)>(
       (ref, key) =>
           ref.watch(profileRemoteProvider).fetchPublicProfile(key.$1, key.$2),
+      retry: (_, _) => null,
     );

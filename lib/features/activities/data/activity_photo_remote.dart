@@ -97,4 +97,5 @@ final activityPhotosProvider = FutureProvider.autoDispose
     .family<List<PhotoItem>, String>(
       (ref, activityId) =>
           ref.watch(activityPhotoRemoteProvider).fetch(activityId),
+      retry: (_, _) => null,
     );
