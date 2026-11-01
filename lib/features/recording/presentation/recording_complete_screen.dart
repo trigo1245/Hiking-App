@@ -15,7 +15,9 @@ import '../../achievements/domain/achievements.dart';
 import '../../achievements/presentation/achievements_providers.dart';
 import '../../achievements/presentation/new_badges_sheet.dart';
 import '../../activities/domain/activity_summary.dart';
+import '../../activities/domain/hike_check.dart';
 import '../../activities/presentation/activities_providers.dart';
+import '../../courses/data/course_repository.dart';
 import '../data/recording_repository.dart';
 
 final activitySummaryProvider = FutureProvider.family<ActivitySummary, String>(
@@ -46,9 +48,69 @@ class _RecordingCompleteScreenState
     super.dispose();
   }
 
+  /// 산행이 아닌 것 같으면 저장 전에 경고한다. 계속 저장할지(true), 그만둘지(false).
+  /// "저장하지 않기"를 고르면 이 기록을 지우고 홈으로 간다.
+  Future<bool> _confirmHike(ActivitySummary summary) async {
+    final bool hike;
+    try {
+      final points = await ref
+          .read(recordingRepositoryProvider)
+          .loadPoints(summary.id);
+      final courses = await ref.read(courseRepositoryProvider).watchAll().first;
+      hike = HikeCheck.isHike(
+        distanceM: summary.distanceM,
+        elevationGainM: summary.elevationGainM,
+        track: points,
+        courses: courses,
+      );
+    } catch (e) {
+      debugPrint('[hike] $e');
+      return true; // 확인하지 못하면 막지 않는다.
+    }
+    if (hike || !mounted) return true;
+
+    final choice = await showModalBottomSheet<_NotHikeChoice>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.background,
+      showDragHandle: true,
+      builder: (_) => const _NotHikeSheet(),
+    );
+    if (choice != _NotHikeChoice.discard || !mounted) {
+      return choice == _NotHikeChoice.save;
+    }
+
+    // 저장하지 않기: 이미 서버에 올라갔으면 서버에서 먼저 지운다 (기기 간 동기화로 되살아나지 않게).
+    final actions = ref.read(uploadActionsProvider);
+    final messenger = ScaffoldMessenger.of(context);
+    try {
+      if (summary.uploadStatus == UploadStatus.done) {
+        await actions.deleteFromServer(summary.id);
+      }
+      await actions.deleteFromDevice(summary.id);
+    } catch (e) {
+      debugPrint('[hike] 지우기: $e');
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          const SnackBar(content: Text('지우지 못했어요. 인터넷에 연결된 뒤 다시 시도해 주세요')),
+        );
+      return false;
+    }
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('기록을 저장하지 않았어요')));
+    if (mounted) context.go(AppRoutes.home);
+    return false;
+  }
+
   Future<void> _save(ActivitySummary summary) async {
     if (_saving) return;
     setState(() => _saving = true);
+    if (!await _confirmHike(summary)) {
+      if (mounted) setState(() => _saving = false);
+      return;
+    }
     final title = _title.text.trim();
     await ref
         .read(recordingRepositoryProvider)
@@ -200,4 +262,65 @@ class _SummaryCard extends StatelessWidget {
       ),
     );
   }
+}
+
+enum _NotHikeChoice { save, discard }
+
+/// 산행이 아닌 것 같을 때 저장 전 경고. 시트를 닫으면 아무것도 하지 않고 완료 화면에 남는다.
+class _NotHikeSheet extends StatelessWidget {
+  const _NotHikeSheet();
+
+  @override
+  Widget build(BuildContext context) => SafeArea(
+    child: SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.screenHorizontal,
+        0,
+        AppSpacing.screenHorizontal,
+        AppSpacing.lg,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Icon(
+            Icons.warning_amber_rounded,
+            size: 40,
+            color: AppColors.danger,
+          ),
+          const SizedBox(height: AppSpacing.md),
+          const Text(
+            '산행이 아닌 것 같아요!',
+            textAlign: TextAlign.center,
+            style: AppTypography.title,
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '저장하면 통계가 나빠질 수 있고, 악용이라고 판단되면 제재를 당할 수 있어요.',
+            textAlign: TextAlign.center,
+            style: AppTypography.body.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.xs),
+          Text(
+            '등록된 등산 코스 근처를 지나지 않았고, 오른 높이도 적어요.',
+            textAlign: TextAlign.center,
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textTertiary,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.xl),
+          AppButton(
+            label: '저장하지 않기',
+            onPressed: () => Navigator.of(context).pop(_NotHikeChoice.discard),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          AppButton(
+            label: '그래도 저장하기',
+            variant: AppButtonVariant.secondary,
+            onPressed: () => Navigator.of(context).pop(_NotHikeChoice.save),
+          ),
+        ],
+      ),
+    ),
+  );
 }

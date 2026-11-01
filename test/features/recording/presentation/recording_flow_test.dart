@@ -141,13 +141,68 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('수고했어요!'), findsOneWidget);
 
-    // 저장하고 홈으로 돌아오면, 방금 끝낸 기록을 다시 묻지 않는다.
+    // 점 하나뿐인 기록이라 산행이 아닌 것 같다는 경고가 뜬다. 그래도 저장한다.
     await tester.tap(find.text('저장하기'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('산행이 아닌 것 같아요!'), findsOneWidget);
+    await tester.tap(find.text('그래도 저장하기'));
     await waitForSave(tester);
+    // 저장하고 홈으로 돌아오면, 방금 끝낸 기록을 다시 묻지 않는다.
     // 첫 기록이라 새 배지 카드가 뜬다.
     await tester.tap(find.text('확인'));
     await tester.pumpAndSettle();
     expect(find.text('등산 기록 시작'), findsOneWidget);
     expect(find.text('끝나지 않은 기록이 있어요'), findsNothing);
+  });
+
+  testWidgets('산행이 아닌 것 같다는 경고에서 "저장하지 않기"를 고르면 기록을 지우고 홈으로 간다', (
+    tester,
+  ) async {
+    final db = testDatabase();
+    final repo = RecordingRepository(db);
+    final t0 = DateTime(2026, 10, 13, 9, 5);
+    final session = await repo.start(t0);
+    await repo.addPoint(
+      session.activityId,
+      TrackPoint(
+        segment: 0,
+        latitude: 35.158,
+        longitude: 129.059,
+        altitude: 20,
+        accuracy: 5,
+        recordedAt: t0.add(const Duration(minutes: 20)),
+      ),
+    );
+    final remote = FakeActivityRemote();
+    await pumpApp(
+      tester,
+      authRepository: signedIn(),
+      database: db,
+      remote: remote,
+    );
+    await tester.tap(find.text('여기까지 저장하기'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('저장하기'));
+    await tester.runAsync(
+      () => Future<void>.delayed(const Duration(milliseconds: 300)),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('산행이 아닌 것 같아요!'), findsOneWidget);
+    expect(
+      find.text('저장하면 통계가 나빠질 수 있고, 악용이라고 판단되면 제재를 당할 수 있어요.'),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('저장하지 않기'));
+    await waitForSave(tester);
+    expect(find.text('기록을 저장하지 않았어요'), findsOneWidget);
+    expect(find.text('등산 기록 시작'), findsOneWidget);
+    final left = await tester.runAsync(() => repo.loadUnfinished());
+    expect(left, isNull);
+    expect(remote.rows, isEmpty); // 서버에도 올리지 않았다
   });
 }
