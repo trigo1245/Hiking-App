@@ -13,8 +13,10 @@ import 'package:hiking_app/features/activities/data/activity_remote.dart';
 import 'package:hiking_app/features/activities/data/gpx_sharer.dart';
 import 'package:hiking_app/features/auth/data/auth_repository.dart';
 import 'package:hiking_app/features/auth/data/avatar_remote.dart';
+import 'package:hiking_app/features/auth/data/profile_remote.dart';
 import 'package:hiking_app/features/auth/domain/profile.dart';
 import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
+import 'package:hiking_app/features/auth/presentation/private_info_screen.dart';
 import 'package:hiking_app/features/courses/data/competition_remote.dart';
 import 'package:hiking_app/features/courses/data/course_remote.dart';
 import 'package:hiking_app/features/courses/data/review_remote.dart';
@@ -24,6 +26,7 @@ import 'package:hiking_app/features/subscription/data/subscription_remote.dart';
 
 import '../features/achievements/fake_achievement_remote.dart';
 import '../features/activities/fake_activity_remote.dart';
+import '../features/auth/fake_profile_remote.dart';
 import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
 import '../features/fakes_phase2.dart';
@@ -61,6 +64,7 @@ Future<void> pumpApp(
   PhotoPicker? photoPicker,
   ActivityPhotoRemote? activityPhotos,
   AvatarRemote? avatars,
+  ProfileRemote? profiles,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -98,6 +102,13 @@ Future<void> pumpApp(
           activityPhotos ?? FakeActivityPhotoRemote(),
         ),
         avatarRemoteProvider.overrideWithValue(avatars ?? FakeAvatarRemote()),
+        profileRemoteProvider.overrideWithValue(
+          profiles ?? FakeProfileRemote(),
+        ),
+        // 주소 검색(웹 화면) 대신 정해 둔 주소를 고른 것으로 한다.
+        addressSearchProvider.overrideWithValue(
+          (_) async => (postcode: '46241', address: '부산 금정구 부산대학로 63번길 2'),
+        ),
         // 위젯 테스트에서는 지도 타일을 인터넷에서 받지 않는다.
         mapTilesEnabledProvider.overrideWithValue(false),
         if (clock != null) clockProvider.overrideWithValue(clock),

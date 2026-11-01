@@ -64,6 +64,8 @@ void main() {
 
     expect(find.textContaining('연결하기'), findsNothing);
 
+    // 카드가 늘어 로그아웃은 아래로 내려야 보인다.
+    await tester.scrollUntilVisible(find.text('로그아웃'), 200);
     await tester.tap(find.text('로그아웃'));
     await tester.pumpAndSettle();
 

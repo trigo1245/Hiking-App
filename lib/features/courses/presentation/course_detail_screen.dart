@@ -19,6 +19,7 @@ import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../recording/presentation/start_recording.dart';
 import '../../subscription/data/subscription_remote.dart';
+import '../../auth/presentation/public_profile_sheet.dart';
 import '../data/course_repository.dart';
 import '../data/review_remote.dart';
 import '../domain/competition.dart';
@@ -473,35 +474,45 @@ class _ConquerorCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final c = conqueror;
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.lg),
-      decoration: BoxDecoration(
-        color: AppColors.backgroundGrouped,
-        borderRadius: BorderRadius.circular(AppRadius.card),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: AppTypography.caption),
-          const SizedBox(height: AppSpacing.md),
-          if (c == null)
-            Text(
-              '아직 없어요\n첫 정복자가 되어 보세요',
-              style: AppTypography.body.copyWith(
-                color: AppColors.textSecondary,
-              ),
-            )
-          else ...[
-            UserAvatar(nickname: c.nickname, imageUrl: c.avatarUrl, size: 44),
-            const SizedBox(height: AppSpacing.sm),
-            NicknameText(
+    return Pressable(
+      onPressed: c == null
+          ? null
+          : () => showPublicProfile(
+              context,
               nickname: c.nickname,
               tag: c.nicknameTag,
-              style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+              avatarUrl: c.avatarUrl,
             ),
-            Text(formatScore(kind, c.value), style: AppTypography.subtitle),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.lg),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: AppTypography.caption),
+            const SizedBox(height: AppSpacing.md),
+            if (c == null)
+              Text(
+                '아직 없어요\n첫 정복자가 되어 보세요',
+                style: AppTypography.body.copyWith(
+                  color: AppColors.textSecondary,
+                ),
+              )
+            else ...[
+              UserAvatar(nickname: c.nickname, imageUrl: c.avatarUrl, size: 44),
+              const SizedBox(height: AppSpacing.sm),
+              NicknameText(
+                nickname: c.nickname,
+                tag: c.nicknameTag,
+                style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+              ),
+              Text(formatScore(kind, c.value), style: AppTypography.subtitle),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }
@@ -575,47 +586,58 @@ class RankingRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
+    // 누르면 그 사람의 공개 프로필을 본다.
+    return Pressable(
+      onPressed: () => showPublicProfile(
+        context,
+        nickname: entry.nickname,
+        tag: entry.nicknameTag,
+        avatarUrl: entry.avatarUrl,
       ),
-      decoration: BoxDecoration(
-        // 내 순위는 배경색으로 구분한다.
-        color: entry.isMe ? AppColors.backgroundGrouped : AppColors.background,
-        borderRadius: BorderRadius.circular(AppRadius.input),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: AppSpacing.xxxl,
-            child: Text(
-              '${entry.rank}',
-              style: AppTypography.subtitle.copyWith(
-                color: entry.rank <= 3
-                    ? AppColors.primary
-                    : AppColors.textTertiary,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          // 내 순위는 배경색으로 구분한다.
+          color: entry.isMe
+              ? AppColors.backgroundGrouped
+              : AppColors.background,
+          borderRadius: BorderRadius.circular(AppRadius.input),
+        ),
+        child: Row(
+          children: [
+            SizedBox(
+              width: AppSpacing.xxxl,
+              child: Text(
+                '${entry.rank}',
+                style: AppTypography.subtitle.copyWith(
+                  color: entry.rank <= 3
+                      ? AppColors.primary
+                      : AppColors.textTertiary,
+                ),
               ),
             ),
-          ),
-          UserAvatar(nickname: entry.nickname, imageUrl: entry.avatarUrl),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: NicknameText(
-              nickname: entry.nickname,
-              tag: entry.nicknameTag,
-              suffix: entry.isMe ? ' (나)' : null,
-              style: AppTypography.body.copyWith(
-                fontWeight: entry.isMe ? FontWeight.w600 : FontWeight.w400,
+            UserAvatar(nickname: entry.nickname, imageUrl: entry.avatarUrl),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: NicknameText(
+                nickname: entry.nickname,
+                tag: entry.nicknameTag,
+                suffix: entry.isMe ? ' (나)' : null,
+                style: AppTypography.body.copyWith(
+                  fontWeight: entry.isMe ? FontWeight.w600 : FontWeight.w400,
+                ),
               ),
             ),
-          ),
-          Text(
-            formatScore(kind, entry.value),
-            style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
-          ),
-        ],
+            Text(
+              formatScore(kind, entry.value),
+              style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
+            ),
+          ],
+        ),
       ),
     );
   }

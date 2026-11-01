@@ -6,9 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../../app/routes.dart';
 
 import '../../../core/design/design.dart';
-import '../../../core/photos/photo_picker.dart';
-import '../../../core/photos/photo_spec.dart';
-import '../../../core/photos/photo_widgets.dart';
 import '../../../core/utils/clock.dart';
 import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/app_button.dart';
@@ -19,13 +16,13 @@ import '../../achievements/presentation/achievements_screen.dart';
 import '../../activities/data/demo_activity_generator.dart';
 import '../../activities/presentation/activities_providers.dart';
 import '../../subscription/data/subscription_remote.dart';
-import '../data/avatar_remote.dart';
+import '../data/profile_remote.dart';
 import '../domain/app_user.dart';
 import '../domain/auth_failure.dart';
 import 'auth_feedback.dart';
 import 'auth_providers.dart';
 
-/// 내 정보 탭: 닉네임, 로그인한 계정, 프리미엄, 로그아웃.
+/// 내 정보 탭: 프로필(누르면 편집), 업적, 프리미엄, 개인정보 관리, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
   const MyInfoScreen({super.key});
 
@@ -62,39 +59,53 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
           vertical: AppSpacing.lg,
         ),
         children: [
-          Row(
-            children: [
-              const _AvatarButton(),
-              const SizedBox(width: AppSpacing.lg),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (profile.isLoading)
-                      const SkeletonBox(width: 120, height: 32)
-                    else
-                      // 불러오기에 실패해도 화면은 쓸 수 있게 기본 닉네임을 보여 준다.
-                      NicknameText(
-                        nickname: profile.value?.nickname ?? '등산객',
-                        tag: profile.value?.nicknameTag,
-                        style: AppTypography.title,
-                      ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      _accountDescription(user),
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                  ],
+          // 누르면 프로필 편집 (다른 사람에게 보이는 정보)
+          Pressable(
+            onPressed: () => context.push(AppRoutes.profileEdit),
+            child: Row(
+              children: [
+                UserAvatar(
+                  nickname: profile.value?.nickname ?? '등산객',
+                  imageUrl: profile.value?.avatarUrl,
+                  size: 64,
                 ),
-              ),
-            ],
+                const SizedBox(width: AppSpacing.lg),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (profile.isLoading)
+                        const SkeletonBox(width: 120, height: 32)
+                      else
+                        // 불러오기에 실패해도 화면은 쓸 수 있게 기본 닉네임을 보여 준다.
+                        NicknameText(
+                          nickname: profile.value?.nickname ?? '등산객',
+                          tag: profile.value?.nicknameTag,
+                          style: AppTypography.title,
+                        ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        _accountDescription(user),
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const Icon(
+                  Icons.chevron_right_rounded,
+                  color: AppColors.textTertiary,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.xxl),
           const AchievementsCard(),
           const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
+          const SizedBox(height: AppSpacing.md),
+          const _PrivateInfoCard(),
           const SizedBox(height: AppSpacing.xxl),
           // 시연·테스트용 기능은 개발 빌드에서만 보인다.
           if (kDebugMode) ...[
@@ -125,98 +136,47 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
   }
 }
 
-/// 프로필 사진. 누르면 앨범·카메라로 바꾸거나 카카오·구글 사진으로 되돌린다.
-/// 바꾼 사진은 랭킹·리뷰·지도의 정복자 표시에도 그대로 쓰인다.
-class _AvatarButton extends ConsumerStatefulWidget {
-  const _AvatarButton();
+/// 개인정보 관리 카드 (본인만 보는 이름·휴대폰 번호·주소). 누르면 개인정보 관리 화면.
+class _PrivateInfoCard extends ConsumerWidget {
+  const _PrivateInfoCard();
 
   @override
-  ConsumerState<_AvatarButton> createState() => _AvatarButtonState();
-}
-
-class _AvatarButtonState extends ConsumerState<_AvatarButton> {
-  bool _busy = false;
-
-  Future<void> _change() async {
-    final profile = ref.read(myProfileProvider).value;
-    final choice = await showPhotoSourceSheet(
-      context,
-      resetLabel: (profile?.hasCustomAvatar ?? false)
-          ? '카카오·구글 사진으로 되돌리기'
-          : null,
-    );
-    if (choice == null || !mounted) return;
-    final messenger = ScaffoldMessenger.of(context);
-    setState(() => _busy = true);
-    String? message;
-    try {
-      final remote = ref.read(avatarRemoteProvider);
-      if (choice == PhotoMenuChoice.reset) {
-        await remote.reset();
-        message = '프로필 사진을 되돌렸어요';
-      } else {
-        final photos = await ref
-            .read(photoPickerProvider)
-            .pick(
-              choice == PhotoMenuChoice.camera
-                  ? PhotoSource.camera
-                  : PhotoSource.gallery,
-              PhotoSpec.avatar,
-            );
-        if (photos.isNotEmpty) {
-          await remote.upload(photos.first);
-          message = '프로필 사진을 바꿨어요';
-        }
-      }
-      ref.invalidate(myProfileProvider);
-    } catch (e) {
-      debugPrint('[avatar] $e');
-      message = '사진을 바꾸지 못했어요. 인터넷 연결을 확인해 주세요';
-    }
-    if (mounted) setState(() => _busy = false);
-    if (message != null) {
-      messenger
-        ..hideCurrentSnackBar()
-        ..showSnackBar(SnackBar(content: Text(message)));
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final profile = ref.watch(myProfileProvider).value;
+  Widget build(BuildContext context, WidgetRef ref) {
+    final info = ref.watch(myPrivateInfoProvider).value;
     return Pressable(
-      onPressed: _busy ? null : _change,
-      child: Stack(
-        children: [
-          UserAvatar(
-            nickname: profile?.nickname ?? '등산객',
-            imageUrl: profile?.avatarUrl,
-            size: 64,
-          ),
-          Positioned(
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(4),
-              decoration: BoxDecoration(
-                color: AppColors.background,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppColors.divider),
-              ),
-              child: _busy
-                  ? const SizedBox.square(
-                      dimension: 14,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Icon(
-                      Icons.photo_camera_rounded,
-                      size: 14,
+      onPressed: () async {
+        await context.push<bool>(AppRoutes.privateInfo);
+        ref.invalidate(myPrivateInfoProvider);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('개인정보 관리', style: AppTypography.subtitle),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '${info?.summary ?? '이름·휴대폰 번호·주소'} · 나만 볼 수 있어요',
+                    style: AppTypography.caption.copyWith(
                       color: AppColors.textSecondary,
-                      semanticLabel: '프로필 사진 바꾸기',
                     ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
       ),
     );
   }

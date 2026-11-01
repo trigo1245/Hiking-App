@@ -8,6 +8,8 @@ import '../features/activities/presentation/activity_detail_screen.dart';
 import '../features/auth/presentation/auth_providers.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/my_info_screen.dart';
+import '../features/auth/presentation/private_info_screen.dart';
+import '../features/auth/presentation/profile_edit_screen.dart';
 import '../features/courses/presentation/course_detail_screen.dart';
 import '../features/courses/domain/competition.dart';
 import '../features/courses/presentation/course_reviews_section.dart';
@@ -105,6 +107,15 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/activity/:id',
         builder: (context, state) =>
             ActivityDetailScreen(activityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: AppRoutes.profileEdit,
+        builder: (context, state) => const ProfileEditScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.privateInfo,
+        builder: (context, state) =>
+            PrivateInfoScreen(request: state.extra as PrivateInfoRequest?),
       ),
       GoRoute(
         path: AppRoutes.achievements,

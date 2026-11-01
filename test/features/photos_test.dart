@@ -230,7 +230,7 @@ void main() {
     expect(reviews.myPhotos, hasLength(2));
   });
 
-  testWidgets('내 정보에서 프로필 사진을 바꾼다', (tester) async {
+  testWidgets('프로필 편집에서 프로필 사진을 바꾼다', (tester) async {
     final avatars = FakeAvatarRemote();
     final picker = FakePhotoPicker(count: 1);
     await pumpApp(
@@ -242,6 +242,8 @@ void main() {
     );
     await settle(tester);
     await tester.tap(find.text('내 정보'));
+    await settle(tester);
+    await tester.tap(find.text('등산객AB12'));
     await settle(tester);
 
     await tester.tap(find.byIcon(Icons.photo_camera_rounded));

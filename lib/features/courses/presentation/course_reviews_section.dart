@@ -16,6 +16,7 @@ import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/segmented_tabs.dart';
 import '../../../core/widgets/skeleton_box.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../../auth/presentation/public_profile_sheet.dart';
 import '../data/review_remote.dart';
 import '../domain/review.dart';
 import 'competition_providers.dart';
@@ -345,40 +346,52 @@ class ReviewTile extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              UserAvatar(
-                nickname: review.nickname,
-                imageUrl: review.avatarUrl,
-                size: 32,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    NicknameText(
-                      nickname: review.nickname,
-                      tag: review.nicknameTag,
-                      suffix: review.isMine ? ' (나)' : null,
-                      style: AppTypography.body.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    if (badge != null)
-                      Text(
-                        badge,
-                        style: AppTypography.caption.copyWith(
-                          color: review.completionCount > 0
-                              ? AppColors.primary
-                              : AppColors.textTertiary,
+          // 작성자를 누르면 공개 프로필을 본다.
+          Pressable(
+            onPressed: () => showPublicProfile(
+              context,
+              nickname: review.nickname,
+              tag: review.nicknameTag,
+              avatarUrl: review.avatarUrl,
+            ),
+            child: Row(
+              children: [
+                UserAvatar(
+                  nickname: review.nickname,
+                  imageUrl: review.avatarUrl,
+                  size: 32,
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      NicknameText(
+                        nickname: review.nickname,
+                        tag: review.nicknameTag,
+                        suffix: review.isMine ? ' (나)' : null,
+                        style: AppTypography.body.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
-                  ],
+                      if (badge != null)
+                        Text(
+                          badge,
+                          style: AppTypography.caption.copyWith(
+                            color: review.completionCount > 0
+                                ? AppColors.primary
+                                : AppColors.textTertiary,
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
-              ),
-              Text('${date.month}월 ${date.day}일', style: AppTypography.caption),
-            ],
+                Text(
+                  '${date.month}월 ${date.day}일',
+                  style: AppTypography.caption,
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           Text(

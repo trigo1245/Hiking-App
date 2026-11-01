@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261027000000_photos.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261028000000_profile_details.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -93,6 +93,19 @@ from unnest(array[
   '중턱까지만', '반만올라요', '무릎조심', '오늘은여기까지', '다음엔정상'
 ]) with ordinality as d(name, n)
 on conflict (id) do nothing;
+
+-- 공개 프로필(소개·주 활동 지역): 랭킹·리뷰에서 눌러 볼 수 있게 넣는다. 일부는 비워 둔다("아직 소개가 없어요").
+update public.profiles p
+set
+  region = (array['부산 금정구', '부산 사하구', '해운대·기장 일대', '주말엔 경남 일대', null])[1 + d.n % 5],
+  bio = case when d.n % 3 = 0 then null else (array[
+    '주말마다 금정산에 올라요. 같이 걸을 분 환영해요.',
+    '천천히 오래 걷는 걸 좋아해요. 정상 라면이 제일 맛있어요.',
+    '새벽 산행으로 일출 보는 게 취미예요.',
+    '무릎을 아끼며 꾸준히 오르는 중이에요. 하산은 늘 조심!'
+  ])[1 + d.n % 4] end
+from (select pg_temp.demo_user(n) as id, n from generate_series(1, 45) as n) as d
+where p.id = d.id;
 
 ------------------------------------------------------------
 -- 3. 완주 기록
