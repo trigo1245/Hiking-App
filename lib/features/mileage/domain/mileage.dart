@@ -7,7 +7,7 @@ import '../../achievements/domain/achievements.dart';
 /// 프리미엄 구독 중 적립 배율
 const mileagePremiumRate = 1.5;
 
-/// 하루(한국 시간) 적립 한도. 프리미엄은 1.5배.
+/// 하루(한국 시간) 적립 한도. 프리미엄은 1.5배. 배지는 한도와 별도.
 const mileageDailyCap = 200;
 
 class MileageSummary {
@@ -77,7 +77,7 @@ class MileageRule {
     MileageRule('코스 완주', 30, '같은 코스는 하루 1번'),
     MileageRule('코스 리뷰', 20, '코스마다 처음 1번'),
     MileageRule('상품 리뷰', 20, '상품마다 처음 1번, 사진을 붙이면 10 더'),
-    MileageRule('업적 배지', 30, '배지 단계마다 처음 1번 · 동 30 · 은 50 · 금 100'),
+    MileageRule('업적 배지', 30, '배지 단계마다 처음 1번 · 동 30 · 은 50 · 금 100 · 하루 한도와 별도'),
   ];
 }
 

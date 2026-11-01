@@ -286,8 +286,8 @@ class _Rules extends StatelessWidget {
       const SizedBox(height: AppSpacing.xs),
       Text(
         premium
-            ? '프리미엄이라 1.5배로 받아요 · 하루 최대 ${formatMileage((mileageDailyCap * mileagePremiumRate).round())}'
-            : '프리미엄은 1.5배로 받아요 · 하루 최대 ${formatMileage(mileageDailyCap)}',
+            ? '프리미엄이라 1.5배로 받아요 · 하루 최대 ${formatMileage((mileageDailyCap * mileagePremiumRate).round())} (배지는 별도)'
+            : '프리미엄은 1.5배로 받아요 · 하루 최대 ${formatMileage(mileageDailyCap)} (배지는 별도)',
         style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
       ),
       const SizedBox(height: AppSpacing.sm),
