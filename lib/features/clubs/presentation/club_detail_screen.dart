@@ -18,6 +18,7 @@ import '../domain/club.dart';
 import 'club_avatar.dart';
 import 'club_event_form_screen.dart';
 import 'club_format.dart';
+import '../../chat/presentation/club_chat_preview.dart';
 
 /// 클럽 화면을 다시 받아야 할 때 (가입·탈퇴·승인·공지·일정 등)
 void refreshClub(WidgetRef ref, String clubId) {
@@ -119,7 +120,7 @@ class _JoinButton extends ConsumerWidget {
   }
 }
 
-enum _Section { notices, events, members }
+enum _Section { notices, events, chat, members }
 
 /// 클럽 내용: 소개(누구나) + 공지·일정·회원(회원만) + 클럽장 도구.
 /// 동호회 탭의 "내 클럽"과 상세 화면이 함께 쓴다.
@@ -168,6 +169,7 @@ class _ClubBodyState extends ConsumerState<ClubBody> {
                 options: const {
                   _Section.notices: '공지',
                   _Section.events: '일정',
+                  _Section.chat: '채팅',
                   _Section.members: '회원',
                 },
                 selected: _section,
@@ -177,6 +179,7 @@ class _ClubBodyState extends ConsumerState<ClubBody> {
               switch (_section) {
                 _Section.notices => _Notices(club: value),
                 _Section.events => _Events(club: value),
+                _Section.chat => ClubChatPreview(clubId: value.id),
                 _Section.members => _Members(club: value),
               },
               const SizedBox(height: AppSpacing.xxxl),

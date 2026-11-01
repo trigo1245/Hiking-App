@@ -15,6 +15,11 @@ abstract final class AppRoutes {
   static String clubEdit(String clubId) => '/club/$clubId/edit';
   static String clubRequests(String clubId) => '/club/$clubId/requests';
 
+  /// 채팅방 (동호회·1:1), 처음 보내는 1:1 메시지(extra: ChatTarget), 1:1 메시지 목록(내 정보에서 진입)
+  static String chat(String roomId) => '/chat/$roomId';
+  static const chatNew = '/new-chat';
+  static const chats = '/me/messages';
+
   /// 기록 중 화면 (하단 탭 없이 전체 화면)
   static const recording = '/record';
   static String recordingDone(String activityId) => '/record-done/$activityId';

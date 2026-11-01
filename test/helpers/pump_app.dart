@@ -17,6 +17,7 @@ import 'package:hiking_app/features/auth/data/profile_remote.dart';
 import 'package:hiking_app/features/auth/domain/profile.dart';
 import 'package:hiking_app/features/auth/presentation/auth_providers.dart';
 import 'package:hiking_app/features/auth/presentation/private_info_screen.dart';
+import 'package:hiking_app/features/chat/data/chat_remote.dart';
 import 'package:hiking_app/features/clubs/data/club_remote.dart';
 import 'package:hiking_app/features/courses/data/competition_remote.dart';
 import 'package:hiking_app/features/courses/data/course_remote.dart';
@@ -28,6 +29,7 @@ import 'package:hiking_app/features/subscription/data/subscription_remote.dart';
 import '../features/achievements/fake_achievement_remote.dart';
 import '../features/activities/fake_activity_remote.dart';
 import '../features/auth/fake_profile_remote.dart';
+import '../features/chat/fake_chat_remote.dart';
 import '../features/clubs/fake_club_remote.dart';
 import '../features/courses/fake_competition_remote.dart';
 import '../features/courses/fake_course_remote.dart';
@@ -68,6 +70,7 @@ Future<void> pumpApp(
   AvatarRemote? avatars,
   ProfileRemote? profiles,
   ClubRemote? clubs,
+  ChatRemote? chats,
   DateTime Function()? clock,
 }) async {
   await tester.pumpWidget(
@@ -106,6 +109,7 @@ Future<void> pumpApp(
         ),
         avatarRemoteProvider.overrideWithValue(avatars ?? FakeAvatarRemote()),
         clubRemoteProvider.overrideWithValue(clubs ?? FakeClubRemote()),
+        chatRemoteProvider.overrideWithValue(chats ?? FakeChatRemote()),
         profileRemoteProvider.overrideWithValue(
           profiles ?? FakeProfileRemote(),
         ),

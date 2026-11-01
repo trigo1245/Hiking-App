@@ -252,6 +252,8 @@ void main() {
       expect(find.text('고당봉 일출을 좋아해요'), findsOneWidget);
       expect(find.text('부산 금정구'), findsOneWidget);
       expect(find.text('내 프로필 편집'), findsNothing);
+      // 다른 사람이면 1:1 메시지를 보낼 수 있다.
+      expect(find.text('메시지 보내기'), findsOneWidget);
     });
   });
 }

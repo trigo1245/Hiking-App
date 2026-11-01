@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261029000000_clubs.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261030000000_chat.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -26,6 +26,11 @@
 -- │   (옮기기 전 완등은 해운대 주말반 실적에 남는다)
 -- └ 부산대 등산 동아리: 김세민이 클럽장, 회원 5명, 가입 신청 2건 대기, 공지 2개, 일정 2개(다가오는 일정에 참석 투표)
 --   (김세민이 앱에서 직접 만든 동호회에 이미 소속돼 있으면 이 클럽은 건너뛴다)
+--
+-- 채팅 (7. 채팅)
+-- ┌ 부산대 등산 동아리 채팅방: 회원 대화 6개, 그중 최근 2개는 김세민이 아직 안 읽음
+-- ├ 받은 메시지 요청: 주말산꾼이 질문을 보냄 (수락·거절해 보기)
+-- └ 이어 가는 1:1 대화: 김세민 ↔ 등산스틱
 
 begin;
 
@@ -448,6 +453,68 @@ select e.id, pg_temp.demo_user(n), case when n = 37 then 'not_going' else 'going
 from public.club_events e
 cross join generate_series(34, 37) as n
 where e.club_id = pg_temp.demo_club(4) and e.title = '11월 정기 산행';
+
+------------------------------------------------------------
+-- 7. 채팅
+------------------------------------------------------------
+-- 부산대 등산 동아리 채팅방 (회원들 대화. 마지막 2개는 김세민이 아직 안 읽음)
+insert into public.chat_rooms (kind, club_id, is_demo)
+select 'club', c.id, true
+from public.clubs c
+where c.id = pg_temp.demo_club(4);
+
+insert into public.chat_messages (room_id, sender_id, body, created_at, is_demo)
+select r.id, x.sender, x.body, now() - x.ago, true
+from public.chat_rooms r
+cross join demo_me me
+cross join lateral (values
+  (pg_temp.demo_user(34), '이번 주 정기 산행 날씨 괜찮을까요?', interval '2 days 3 hours'),
+  (me.id, '토요일 맑대요! 범어사 매표소 앞 8시예요', interval '2 days 2 hours'),
+  (pg_temp.demo_user(35), '저 처음 가는데 초보도 괜찮나요?', interval '1 day 5 hours'),
+  (pg_temp.demo_user(36), '범어사 코스는 완만해서 괜찮아요. 물만 넉넉히!', interval '1 day 4 hours'),
+  (pg_temp.demo_user(37), '이번엔 일이 있어서 불참이에요 ㅠㅠ 사진 많이 올려 주세요', interval '3 hours'),
+  (pg_temp.demo_user(34), '고당봉에서 점심 먹고 내려와요~', interval '1 hour')
+) as x(sender, body, ago)
+where r.club_id = pg_temp.demo_club(4);
+
+-- 김세민이 동아리 채팅을 마지막으로 읽은 시각 (그 뒤 2개가 새 메시지)
+insert into public.chat_reads (room_id, user_id, last_read_at)
+select r.id, me.id, now() - interval '1 day'
+from public.chat_rooms r cross join demo_me me
+where r.club_id = pg_temp.demo_club(4);
+
+-- 받은 메시지 요청: 주말산꾼(3번)이 랭킹을 보고 질문을 보냈다 (수락·거절해 본다)
+insert into public.chat_rooms (kind, requester_id, recipient_id, status, is_demo)
+select 'direct', pg_temp.demo_user(3), me.id, 'pending', true
+from demo_me me;
+
+insert into public.chat_messages (room_id, sender_id, body, created_at, is_demo)
+select r.id, r.requester_id,
+  '안녕하세요! 승학산 동아대 코스 최다완등이시던데, 평일 저녁에도 오르시나요?',
+  now() - interval '5 hours', true
+from public.chat_rooms r cross join demo_me me
+where r.kind = 'direct' and r.requester_id = pg_temp.demo_user(3) and r.recipient_id = me.id;
+
+-- 이어 가는 1:1 대화: 김세민 ↔ 등산스틱(34번)
+insert into public.chat_rooms (kind, requester_id, recipient_id, status, is_demo)
+select 'direct', me.id, pg_temp.demo_user(34), 'accepted', true
+from demo_me me;
+
+insert into public.chat_messages (room_id, sender_id, body, created_at, is_demo)
+select r.id, x.sender, x.body, now() - x.ago, true
+from public.chat_rooms r
+cross join demo_me me
+cross join lateral (values
+  (me.id, '지난번 산행 사진 고마워요!', interval '3 days 2 hours'),
+  (pg_temp.demo_user(34), '별말씀을요 ㅎㅎ 다음엔 승학산 노을 보러 가요', interval '3 days 1 hour'),
+  (me.id, '좋아요. 일정 만들어 둘게요', interval '3 days')
+) as x(sender, body, ago)
+where r.kind = 'direct' and r.requester_id = me.id and r.recipient_id = pg_temp.demo_user(34);
+
+insert into public.chat_reads (room_id, user_id, last_read_at)
+select r.id, me.id, now()
+from public.chat_rooms r cross join demo_me me
+where r.kind = 'direct' and r.requester_id = me.id and r.recipient_id = pg_temp.demo_user(34);
 
 commit;
 

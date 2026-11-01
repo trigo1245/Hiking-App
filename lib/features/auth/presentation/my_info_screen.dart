@@ -21,6 +21,7 @@ import '../domain/app_user.dart';
 import '../domain/auth_failure.dart';
 import 'auth_feedback.dart';
 import 'auth_providers.dart';
+import '../../chat/data/chat_remote.dart';
 
 /// 내 정보 탭: 프로필(누르면 편집), 업적, 프리미엄, 개인정보 관리, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
@@ -105,6 +106,8 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
           const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
           const SizedBox(height: AppSpacing.md),
+          const _MessagesCard(),
+          const SizedBox(height: AppSpacing.md),
           const _PrivateInfoCard(),
           const SizedBox(height: AppSpacing.xxl),
           // 시연·테스트용 기능은 개발 빌드에서만 보인다.
@@ -134,6 +137,77 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
     if (provider == null) return '로그인했어요';
     return '${provider.label} 계정으로 로그인했어요';
   }
+}
+
+/// 1:1 메시지 카드: 안 읽은 메시지·받은 요청 수. 누르면 메시지 목록.
+class _MessagesCard extends ConsumerWidget {
+  const _MessagesCard();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final badges = ref.watch(chatBadgesProvider).value;
+    final count = (badges?.directUnread ?? 0) + (badges?.pendingRequests ?? 0);
+    return Pressable(
+      onPressed: () async {
+        await context.push(AppRoutes.chats);
+        ref.invalidate(chatBadgesProvider);
+      },
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('메시지', style: AppTypography.subtitle),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    [
+                      if ((badges?.pendingRequests ?? 0) > 0)
+                        '메시지 요청 ${badges!.pendingRequests}',
+                      if ((badges?.directUnread ?? 0) > 0)
+                        '안 읽은 메시지 ${badges!.directUnread}',
+                    ].join(' · ').ifEmpty('1:1 대화'),
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (count > 0)
+              Container(
+                margin: const EdgeInsets.only(right: AppSpacing.xs),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 1),
+                decoration: BoxDecoration(
+                  color: AppColors.danger,
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                ),
+                child: Text(
+                  '$count',
+                  style: AppTypography.caption.copyWith(
+                    color: AppColors.onPrimary,
+                  ),
+                ),
+              ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+extension on String {
+  String ifEmpty(String fallback) => isEmpty ? fallback : this;
 }
 
 /// 개인정보 관리 카드 (본인만 보는 이름·휴대폰 번호·주소). 누르면 개인정보 관리 화면.

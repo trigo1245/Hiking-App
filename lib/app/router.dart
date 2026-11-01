@@ -26,6 +26,8 @@ import '../features/clubs/presentation/club_detail_screen.dart';
 import '../features/clubs/presentation/club_form_screen.dart';
 import '../features/clubs/presentation/club_requests_screen.dart';
 import '../features/clubs/presentation/clubs_screen.dart';
+import '../features/chat/presentation/chat_list_screen.dart';
+import '../features/chat/presentation/chat_screen.dart';
 
 export 'routes.dart';
 
@@ -111,6 +113,20 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/activity/:id',
         builder: (context, state) =>
             ActivityDetailScreen(activityId: state.pathParameters['id']!),
+      ),
+      GoRoute(
+        path: '/chat/:id',
+        builder: (context, state) =>
+            ChatScreen(roomId: state.pathParameters['id']),
+      ),
+      GoRoute(
+        path: AppRoutes.chatNew,
+        builder: (context, state) =>
+            ChatScreen(target: state.extra! as ChatTarget),
+      ),
+      GoRoute(
+        path: AppRoutes.chats,
+        builder: (context, state) => const ChatListScreen(),
       ),
       GoRoute(
         path: AppRoutes.clubCreate,
