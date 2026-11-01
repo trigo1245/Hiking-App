@@ -361,44 +361,12 @@ class _Notices extends ConsumerWidget {
   final ClubDetail club;
 
   Future<void> _write(BuildContext context, WidgetRef ref) async {
-    final controller = TextEditingController();
     final body = await showModalBottomSheet<String>(
       context: context,
       isScrollControlled: true,
       backgroundColor: AppColors.background,
-      builder: (context) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.screenHorizontal,
-          AppSpacing.xl,
-          AppSpacing.screenHorizontal,
-          MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xl,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text('공지 쓰기', style: AppTypography.subtitle),
-            const SizedBox(height: AppSpacing.md),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              maxLength: clubNoticeMaxLength,
-              minLines: 3,
-              maxLines: 8,
-              style: AppTypography.body,
-              decoration: const InputDecoration(hintText: '회원에게 알릴 내용을 적어 주세요'),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            AppButton(
-              label: '올리기',
-              onPressed: () =>
-                  Navigator.of(context).pop(controller.text.trim()),
-            ),
-          ],
-        ),
-      ),
+      builder: (_) => const _NoticeSheet(),
     );
-    controller.dispose();
     if (body == null || body.isEmpty || !context.mounted) return;
     await runClubAction(
       context,
@@ -897,6 +865,57 @@ class _Empty extends StatelessWidget {
       message,
       textAlign: TextAlign.center,
       style: AppTypography.body.copyWith(color: AppColors.textTertiary),
+    ),
+  );
+}
+
+/// 공지 쓰기 시트. 입력칸 컨트롤러는 시트가 완전히 사라질 때 지운다.
+/// (시트가 닫히는 동안에도 입력칸이 그려지므로, 닫자마자 지우면 오류가 난다)
+class _NoticeSheet extends StatefulWidget {
+  const _NoticeSheet();
+
+  @override
+  State<_NoticeSheet> createState() => _NoticeSheetState();
+}
+
+class _NoticeSheetState extends State<_NoticeSheet> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      AppSpacing.screenHorizontal,
+      AppSpacing.xl,
+      AppSpacing.screenHorizontal,
+      MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xl,
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('공지 쓰기', style: AppTypography.subtitle),
+        const SizedBox(height: AppSpacing.md),
+        TextField(
+          controller: _controller,
+          autofocus: true,
+          maxLength: clubNoticeMaxLength,
+          minLines: 3,
+          maxLines: 8,
+          style: AppTypography.body,
+          decoration: const InputDecoration(hintText: '회원에게 알릴 내용을 적어 주세요'),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        AppButton(
+          label: '올리기',
+          onPressed: () => Navigator.of(context).pop(_controller.text.trim()),
+        ),
+      ],
     ),
   );
 }
