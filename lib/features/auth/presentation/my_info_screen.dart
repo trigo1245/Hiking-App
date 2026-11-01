@@ -26,7 +26,7 @@ import '../../chat/data/chat_remote.dart';
 /// 맨 아래에 보여 주는 앱 버전 (pubspec.yaml의 version과 맞춘다)
 const appVersionLabel = '0.1.0';
 
-/// 내 정보 탭: 프로필(누르면 편집), 메시지, 업적, 프리미엄, 개인정보 관리, 로그아웃.
+/// 내 정보 탭: 프로필(누르면 편집), 메시지, 업적, 프리미엄, 주문 내역, 개인정보 관리, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
   const MyInfoScreen({super.key});
 
@@ -122,6 +122,8 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
           const AchievementsCard(),
           const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
+          const SizedBox(height: AppSpacing.md),
+          const _OrdersCard(),
           const SizedBox(height: AppSpacing.md),
           const _PrivateInfoCard(),
           const SizedBox(height: AppSpacing.xxl),
@@ -237,6 +239,48 @@ class _MessagesCard extends ConsumerWidget {
 
 extension on String {
   String ifEmpty(String fallback) => isEmpty ? fallback : this;
+}
+
+/// 주문 내역 카드 (쇼핑). 누르면 주문 내역 화면.
+class _OrdersCard extends StatelessWidget {
+  const _OrdersCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Pressable(
+      onPressed: () => context.push(AppRoutes.orders),
+      child: Container(
+        padding: const EdgeInsets.all(AppSpacing.xl),
+        decoration: BoxDecoration(
+          color: AppColors.backgroundGrouped,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('주문 내역', style: AppTypography.subtitle),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '배송 상태를 보고, 받은 상품의 리뷰를 써요',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textTertiary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 }
 
 /// 개인정보 관리 카드 (본인만 보는 이름·휴대폰 번호·주소). 누르면 개인정보 관리 화면.

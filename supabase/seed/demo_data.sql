@@ -1,6 +1,6 @@
 -- 시연용 데이터: 기존 시연용 데이터를 모두 지우고 여러 상황을 확인할 수 있는 데이터를 다시 넣는다.
 -- 개발용 Supabase 프로젝트에서만 실행한다. (CLAUDE.md 6-2장 "시연용 데이터")
--- 먼저 migrations/ 전부(20261030000000_chat.sql까지)와 seed/courses.sql을 실행해야 한다.
+-- 먼저 migrations/ 전부(20261101000000_shop.sql까지)와 seed/courses.sql을 실행해야 한다.
 -- 여러 번 실행해도 된다.
 --
 -- 순서: ① 이 SQL 실행 → ② 앱 내 정보의 "시연용 기록 다시 만들기 (8개)"
@@ -31,6 +31,10 @@
 -- ┌ 부산대 등산 동아리 채팅방: 회원 대화 6개, 그중 최근 2개는 김세민이 아직 안 읽음
 -- ├ 받은 메시지 요청: 주말산꾼이 질문을 보냄 (수락·거절해 보기)
 -- └ 이어 가는 1:1 대화: 김세민 ↔ 등산스틱
+--
+-- 쇼핑 (8. 쇼핑)
+-- ┌ 상품 12개마다 시연용 사용자들의 주문(배송 완료)과 리뷰(별점·후기, 일부는 후기 없이 별점만)
+-- └ 김세민: 데이하이크 22L 배낭(블루)을 5일 전 주문해 배송 완료, 리뷰는 아직 없음 → 시연에서 바로 리뷰 쓰기
 
 begin;
 
@@ -74,6 +78,11 @@ where user_id in (select id from demo_me) and title like '시연용%';
 delete from auth.users where raw_app_meta_data ->> 'demo' = 'true';
 -- 시연용 동호회 (소속·신청·공지·일정·투표가 함께 지워진다)
 delete from public.clubs where is_demo;
+-- 쇼핑: 시연용 주문·리뷰 + 김세민 계정의 주문·상품 리뷰 전부 (리허설에서 주문한 것도 지워 처음 상태로)
+delete from public.product_reviews
+where is_demo or user_id in (select id from demo_me);
+delete from public.orders
+where is_demo or user_id in (select id from demo_me);
 
 ------------------------------------------------------------
 -- 2. 시연용 사용자 45명 (로그인할 수 없는 계정). 가입 트리거가 프로필(닉네임#태그)을 만든다.
@@ -516,6 +525,80 @@ select r.id, me.id, now()
 from public.chat_rooms r cross join demo_me me
 where r.kind = 'direct' and r.requester_id = me.id and r.recipient_id = pg_temp.demo_user(34);
 
+------------------------------------------------------------
+-- 8. 쇼핑: 시연용 사용자의 주문(배송 완료)과 상품 리뷰, 김세민의 리뷰 쓰기 전 주문
+------------------------------------------------------------
+-- 상품마다 리뷰를 남길 사용자: 상품 순서(sort_order)로 흩뿌려 상품마다 4~8명쯤
+create temp table demo_buyer on commit drop as
+select p.id as product_id, p.category, p.price, p.options, p.sort_order as s, n,
+  now() - (((n * 5 + p.sort_order) % 40) + 4) * interval '1 day' as ordered_at
+from public.products p
+cross join generate_series(1, 45) as n
+where (n * 7 + p.sort_order) % 9 = 0;
+
+insert into public.orders (
+  user_id, product_id, option_value, quantity, unit_price, total_price,
+  recipient_name, recipient_phone, postcode, address, address_detail,
+  created_at, is_demo
+)
+select pg_temp.demo_user(b.n), b.product_id,
+  case when b.options is null then null
+    else b.options[1 + b.n % array_length(b.options, 1)] end,
+  1, b.price, b.price,
+  '시연용', '01000000000', '46241', '부산광역시 금정구 부산대학로 63번길 2 (시연용 주소)', null,
+  b.ordered_at, true
+from demo_buyer b;
+
+create temp table demo_product_comments (category text, k integer, comment text) on commit drop;
+insert into demo_product_comments values
+  ('shoes', 1, '정사이즈로 샀는데 딱 맞아요. 금정산 한 바퀴 돌아도 발이 편했어요.'),
+  ('shoes', 2, '밑창이 잘 잡아 줘서 젖은 바위에서도 덜 미끄러웠어요.'),
+  ('shoes', 3, '처음엔 조금 딱딱했는데 두세 번 신으니 길들었어요.'),
+  ('backpack', 1, '당일 산행에 물 두 병, 도시락, 바람막이까지 넉넉히 들어가요.'),
+  ('backpack', 2, '등판 통풍이 잘 돼서 여름에도 등이 덜 젖었어요.'),
+  ('backpack', 3, '허리 벨트가 있으니 오래 걸어도 어깨가 덜 아파요.'),
+  ('poles', 1, '내리막에서 무릎이 확실히 편해졌어요. 진작 살 걸 그랬어요.'),
+  ('poles', 2, '접으면 배낭 옆에 쏙 들어가서 좋아요.'),
+  ('poles', 3, '가볍고 튼튼해요. 길이 조절도 쉬워요.'),
+  ('clothing', 1, '정상에서 바람 불 때 걸치기 딱 좋아요. 접으면 주먹만 해요.'),
+  ('clothing', 2, '땀이 금방 말라서 오르막에서도 쾌적했어요.'),
+  ('clothing', 3, '사이즈는 한 치수 크게 사는 걸 추천해요.'),
+  ('safety', 1, '하산이 늦어졌을 때 덕분에 안전하게 내려왔어요.'),
+  ('safety', 2, '작고 가벼워서 배낭에 늘 넣어 다녀요.'),
+  ('safety', 3, '혹시 몰라 샀는데 마음이 든든해요.');
+
+-- 별점은 대부분 4~5점, 가끔 3점·2점. 넷 중 하나는 후기 없이 별점만.
+insert into public.product_reviews
+  (product_id, user_id, rating, comment, created_at, updated_at, is_demo)
+select b.product_id, pg_temp.demo_user(b.n),
+  case
+    when (b.n + b.s) % 10 = 0 then 2
+    when (b.n + b.s) % 5 = 0 then 3
+    when (b.n + b.s) % 2 = 0 then 4
+    else 5
+  end,
+  case when b.n % 4 = 0 then null
+    else (select c.comment from demo_product_comments c
+          where c.category = b.category and c.k = 1 + b.n % 3) end,
+  b.ordered_at + interval '2 days',
+  b.ordered_at + interval '2 days',
+  true
+from demo_buyer b;
+
+-- 김세민: 5일 전 주문해 배송이 끝난 배낭 (리뷰는 시연에서 직접 쓴다)
+insert into public.orders (
+  user_id, product_id, option_value, quantity, unit_price, total_price,
+  recipient_name, recipient_phone, postcode, address, address_detail,
+  created_at, is_demo
+)
+select me.id, p.id, '블루', 1, p.price, p.price,
+  coalesce(pp.name, '김세민'), coalesce(pp.phone, '01000000000'), pp.postcode,
+  coalesce(pp.address, '부산광역시 금정구 부산대학로 63번길 2 (시연용 주소)'), pp.address_detail,
+  now() - interval '5 days', true
+from demo_me me
+join public.products p on p.id = 'dayhike-22'
+left join public.private_profiles pp on pp.user_id = me.id;
+
 commit;
 
 ------------------------------------------------------------
@@ -525,3 +608,5 @@ commit;
 -- delete from public.course_attempts where is_demo;
 -- delete from public.course_completions where is_demo;
 -- delete from auth.users where raw_app_meta_data ->> 'demo' = 'true';
+-- delete from public.product_reviews where is_demo;
+-- delete from public.orders where is_demo;

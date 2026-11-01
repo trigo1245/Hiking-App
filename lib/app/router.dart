@@ -28,6 +28,11 @@ import '../features/clubs/presentation/club_requests_screen.dart';
 import '../features/clubs/presentation/clubs_screen.dart';
 import '../features/chat/presentation/chat_list_screen.dart';
 import '../features/chat/presentation/chat_screen.dart';
+import '../features/shop/presentation/order_screen.dart';
+import '../features/shop/presentation/orders_screen.dart';
+import '../features/shop/presentation/product_detail_screen.dart';
+import '../features/shop/presentation/product_review_screen.dart';
+import '../features/shop/presentation/shop_screen.dart';
 
 export 'routes.dart';
 
@@ -166,10 +171,53 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.premium,
         builder: (context, state) => const PremiumScreen(),
       ),
+      GoRoute(
+        path: '/product/:id',
+        builder: (context, state) =>
+            ProductDetailScreen(productId: state.pathParameters['id']!),
+        routes: [
+          GoRoute(
+            path: 'review',
+            builder: (context, state) =>
+                ProductReviewScreen(productId: state.pathParameters['id']!),
+          ),
+        ],
+      ),
+      GoRoute(
+        path: AppRoutes.orderNew,
+        builder: (context, state) =>
+            OrderScreen(draft: state.extra! as OrderDraft),
+      ),
+      GoRoute(
+        path: AppRoutes.orderDone,
+        builder: (context, state) =>
+            OrderDoneScreen(done: state.extra! as OrderDone),
+      ),
+      GoRoute(
+        path: AppRoutes.orders,
+        builder: (context, state) => const OrdersScreen(),
+      ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) =>
             AppShell(navigationShell: navigationShell),
+        // 탭 순서: 쇼핑 / 동호회 / 홈 / 기록 / 내 정보 (앱을 열면 홈부터 보인다)
         branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.shop,
+                builder: (context, state) => const ShopScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.clubs,
+                builder: (context, state) => const ClubsScreen(),
+              ),
+            ],
+          ),
           StatefulShellBranch(
             routes: [
               GoRoute(
@@ -183,14 +231,6 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.activities,
                 builder: (context, state) => const ActivitiesScreen(),
-              ),
-            ],
-          ),
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.clubs,
-                builder: (context, state) => const ClubsScreen(),
               ),
             ],
           ),

@@ -40,6 +40,27 @@ abstract final class AppColors {
   /// 아직 얻지 못한 배지
   static const badgeLocked = Color(0xFFD1D6DB);
 
+  /// 쇼핑 상품 카드 그림 (사진 대신 코드로 그린다). 상품의 색 번호로 고른다. 배경·아이콘 짝.
+  static const productArtBackgrounds = [
+    Color(0xFFE8F3FF),
+    Color(0xFFE5F8EF),
+    Color(0xFFFFF3E0),
+    Color(0xFFF3EDFF),
+    Color(0xFFFFEBEE),
+    Color(0xFFE6F7F8),
+  ];
+  static const productArtForegrounds = [
+    Color(0xFF3182F6),
+    Color(0xFF03B26C),
+    Color(0xFFF08A24),
+    Color(0xFF7B5CE5),
+    Color(0xFFF04452),
+    Color(0xFF13A3AE),
+  ];
+
+  /// 별점의 별
+  static const star = Color(0xFFFFB331);
+
   /// 카카오 로그인 버튼 (카카오 로그인 디자인 가이드 지정 색)
   static const kakaoContainer = Color(0xFFFEE500);
   static const kakaoLabel = Color(0xD9000000);

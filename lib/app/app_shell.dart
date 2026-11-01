@@ -7,17 +7,25 @@ import '../features/chat/data/chat_remote.dart';
 import '../core/design/design.dart';
 import 'background_syncer.dart';
 
-/// 하단 탭(홈 / 기록 / 동호회 / 내 정보)을 가진 바깥 틀.
+/// 하단 탭(쇼핑 / 동호회 / 홈 / 기록 / 내 정보)을 가진 바깥 틀.
 /// 각 탭의 화면 상태는 [StatefulNavigationShell]이 따로 보관한다.
 class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
+  // 탭 순서 (router.dart의 branches와 같다): 쇼핑 / 동호회 / 홈 / 기록 / 내 정보
+  static const _clubsTab = 1;
+  static const _myInfoTab = 4;
+
   void _onTap(WidgetRef ref, int index) {
     HapticFeedback.selectionClick();
     // 동호회·내 정보 탭으로 오면 다른 사람이 바꾼 것(가입 신청·메시지 등)을 바로 다시 받는다.
-    refreshSharedData(ref, clubs: index == 2, chats: index == 2 || index == 3);
+    refreshSharedData(
+      ref,
+      clubs: index == _clubsTab,
+      chats: index == _clubsTab || index == _myInfoTab,
+    );
     navigationShell.goBranch(
       index,
       // 이미 선택된 탭을 다시 누르면 그 탭의 첫 화면으로 돌아간다.
@@ -44,14 +52,9 @@ class AppShell extends ConsumerWidget {
           onTap: (i) => _onTap(ref, i),
           items: [
             const BottomNavigationBarItem(
-              icon: Icon(Icons.home_outlined),
-              activeIcon: Icon(Icons.home_rounded),
-              label: '홈',
-            ),
-            const BottomNavigationBarItem(
-              icon: Icon(Icons.list_alt_outlined),
-              activeIcon: Icon(Icons.list_alt_rounded),
-              label: '기록',
+              icon: Icon(Icons.shopping_bag_outlined),
+              activeIcon: Icon(Icons.shopping_bag_rounded),
+              label: '쇼핑',
             ),
             BottomNavigationBarItem(
               icon: _Dot(
@@ -63,6 +66,16 @@ class AppShell extends ConsumerWidget {
                 child: const Icon(Icons.groups_rounded),
               ),
               label: '동호회',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.home_outlined),
+              activeIcon: Icon(Icons.home_rounded),
+              label: '홈',
+            ),
+            const BottomNavigationBarItem(
+              icon: Icon(Icons.list_alt_outlined),
+              activeIcon: Icon(Icons.list_alt_rounded),
+              label: '기록',
             ),
             BottomNavigationBarItem(
               icon: _Dot(

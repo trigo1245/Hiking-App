@@ -8,6 +8,14 @@ abstract final class AppRoutes {
   static const activities = '/activities';
   static const myInfo = '/me';
 
+  /// 쇼핑 탭, 상품 상세, 상품 리뷰 쓰기, 주문서(extra: OrderDraft), 주문 완료(extra: OrderDone), 주문 내역
+  static const shop = '/shop';
+  static String product(String productId) => '/product/$productId';
+  static String productReview(String productId) => '/product/$productId/review';
+  static const orderNew = '/new-order';
+  static const orderDone = '/order-done';
+  static const orders = '/me/orders';
+
   /// 동호회 탭, 동호회 상세·만들기·정보 수정·가입 신청
   static const clubs = '/clubs';
   static const clubCreate = '/new-club';
