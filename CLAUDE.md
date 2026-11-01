@@ -357,6 +357,7 @@ Storage 추가       : avatars(공개) {user_id}/{id}.jpg, activity-photos(비�
 - 글자 크기: 대형 수치 40 Bold / 제목 24 Bold / 소제목 18 SemiBold / 본문 16 Regular / 보조 13 Regular.
 - 하단 고정 버튼: 높이 56, 좌우 여백 20, primary 배경, 흰 글씨 17 SemiBold.
 - 터치 시 살짝 눌리는 효과(scale 0.97)와 가벼운 햅틱을 준다.
+- 닉네임#태그는 어디서나 `NicknameText`(`lib/core/widgets/nickname_text.dart`)로 보여 준다. `#태그`는 닉네임보다 연하게(textTertiary, 보통 굵기).
 - 다크 모드는 이후 단계. 단, 색은 반드시 토큰으로만 써서 나중에 추가하기 쉽게 한다.
 
 ---

@@ -10,6 +10,7 @@ import '../../../core/photos/photo_picker.dart';
 import '../../../core/photos/photo_spec.dart';
 import '../../../core/photos/photo_widgets.dart';
 import '../../../core/utils/clock.dart';
+import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/pressable.dart';
 import '../../../core/widgets/skeleton_box.dart';
@@ -73,8 +74,9 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
                       const SkeletonBox(width: 120, height: 32)
                     else
                       // 불러오기에 실패해도 화면은 쓸 수 있게 기본 닉네임을 보여 준다.
-                      Text(
-                        profile.value?.nickname ?? '등산객',
+                      NicknameText(
+                        nickname: profile.value?.nickname ?? '등산객',
+                        tag: profile.value?.nicknameTag,
                         style: AppTypography.title,
                       ),
                     const SizedBox(height: AppSpacing.xs),

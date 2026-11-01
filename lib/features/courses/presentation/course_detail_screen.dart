@@ -9,6 +9,7 @@ import '../../../core/design/design.dart';
 import '../../../core/map/map_tiles.dart';
 import '../../../core/map/route_preview_map.dart';
 import '../../../core/utils/format.dart';
+import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/metric_text.dart';
@@ -493,10 +494,10 @@ class _ConquerorCard extends StatelessWidget {
           else ...[
             UserAvatar(nickname: c.nickname, imageUrl: c.avatarUrl, size: 44),
             const SizedBox(height: AppSpacing.sm),
-            Text(
-              '${c.nickname}#${c.nicknameTag}',
+            NicknameText(
+              nickname: c.nickname,
+              tag: c.nicknameTag,
               style: AppTypography.body.copyWith(fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
             ),
             Text(formatScore(kind, c.value), style: AppTypography.subtitle),
           ],
@@ -601,12 +602,13 @@ class RankingRow extends StatelessWidget {
           UserAvatar(nickname: entry.nickname, imageUrl: entry.avatarUrl),
           const SizedBox(width: AppSpacing.md),
           Expanded(
-            child: Text(
-              entry.isMe ? '${entry.displayName} (나)' : entry.displayName,
+            child: NicknameText(
+              nickname: entry.nickname,
+              tag: entry.nicknameTag,
+              suffix: entry.isMe ? ' (나)' : null,
               style: AppTypography.body.copyWith(
                 fontWeight: entry.isMe ? FontWeight.w600 : FontWeight.w400,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
           Text(

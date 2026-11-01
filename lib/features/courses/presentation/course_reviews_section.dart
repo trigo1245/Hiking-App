@@ -9,6 +9,7 @@ import '../../../core/design/design.dart';
 import '../../../core/photos/photo_picker.dart';
 import '../../../core/photos/photo_spec.dart';
 import '../../../core/photos/photo_widgets.dart';
+import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/pressable.dart';
@@ -356,14 +357,13 @@ class ReviewTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      review.isMine
-                          ? '${review.displayName} (나)'
-                          : review.displayName,
+                    NicknameText(
+                      nickname: review.nickname,
+                      tag: review.nicknameTag,
+                      suffix: review.isMine ? ' (나)' : null,
                       style: AppTypography.body.copyWith(
                         fontWeight: FontWeight.w600,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
                     if (badge != null)
                       Text(

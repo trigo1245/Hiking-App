@@ -3,12 +3,16 @@ class Profile {
   const Profile({
     required this.id,
     required this.nickname,
+    this.nicknameTag,
     this.avatarUrl,
     this.hasCustomAvatar = false,
   });
 
   final String id;
   final String nickname;
+
+  /// 같은 닉네임을 구분하는 4자리 숫자 (예: 0421)
+  final String? nicknameTag;
 
   /// 프로필 사진 주소 (카카오·구글 사진 또는 직접 올린 사진)
   final String? avatarUrl;
@@ -19,6 +23,7 @@ class Profile {
   factory Profile.fromJson(Map<String, dynamic> json) => Profile(
     id: json['id'] as String,
     nickname: json['nickname'] as String,
+    nicknameTag: json['nickname_tag'] as String?,
     avatarUrl: json['avatar_url'] as String?,
     hasCustomAvatar: json['custom_avatar_path'] != null,
   );
