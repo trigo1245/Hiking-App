@@ -24,11 +24,11 @@
 -- ├ 승학산 노을회: 회원 10명
 -- ├ 해운대 주말반: 회원 8명. 10번 회원이 7~8월에 있다가 금정산 새벽산행으로 옮겼다
 -- │   (옮기기 전 완등은 해운대 주말반 실적에 남는다)
--- └ 부산대 등산 동아리: 김세민이 클럽장, 회원 5명, 가입 신청 2건 대기, 공지 2개, 일정 2개(다가오는 일정에 참석 투표)
+-- └ 동아대 등산 동아리: 김세민이 클럽장, 회원 5명, 가입 신청 2건 대기, 공지 2개, 일정 2개(다가오는 일정에 참석 투표)
 --   (김세민이 앱에서 직접 만든 동호회에 이미 소속돼 있으면 이 클럽은 건너뛴다)
 --
 -- 채팅 (7. 채팅)
--- ┌ 부산대 등산 동아리 채팅방: 회원 대화 6개, 그중 최근 2개는 김세민이 아직 안 읽음
+-- ┌ 동아대 등산 동아리 채팅방: 회원 대화 6개, 그중 최근 2개는 김세민이 아직 안 읽음
 -- ├ 받은 메시지 요청: 주말산꾼이 질문을 보냄 (수락·거절해 보기)
 -- └ 이어 가는 1:1 대화: 김세민 ↔ 등산스틱
 --
@@ -416,9 +416,9 @@ select pg_temp.demo_club(1), pg_temp.demo_user(10),
 
 -- 김세민이 클럽장인 동아리 (앱에서 만든 동호회에 이미 소속돼 있으면 건너뛴다)
 insert into public.clubs (id, name, bio, region, leader_id, is_demo, created_at)
-select pg_temp.demo_club(4), '부산대 등산 동아리',
-  '부산대 학생·졸업생 등산 모임이에요. 한 달에 두 번 금정산·승학산을 올라요.',
-  '부산 금정구 장전동', me.id, true, timestamptz '2026-06-15 09:00:00+09'
+select pg_temp.demo_club(4), '동아대 등산 동아리',
+  '동아대 학생·졸업생 등산 모임이에요. 한 달에 두 번 금정산·승학산을 올라요.',
+  '부산 사하구 하단동', me.id, true, timestamptz '2026-06-15 09:00:00+09'
 from demo_me me
 where not exists (
   select 1 from public.club_memberships m where m.user_id = me.id and m.left_at is null
@@ -469,7 +469,7 @@ where e.club_id = pg_temp.demo_club(4) and e.title = '11월 정기 산행';
 ------------------------------------------------------------
 -- 7. 채팅
 ------------------------------------------------------------
--- 부산대 등산 동아리 채팅방 (회원들 대화. 마지막 2개는 김세민이 아직 안 읽음)
+-- 동아대 등산 동아리 채팅방 (회원들 대화. 마지막 2개는 김세민이 아직 안 읽음)
 insert into public.chat_rooms (kind, club_id, is_demo)
 select 'club', c.id, true
 from public.clubs c
@@ -548,7 +548,7 @@ select pg_temp.demo_user(b.n), b.product_id,
   case when b.options is null then null
     else b.options[1 + b.n % array_length(b.options, 1)] end,
   1, b.price, b.price,
-  '시연용', '01000000000', '46241', '부산광역시 금정구 부산대학로 63번길 2 (시연용 주소)', null,
+  '시연용', '01000000000', '49315', '부산광역시 사하구 낙동대로550번길 37 (시연용 주소)', null,
   b.ordered_at, true
 from demo_buyer b;
 
@@ -596,7 +596,7 @@ insert into public.orders (
 )
 select me.id, p.id, '블루', 1, p.price, p.price,
   coalesce(pp.name, '김세민'), coalesce(pp.phone, '01000000000'), pp.postcode,
-  coalesce(pp.address, '부산광역시 금정구 부산대학로 63번길 2 (시연용 주소)'), pp.address_detail,
+  coalesce(pp.address, '부산광역시 사하구 낙동대로550번길 37 (시연용 주소)'), pp.address_detail,
   now() - interval '5 days', true
 from demo_me me
 join public.products p on p.id = 'dayhike-22'
