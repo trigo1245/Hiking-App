@@ -61,6 +61,7 @@ class SupabaseShopRemote implements ShopRemote {
         art: (r['art'] as int?) ?? 0,
         ratingAvg: (r['rating_avg'] as num?)?.toDouble(),
         reviewCount: (r['review_count'] as int?) ?? 0,
+        adRank: r['ad_rank'] as int?,
       ),
   ];
 
@@ -270,3 +271,13 @@ final myProductReviewProvider = FutureProvider.autoDispose
       (ref, id) => ref.watch(shopRemoteProvider).fetchMyReview(id),
       retry: (_, _) => null,
     );
+
+/// 광고 칸을 번갈아 채우는 순번. 쇼핑 탭에 들어올 때·카테고리를 바꿀 때·새로고침할 때 1씩 늘린다.
+class AdRotation extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void next() => state++;
+}
+
+final adRotationProvider = NotifierProvider<AdRotation, int>(AdRotation.new);

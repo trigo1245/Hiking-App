@@ -30,6 +30,7 @@ class Product {
     this.art = 0,
     this.ratingAvg,
     this.reviewCount = 0,
+    this.adRank,
   });
 
   final String id;
@@ -51,6 +52,10 @@ class Product {
   final double? ratingAvg;
   final int reviewCount;
 
+  /// 광고 순서 (작을수록 먼저). null이면 광고가 아니다.
+  final int? adRank;
+
+  bool get isAd => adRank != null;
   bool get hasOptions => options.isNotEmpty;
 }
 
@@ -199,4 +204,55 @@ String withObjectParticle(String word) {
   final isHangul = last >= 0xAC00 && last <= 0xD7A3;
   final hasFinal = isHangul && (last - 0xAC00) % 28 != 0;
   return '$word${hasFinal ? '을' : '를'}';
+}
+
+/// 쇼핑 화면 맨 위 광고 칸의 최대 개수
+const shopAdSlots = 2;
+
+/// 쇼핑 화면 배치: 맨 위 광고 칸과 그 아래 일반 목록.
+/// - [category]가 null이면 전체, 아니면 그 분류 상품만.
+/// - 광고 칸에는 지금 보이는 상품 중 광고 상품을 최대 [shopAdSlots]개 넣는다. 광고 상품이 더 많으면
+///   [rotation](쇼핑 탭에 들어올 때마다 1씩 늘어난다)만큼 광고 순서를 돌려 번갈아 보여 준다.
+/// - 광고 칸에 들어간 상품은 아래 목록에서 빼고, 들어가지 못한 광고 상품은 일반 상품처럼 목록에 둔다.
+class ShopLayout {
+  const ShopLayout({required this.ads, required this.items});
+
+  factory ShopLayout.of(
+    List<Product> products, {
+    ProductCategory? category,
+    int rotation = 0,
+  }) {
+    final visible = [
+      for (final p in products)
+        if (category == null || p.category == category) p,
+    ];
+    final eligible = [
+      for (final p in visible)
+        if (p.isAd) p,
+    ]..sort((a, b) => a.adRank!.compareTo(b.adRank!));
+    final List<Product> ads;
+    if (eligible.length <= shopAdSlots) {
+      ads = eligible;
+    } else {
+      final start = rotation % eligible.length;
+      ads = [
+        for (var i = 0; i < shopAdSlots; i++)
+          eligible[(start + i) % eligible.length],
+      ];
+    }
+    final shown = {for (final p in ads) p.id};
+    return ShopLayout(
+      ads: ads,
+      items: [
+        for (final p in visible)
+          if (!shown.contains(p.id)) p,
+      ],
+    );
+  }
+
+  /// 맨 위 광고 칸 (최대 [shopAdSlots]개)
+  final List<Product> ads;
+
+  /// 그 아래 일반 목록 (원래 순서)
+  final List<Product> items;
 }

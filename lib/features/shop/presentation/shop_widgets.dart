@@ -131,3 +131,21 @@ class RatingSummary extends StatelessWidget {
     );
   }
 }
+
+/// 광고 상품 표시 ("광고")
+class AdBadge extends StatelessWidget {
+  const AdBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+    decoration: BoxDecoration(
+      color: AppColors.textPrimary.withValues(alpha: 0.6),
+      borderRadius: BorderRadius.circular(AppSpacing.xs),
+    ),
+    child: Text(
+      '광고',
+      style: AppTypography.caption.copyWith(color: AppColors.onPrimary),
+    ),
+  );
+}

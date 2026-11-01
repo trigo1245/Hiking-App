@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/chat/data/chat_remote.dart';
+import '../features/shop/data/shop_remote.dart';
 import '../core/design/design.dart';
 import 'background_syncer.dart';
 
@@ -15,11 +16,16 @@ class AppShell extends ConsumerWidget {
   final StatefulNavigationShell navigationShell;
 
   // 탭 순서 (router.dart의 branches와 같다): 쇼핑 / 동호회 / 홈 / 기록 / 내 정보
+  static const _shopTab = 0;
   static const _clubsTab = 1;
   static const _myInfoTab = 4;
 
   void _onTap(WidgetRef ref, int index) {
     HapticFeedback.selectionClick();
+    // 쇼핑 탭에 다른 탭에서 들어오면 광고 칸을 다음 차례로 바꾼다.
+    if (index == _shopTab && navigationShell.currentIndex != _shopTab) {
+      ref.read(adRotationProvider.notifier).next();
+    }
     // 동호회·내 정보 탭으로 오면 다른 사람이 바꾼 것(가입 신청·메시지 등)을 바로 다시 받는다.
     refreshSharedData(
       ref,

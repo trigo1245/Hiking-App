@@ -81,6 +81,7 @@ class FakeShopRemote implements ShopRemote {
             : reviews[p.id]!.map((r) => r.rating).reduce((a, b) => a + b) /
                   reviews[p.id]!.length,
         reviewCount: reviews[p.id]?.length ?? 0,
+        adRank: p.adRank,
       ),
   ];
 
