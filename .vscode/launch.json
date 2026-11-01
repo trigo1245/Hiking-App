@@ -1,0 +1,14 @@
+{
+  // F5(실행·디버그)로 앱을 띄운다. env.json(Supabase URL·키)을 함께 넣는다.
+  // 실행 중에 파일을 저장하면 핫 리로드된다.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "hiking_app (debug)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "args": ["--dart-define-from-file=env.json"]
+    }
+  ]
+}
