@@ -366,7 +366,7 @@ create function pg_temp.demo_club(n integer)
 returns uuid
 language sql
 immutable
-as $ select ('c0000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid $;
+as $$ select ('c0000000-0000-4000-8000-' || lpad(n::text, 12, '0'))::uuid $$;
 
 insert into public.clubs (id, name, bio, region, leader_id, is_demo, created_at)
 values
