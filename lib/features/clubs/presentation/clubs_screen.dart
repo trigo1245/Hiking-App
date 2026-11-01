@@ -103,80 +103,86 @@ class _FindClubState extends ConsumerState<_FindClub> {
     return Column(
       children: [
         Expanded(
-          child: ListView(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.screenHorizontal,
-            ),
-            children: [
-              if (pending != null) ...[
-                Pressable(
-                  onPressed: () => context.push(AppRoutes.club(pending)),
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpacing.lg),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(AppRadius.input),
-                    ),
-                    child: Text(
-                      '${widget.status.pendingClubName ?? '동호회'}에 가입 신청했어요. '
-                      '클럽장이 승인하면 이곳에 내 클럽이 보여요',
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.primary,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ] else ...[
-                Text('아직 소속된 동호회가 없어요', style: AppTypography.subtitle),
-                const SizedBox(height: AppSpacing.xs),
-                Text(
-                  '함께 오르면 완등이 클럽 실적으로 쌓여요. 한 번에 한 동호회에만 가입할 수 있어요',
-                  style: AppTypography.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-              TextField(
-                style: AppTypography.body,
-                textInputAction: TextInputAction.search,
-                decoration: const InputDecoration(
-                  hintText: '동호회 이름·지역으로 찾기',
-                  prefixIcon: Icon(Icons.search_rounded),
-                ),
-                onSubmitted: (v) => setState(() => _query = v.trim()),
+          child: RefreshIndicator(
+            onRefresh: () async => ref
+              ..invalidate(myClubStatusProvider)
+              ..invalidate(clubListProvider),
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.symmetric(
+                horizontal: AppSpacing.screenHorizontal,
               ),
-              const SizedBox(height: AppSpacing.lg),
-              ...switch (clubs) {
-                AsyncValue(:final value?) when value.isEmpty => [
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: AppSpacing.xl,
-                    ),
-                    child: Text(
-                      _query.isEmpty
-                          ? '아직 동호회가 없어요. 첫 동호회를 만들어 보세요'
-                          : '찾는 동호회가 없어요',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.body.copyWith(
-                        color: AppColors.textTertiary,
+              children: [
+                if (pending != null) ...[
+                  Pressable(
+                    onPressed: () => context.push(AppRoutes.club(pending)),
+                    child: Container(
+                      padding: const EdgeInsets.all(AppSpacing.lg),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(AppRadius.input),
+                      ),
+                      child: Text(
+                        '${widget.status.pendingClubName ?? '동호회'}에 가입 신청했어요. '
+                        '클럽장이 승인하면 이곳에 내 클럽이 보여요',
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.primary,
+                        ),
                       ),
                     ),
                   ),
-                ],
-                AsyncValue(:final value?) => [
-                  for (final c in value) _ClubTile(club: c),
-                ],
-                AsyncValue(:final error?) => [
-                  _Retry(
-                    message: clubErrorMessage(error),
-                    onRetry: () => ref.invalidate(clubListProvider),
+                  const SizedBox(height: AppSpacing.lg),
+                ] else ...[
+                  Text('아직 소속된 동호회가 없어요', style: AppTypography.subtitle),
+                  const SizedBox(height: AppSpacing.xs),
+                  Text(
+                    '함께 오르면 완등이 클럽 실적으로 쌓여요. 한 번에 한 동호회에만 가입할 수 있어요',
+                    style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
                   ),
+                  const SizedBox(height: AppSpacing.lg),
                 ],
-                _ => [const SkeletonBox(width: double.infinity, height: 160)],
-              },
-            ],
+                TextField(
+                  style: AppTypography.body,
+                  textInputAction: TextInputAction.search,
+                  decoration: const InputDecoration(
+                    hintText: '동호회 이름·지역으로 찾기',
+                    prefixIcon: Icon(Icons.search_rounded),
+                  ),
+                  onSubmitted: (v) => setState(() => _query = v.trim()),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                ...switch (clubs) {
+                  AsyncValue(:final value?) when value.isEmpty => [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.xl,
+                      ),
+                      child: Text(
+                        _query.isEmpty
+                            ? '아직 동호회가 없어요. 첫 동호회를 만들어 보세요'
+                            : '찾는 동호회가 없어요',
+                        textAlign: TextAlign.center,
+                        style: AppTypography.body.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                    ),
+                  ],
+                  AsyncValue(:final value?) => [
+                    for (final c in value) _ClubTile(club: c),
+                  ],
+                  AsyncValue(:final error?) => [
+                    _Retry(
+                      message: clubErrorMessage(error),
+                      onRetry: () => ref.invalidate(clubListProvider),
+                    ),
+                  ],
+                  _ => [const SkeletonBox(width: double.infinity, height: 160)],
+                },
+              ],
+            ),
           ),
         ),
         Padding(
@@ -270,102 +276,114 @@ class _ClubRankingState extends ConsumerState<_ClubRanking> {
         ? Season.of(current.end.subtract(const Duration(days: 200)))
         : current;
     final ranking = ref.watch(clubRankingProvider(season.id));
-    return ListView(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.screenHorizontal,
-      ),
-      children: [
-        SegmentedTabs<bool>(
-          options: const {false: '이번 시즌', true: '지난 시즌'},
-          selected: _previous,
-          onChanged: (v) => setState(() => _previous = v),
+    return RefreshIndicator(
+      onRefresh: () async => ref.invalidate(clubRankingProvider(season.id)),
+      child: ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.screenHorizontal,
         ),
-        const SizedBox(height: AppSpacing.sm),
-        Text(
-          '${season.label} · 회원이 소속 기간에 완주한 횟수의 합',
-          style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
-        ),
-        const SizedBox(height: AppSpacing.lg),
-        ...switch (ranking) {
-          AsyncValue(:final value?) when value.isEmpty => [
-            Text(
-              '아직 동호회가 없어요',
-              textAlign: TextAlign.center,
-              style: AppTypography.body.copyWith(color: AppColors.textTertiary),
+        children: [
+          SegmentedTabs<bool>(
+            options: const {false: '이번 시즌', true: '지난 시즌'},
+            selected: _previous,
+            onChanged: (v) => setState(() => _previous = v),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          Text(
+            '${season.label} · 회원이 소속 기간에 완주한 횟수의 합',
+            style: AppTypography.caption.copyWith(
+              color: AppColors.textSecondary,
             ),
-          ],
-          AsyncValue(:final value?) => [
-            for (final r in value)
-              Pressable(
-                onPressed: () => context.push(AppRoutes.club(r.clubId)),
-                child: Container(
-                  margin: const EdgeInsets.only(bottom: AppSpacing.xs),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                    vertical: AppSpacing.sm,
-                  ),
-                  decoration: BoxDecoration(
-                    color: r.isMine
-                        ? AppColors.backgroundGrouped
-                        : AppColors.background,
-                    borderRadius: BorderRadius.circular(AppRadius.input),
-                  ),
-                  child: Row(
-                    children: [
-                      SizedBox(
-                        width: AppSpacing.xxxl,
-                        child: Text(
-                          '${r.rank}',
-                          style: AppTypography.subtitle.copyWith(
-                            color: r.rank <= 3
-                                ? AppColors.primary
-                                : AppColors.textTertiary,
-                          ),
-                        ),
-                      ),
-                      ClubAvatar(name: r.name, photoUrl: r.photoUrl, size: 40),
-                      const SizedBox(width: AppSpacing.md),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              r.isMine ? '${r.name} (내 클럽)' : r.name,
-                              style: AppTypography.body.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            Text(
-                              '회원 ${r.memberCount}명 · 활동 ${r.activeMembers}명',
-                              style: AppTypography.caption.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Text(
-                        '${r.completions}회',
-                        style: AppTypography.body.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          ...switch (ranking) {
+            AsyncValue(:final value?) when value.isEmpty => [
+              Text(
+                '아직 동호회가 없어요',
+                textAlign: TextAlign.center,
+                style: AppTypography.body.copyWith(
+                  color: AppColors.textTertiary,
                 ),
               ),
-          ],
-          AsyncValue(:final error?) => [
-            _Retry(
-              message: clubErrorMessage(error),
-              onRetry: () => ref.invalidate(clubRankingProvider(season.id)),
-            ),
-          ],
-          _ => [const SkeletonBox(width: double.infinity, height: 200)],
-        },
-        const SizedBox(height: AppSpacing.xxl),
-      ],
+            ],
+            AsyncValue(:final value?) => [
+              for (final r in value)
+                Pressable(
+                  onPressed: () => context.push(AppRoutes.club(r.clubId)),
+                  child: Container(
+                    margin: const EdgeInsets.only(bottom: AppSpacing.xs),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
+                    ),
+                    decoration: BoxDecoration(
+                      color: r.isMine
+                          ? AppColors.backgroundGrouped
+                          : AppColors.background,
+                      borderRadius: BorderRadius.circular(AppRadius.input),
+                    ),
+                    child: Row(
+                      children: [
+                        SizedBox(
+                          width: AppSpacing.xxxl,
+                          child: Text(
+                            '${r.rank}',
+                            style: AppTypography.subtitle.copyWith(
+                              color: r.rank <= 3
+                                  ? AppColors.primary
+                                  : AppColors.textTertiary,
+                            ),
+                          ),
+                        ),
+                        ClubAvatar(
+                          name: r.name,
+                          photoUrl: r.photoUrl,
+                          size: 40,
+                        ),
+                        const SizedBox(width: AppSpacing.md),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                r.isMine ? '${r.name} (내 클럽)' : r.name,
+                                style: AppTypography.body.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                '회원 ${r.memberCount}명 · 활동 ${r.activeMembers}명',
+                                style: AppTypography.caption.copyWith(
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${r.completions}회',
+                          style: AppTypography.body.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+            ],
+            AsyncValue(:final error?) => [
+              _Retry(
+                message: clubErrorMessage(error),
+                onRetry: () => ref.invalidate(clubRankingProvider(season.id)),
+              ),
+            ],
+            _ => [const SkeletonBox(width: double.infinity, height: 200)],
+          },
+          const SizedBox(height: AppSpacing.xxl),
+        ],
+      ),
     );
   }
 }

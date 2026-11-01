@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/design/design.dart';
@@ -7,13 +8,15 @@ import 'background_syncer.dart';
 
 /// 하단 탭(홈 / 기록 / 동호회 / 내 정보)을 가진 바깥 틀.
 /// 각 탭의 화면 상태는 [StatefulNavigationShell]이 따로 보관한다.
-class AppShell extends StatelessWidget {
+class AppShell extends ConsumerWidget {
   const AppShell({super.key, required this.navigationShell});
 
   final StatefulNavigationShell navigationShell;
 
-  void _onTap(int index) {
+  void _onTap(WidgetRef ref, int index) {
     HapticFeedback.selectionClick();
+    // 동호회·내 정보 탭으로 오면 다른 사람이 바꾼 것(가입 신청·메시지 등)을 바로 다시 받는다.
+    refreshSharedData(ref, clubs: index == 2, chats: index == 2 || index == 3);
     navigationShell.goBranch(
       index,
       // 이미 선택된 탭을 다시 누르면 그 탭의 첫 화면으로 돌아간다.
@@ -22,7 +25,7 @@ class AppShell extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       // 하단 탭 화면이 떠 있는 동안 기록 업로드·코스 받기를 한다.
       body: BackgroundSyncer(child: navigationShell),
@@ -32,7 +35,7 @@ class AppShell extends StatelessWidget {
         ),
         child: BottomNavigationBar(
           currentIndex: navigationShell.currentIndex,
-          onTap: _onTap,
+          onTap: (i) => _onTap(ref, i),
           items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home_outlined),

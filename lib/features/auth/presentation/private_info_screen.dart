@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
+import '../../../core/utils/error_message.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/pressable.dart';
@@ -47,7 +48,9 @@ Future<bool> requirePrivateInfo(
     if (context.mounted) {
       ScaffoldMessenger.of(context)
         ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(content: Text('인터넷에 연결된 뒤 다시 시도해 주세요')));
+        ..showSnackBar(
+          SnackBar(content: Text(errorMessage(e, failed: '개인정보를 확인하지 못했어요'))),
+        );
     }
     return false;
   }
@@ -173,7 +176,7 @@ class _PrivateInfoScreenState extends ConsumerState<PrivateInfoScreen> {
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('저장하지 못했어요. 인터넷 연결을 확인해 주세요')),
+          SnackBar(content: Text(errorMessage(e, failed: '저장하지 못했어요'))),
         );
       if (mounted) setState(() => _busy = false);
     }

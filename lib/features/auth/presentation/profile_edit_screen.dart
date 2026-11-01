@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/design/design.dart';
+import '../../../core/utils/error_message.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/skeleton_box.dart';
@@ -73,7 +74,7 @@ class _ProfileEditScreenState extends ConsumerState<ProfileEditScreen> {
       messenger
         ..hideCurrentSnackBar()
         ..showSnackBar(
-          const SnackBar(content: Text('저장하지 못했어요. 인터넷 연결을 확인해 주세요')),
+          SnackBar(content: Text(errorMessage(e, failed: '저장하지 못했어요'))),
         );
       if (mounted) setState(() => _busy = false);
     }

@@ -83,7 +83,7 @@ class _RecordingCompleteScreenState
     } else {
       // 바로 알 수 있는 새 배지가 없으면 업로드를 잠깐 기다려 완등·정복 배지만 확인한다.
       final later = await gainedLater()
-          .timeout(const Duration(seconds: 10))
+          .timeout(const Duration(seconds: 4))
           .catchError((_) => const <EarnedBadge>[]);
       if (later.isNotEmpty && mounted) {
         await showNewBadges(context, initial: later);

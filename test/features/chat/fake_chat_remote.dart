@@ -43,6 +43,7 @@ class FakeChatRemote implements ChatRemote {
   void receive(String roomId, String nickname, String tag, String body) {
     messages[roomId]!.add(_msg(nickname, tag, body));
     _watchers[roomId]?.add(null);
+    _mine.add(null);
   }
 
   ChatRoomInfo _with(ChatRoomInfo r, {DirectStatus? status}) => ChatRoomInfo(
@@ -181,4 +182,29 @@ class FakeChatRemote implements ChatRemote {
   @override
   Stream<void> watch(String roomId) =>
       (_watchers[roomId] ??= StreamController<void>.broadcast()).stream;
+
+  final _mine = StreamController<void>.broadcast();
+
+  @override
+  Stream<void> watchMine() => _mine.stream;
+
+  /// 다른 사람이 새 메시지 요청을 보낸 것처럼 방을 넣고 신호를 보낸다.
+  String receiveRequest(String nickname, String tag, String body) {
+    final id = addRoom(
+      (id) => ChatRoomInfo(
+        roomId: id,
+        kind: ChatKind.direct,
+        title: nickname,
+        otherNickname: nickname,
+        otherTag: tag,
+        status: DirectStatus.pending,
+        iAmRequester: false,
+        iAmLeader: false,
+        canSend: false,
+      ),
+      lines: [(nickname, tag, body, false)],
+    );
+    _mine.add(null);
+    return id;
+  }
 }

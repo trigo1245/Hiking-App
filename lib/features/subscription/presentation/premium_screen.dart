@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/design/design.dart';
+import '../../../core/utils/error_message.dart';
 import '../../../core/widgets/app_button.dart';
 import '../../../core/widgets/bottom_action_bar.dart';
 import '../../../core/widgets/confirm_sheet.dart';
@@ -43,7 +44,7 @@ class _PremiumScreenState extends ConsumerState<PremiumScreen> {
       if (mounted) _snack(done);
     } catch (e) {
       debugPrint('[premium] $e');
-      if (mounted) _snack('처리하지 못했어요. 인터넷 연결을 확인해 주세요');
+      if (mounted) _snack(errorMessage(e));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

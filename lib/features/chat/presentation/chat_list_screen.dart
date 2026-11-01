@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
+import '../../../core/utils/error_message.dart';
 import '../../../core/widgets/empty_view.dart';
 import '../../../core/widgets/nickname_text.dart';
 import '../../../core/widgets/pressable.dart';
@@ -41,7 +42,7 @@ class ChatListScreen extends ConsumerWidget {
                 ),
                 const SizedBox(height: AppSpacing.xs),
                 Text(
-                  '수락하기 전에는 상대가 내가 읽었는지 알 수 없어요',
+                  '수락하면 대화할 수 있어요. 거절하면 이 사람은 더 보낼 수 없어요',
                   style: AppTypography.caption.copyWith(
                     color: AppColors.textSecondary,
                   ),
@@ -60,9 +61,8 @@ class ChatListScreen extends ConsumerWidget {
           child: TextButton(
             onPressed: () => ref.invalidate(directChatsProvider),
             child: Text(
-              error.toString().contains('Socket')
-                  ? '인터넷에 연결된 뒤 다시 시도해 주세요'
-                  : '메시지를 불러오지 못했어요. 다시 시도',
+              '${errorMessage(error, failed: '메시지를 불러오지 못했어요')}\n눌러서 다시 시도',
+              textAlign: TextAlign.center,
             ),
           ),
         ),

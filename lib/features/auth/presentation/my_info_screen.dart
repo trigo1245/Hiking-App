@@ -23,7 +23,10 @@ import 'auth_feedback.dart';
 import 'auth_providers.dart';
 import '../../chat/data/chat_remote.dart';
 
-/// 내 정보 탭: 프로필(누르면 편집), 업적, 프리미엄, 개인정보 관리, 로그아웃.
+/// 맨 아래에 보여 주는 앱 버전 (pubspec.yaml의 version과 맞춘다)
+const appVersionLabel = '0.1.0';
+
+/// 내 정보 탭: 프로필(누르면 편집), 메시지, 업적, 프리미엄, 개인정보 관리, 로그아웃.
 class MyInfoScreen extends ConsumerStatefulWidget {
   const MyInfoScreen({super.key});
 
@@ -33,6 +36,18 @@ class MyInfoScreen extends ConsumerStatefulWidget {
 
 class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
   bool _busy = false;
+  int _versionTaps = 0;
+  bool _devUnlocked = false;
+
+  void _onVersionTap() {
+    if (_devUnlocked || kDebugMode) return;
+    _versionTaps++;
+    if (_versionTaps < 5) return;
+    setState(() => _devUnlocked = true);
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(const SnackBar(content: Text('개발용 메뉴를 열었어요')));
+  }
 
   Future<void> _signOut() async {
     if (_busy) return;
@@ -102,16 +117,17 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
             ),
           ),
           const SizedBox(height: AppSpacing.xxl),
+          const _MessagesCard(),
+          const SizedBox(height: AppSpacing.md),
           const AchievementsCard(),
           const SizedBox(height: AppSpacing.md),
           const _PremiumCard(),
           const SizedBox(height: AppSpacing.md),
-          const _MessagesCard(),
-          const SizedBox(height: AppSpacing.md),
           const _PrivateInfoCard(),
           const SizedBox(height: AppSpacing.xxl),
-          // 시연·테스트용 기능은 개발 빌드에서만 보인다.
-          if (kDebugMode) ...[
+          // 시연·테스트용 기능: 개발 빌드에서는 늘 보이고, 시연용 릴리스 빌드에서는
+          // 맨 아래 버전 글자를 5번 누르면 보인다.
+          if (kDebugMode || _devUnlocked) ...[
             const _DemoDataButton(),
             const SizedBox(height: AppSpacing.lg),
           ],
@@ -122,6 +138,19 @@ class _MyInfoScreenState extends ConsumerState<MyInfoScreen> {
               child: Text(
                 '로그아웃',
                 style: AppTypography.body.copyWith(
+                  color: AppColors.textTertiary,
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _onVersionTap,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Text(
+                '버전 $appVersionLabel',
+                style: AppTypography.caption.copyWith(
                   color: AppColors.textTertiary,
                 ),
               ),
@@ -355,7 +384,7 @@ class _DemoDataButtonState extends ConsumerState<_DemoDataButton> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        const Text('개발용 (개발 빌드에서만 보여요)', style: AppTypography.caption),
+        const Text('개발용 (시연 준비용)', style: AppTypography.caption),
         const SizedBox(height: AppSpacing.sm),
         AppButton(
           label: _busy ? '만드는 중…' : '시연용 기록 다시 만들기 (8개)',

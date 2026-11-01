@@ -4,6 +4,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/supabase/supabase_setup.dart';
+import '../../../core/utils/error_message.dart';
 import '../../courses/domain/competition.dart';
 import '../domain/club.dart';
 
@@ -60,13 +61,8 @@ abstract interface class ClubRemote {
   Future<List<ClubRankingEntry>> fetchRanking(Season season);
 }
 
-/// 서버가 거절한 이유(한국어 문구)가 있으면 그대로, 아니면 연결 안내.
-String clubErrorMessage(Object error) {
-  if (error is PostgrestException && RegExp(r'[가-힣]').hasMatch(error.message)) {
-    return error.message;
-  }
-  return '처리하지 못했어요. 인터넷 연결을 확인해 주세요';
-}
+/// 서버가 거절한 이유(한국어 문구)가 있으면 그대로, 아니면 원인(연결·서버)에 맞는 안내.
+String clubErrorMessage(Object error) => errorMessage(error);
 
 class SupabaseClubRemote implements ClubRemote {
   SupabaseClubRemote(this._client);

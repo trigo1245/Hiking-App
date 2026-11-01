@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../app/routes.dart';
 import '../../../core/design/design.dart';
+import '../../../core/utils/error_message.dart';
 import '../../../core/photos/photo_picker.dart';
 import '../../../core/photos/photo_spec.dart';
 import '../../../core/photos/photo_widgets.dart';
@@ -523,7 +524,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
       if (mounted) context.pop();
     } catch (e) {
       debugPrint('[review] $e');
-      _snack('저장하지 못했어요. 인터넷 연결을 확인해 주세요');
+      _snack(errorMessage(e, failed: '저장하지 못했어요'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -537,7 +538,7 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
       if (mounted) context.pop();
     } catch (e) {
       debugPrint('[review] $e');
-      _snack('지우지 못했어요. 인터넷 연결을 확인해 주세요');
+      _snack(errorMessage(e, failed: '지우지 못했어요'));
     } finally {
       if (mounted) setState(() => _busy = false);
     }

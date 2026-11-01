@@ -38,6 +38,10 @@ abstract interface class ChatRemote {
 
   /// 이 방에 새 메시지·상태 변화가 있으면 신호를 보낸다 (내용은 [fetchMessages]로 다시 받는다).
   Stream<void> watch(String roomId);
+
+  /// 내가 읽을 수 있는 모든 방(동호회·1:1)에 새 메시지·요청·상태 변화가 있으면 신호를 보낸다.
+  /// 안 읽은 수·메시지 목록을 다시 받는 데 쓴다. 어떤 방이 오는지는 서버 RLS가 정한다.
+  Stream<void> watchMine();
 }
 
 class SupabaseChatRemote implements ChatRemote {
@@ -220,6 +224,31 @@ class SupabaseChatRemote implements ChatRemote {
             column: 'id',
             value: roomId,
           ),
+          callback: ping,
+        )
+        .subscribe();
+    return controller.stream;
+  }
+
+  @override
+  Stream<void> watchMine() {
+    late final RealtimeChannel channel;
+    final controller = StreamController<void>(
+      onCancel: () => _client.removeChannel(channel),
+    );
+    void ping(PostgresChangePayload _) => controller.add(null);
+    channel = _client
+        .channel('chat-mine')
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'chat_messages',
+          callback: ping,
+        )
+        .onPostgresChanges(
+          event: PostgresChangeEvent.all,
+          schema: 'public',
+          table: 'chat_rooms',
           callback: ping,
         )
         .subscribe();

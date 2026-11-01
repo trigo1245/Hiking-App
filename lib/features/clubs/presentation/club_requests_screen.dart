@@ -38,72 +38,77 @@ class ClubRequestsScreen extends ConsumerWidget {
         AsyncValue(:final value?) when value.isEmpty => const EmptyView(
           message: '기다리는 가입 신청이 없어요',
         ),
-        AsyncValue(:final value?) => ListView(
-          padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
-          children: [
-            for (final r in value)
-              Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.lg),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Pressable(
-                        onPressed: () => showPublicProfile(
-                          context,
-                          nickname: r.nickname,
-                          tag: r.nicknameTag,
-                          avatarUrl: r.avatarUrl,
-                        ),
-                        child: Row(
-                          children: [
-                            UserAvatar(
-                              nickname: r.nickname,
-                              imageUrl: r.avatarUrl,
-                            ),
-                            const SizedBox(width: AppSpacing.md),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  NicknameText(
-                                    nickname: r.nickname,
-                                    tag: r.nicknameTag,
-                                    style: AppTypography.body.copyWith(
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                  Text(
-                                    [
-                                      if ((r.region ?? '').isNotEmpty)
-                                        r.region!,
-                                      '${formatShortDate(r.requestedAt)} 신청',
-                                    ].join(' · '),
-                                    style: AppTypography.caption.copyWith(
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                                ],
+        AsyncValue(:final value?) => RefreshIndicator(
+          onRefresh: () async =>
+              ref.invalidate(clubJoinRequestsProvider(clubId)),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
+            children: [
+              for (final r in value)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.lg),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Pressable(
+                          onPressed: () => showPublicProfile(
+                            context,
+                            nickname: r.nickname,
+                            tag: r.nicknameTag,
+                            avatarUrl: r.avatarUrl,
+                          ),
+                          child: Row(
+                            children: [
+                              UserAvatar(
+                                nickname: r.nickname,
+                                imageUrl: r.avatarUrl,
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    NicknameText(
+                                      nickname: r.nickname,
+                                      tag: r.nicknameTag,
+                                      style: AppTypography.body.copyWith(
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    Text(
+                                      [
+                                        if ((r.region ?? '').isNotEmpty)
+                                          r.region!,
+                                        '${formatShortDate(r.requestedAt)} 신청',
+                                      ].join(' · '),
+                                      style: AppTypography.caption.copyWith(
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    TextButton(
-                      onPressed: () => decide(r.id, false),
-                      child: Text(
-                        '거절',
-                        style: TextStyle(color: AppColors.textSecondary),
+                      TextButton(
+                        onPressed: () => decide(r.id, false),
+                        child: Text(
+                          '거절',
+                          style: TextStyle(color: AppColors.textSecondary),
+                        ),
                       ),
-                    ),
-                    FilledButton(
-                      onPressed: () => decide(r.id, true),
-                      child: const Text('승인'),
-                    ),
-                  ],
+                      FilledButton(
+                        onPressed: () => decide(r.id, true),
+                        child: const Text('승인'),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-          ],
+            ],
+          ),
         ),
         AsyncValue(:final error?) => EmptyView(
           message: clubErrorMessage(error),
