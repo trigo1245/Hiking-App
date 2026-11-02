@@ -25,6 +25,13 @@ class FakeActivityRemote implements ActivityRemote {
   }
 
   @override
+  Future<void> updateTitle(String activityId, String title) async {
+    if (failWith case final error?) throw error;
+    final row = rows[activityId];
+    if (row != null) rows[activityId] = {...row, 'title': title};
+  }
+
+  @override
   Future<void> recordCompletions(
     String activityId,
     List<CourseCompletion> completions,

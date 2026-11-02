@@ -17,6 +17,9 @@ abstract interface class ActivityRemote {
   /// activities 테이블에 요약을 넣는다. 같은 id가 있으면 덮어쓴다(upsert).
   Future<void> upsertActivity(Map<String, Object?> row);
 
+  /// 이미 올라간 기록의 제목만 바꾼다. 서버에 없는 기록이면 아무 일도 하지 않는다.
+  Future<void> updateTitle(String activityId, String title);
+
   /// 앱이 판정한 코스 완주 결과를 저장한다. 같은 기록의 이전 결과는 바뀐다.
   Future<void> recordCompletions(
     String activityId,
@@ -63,6 +66,14 @@ class SupabaseActivityRemote implements ActivityRemote {
   @override
   Future<void> upsertActivity(Map<String, Object?> row) async {
     await _client.from('activities').upsert(row);
+  }
+
+  @override
+  Future<void> updateTitle(String activityId, String title) async {
+    await _client
+        .from('activities')
+        .update({'title': title})
+        .eq('id', activityId);
   }
 
   @override

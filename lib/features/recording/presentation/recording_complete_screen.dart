@@ -202,7 +202,7 @@ class _RecordingCompleteScreenState
                 controller: _title,
                 style: AppTypography.body,
                 textInputAction: TextInputAction.done,
-                maxLength: 40,
+                maxLength: activityTitleMaxLength,
                 decoration: const InputDecoration(counterText: ''),
               ),
             ],

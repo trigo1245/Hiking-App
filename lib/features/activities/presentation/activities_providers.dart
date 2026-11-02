@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../auth/presentation/auth_providers.dart';
+import '../../recording/data/recording_repository.dart';
 import '../data/activities_repository.dart';
 import '../data/activity_downloader.dart';
 import '../data/activity_remote.dart';
@@ -35,6 +36,27 @@ class UploadActions {
     final userId = _userId;
     if (userId == null) return;
     await _ref.read(activityUploaderProvider).uploadPending(userId: userId);
+  }
+
+  /// 기록 제목을 바꾼다. 기기에 먼저 저장하고, 이미 올라간 기록이면 서버 제목도 바꾼다.
+  /// 서버에 바꾸지 못하면(인터넷 없음 등) "업로드 대기"로 돌려, 다음 업로드 때 새 제목이 올라가게 한다.
+  /// 서버까지 바꿨으면 true.
+  Future<bool> rename(String activityId, String title) async {
+    final recording = _ref.read(recordingRepositoryProvider);
+    await recording.updateTitle(activityId, title);
+    final userId = _userId;
+    if (userId == null) return false;
+    final summary = await recording.loadSummary(activityId);
+    if (summary.uploadStatus != UploadStatus.done) return false;
+    try {
+      await _ref.read(activityRemoteProvider).updateTitle(activityId, title);
+      return true;
+    } catch (_) {
+      await _ref
+          .read(activitiesRepositoryProvider)
+          .setUploadStatus(activityId, UploadStatus.pending, userId: userId);
+      return false;
+    }
   }
 
   /// 기록을 서버에서 지운다. 실패하면(인터넷 없음 등) 오류를 던지고, 이때는 기기에서도 지우지 않는다.

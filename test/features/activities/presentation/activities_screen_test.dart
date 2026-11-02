@@ -1,4 +1,4 @@
-import 'dart:ui';
+import 'package:flutter/material.dart';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hiking_app/core/database/app_database.dart';
@@ -200,7 +200,7 @@ void main() {
     expect(find.text('업로드 완료'), findsOneWidget);
   });
 
-  group('기록 지우기', () {
+  group('기록 상세 (올라간 기록): 지우기·제목 바꾸기', () {
     /// 올라간 기록 하나를 만들고 그 기록 상세를 연다.
     Future<(FakeActivityRemote, String)> openUploadedDetail(
       WidgetTester tester,
@@ -278,6 +278,41 @@ void main() {
       // 기록 상세에 그대로 있다.
       expect(find.text('이 기록 지우기'), findsOneWidget);
       expect(remote.rows, hasLength(1));
+    });
+
+    testWidgets('제목 바꾸기: 기기와 서버의 제목이 함께 바뀐다', (tester) async {
+      final (remote, id) = await openUploadedDetail(tester);
+
+      await tester.tap(find.byTooltip('제목 바꾸기'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '승학산 노을 산행');
+      await tester.tap(find.text('저장하기'));
+      await settleUploads(tester);
+
+      expect(find.text('제목을 바꿨어요'), findsOneWidget);
+      expect(find.text('승학산 노을 산행'), findsWidgets); // 상단 제목
+      expect(remote.rows[id]!['title'], '승학산 노을 산행');
+    });
+
+    testWidgets('제목 바꾸기: 인터넷이 없으면 기기에만 바꾸고, 다음 업로드 때 서버에 올린다', (tester) async {
+      final (remote, id) = await openUploadedDetail(tester);
+      remote.failWith = Exception('Failed host lookup');
+
+      await tester.tap(find.byTooltip('제목 바꾸기'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), '승학산 노을 산행');
+      await tester.tap(find.text('저장하기'));
+      await settleUploads(tester);
+
+      expect(find.text('제목을 바꿨어요. 인터넷에 연결되면 서버에도 반영할게요'), findsOneWidget);
+      expect(remote.rows[id]!['title'], '금정산 고당봉');
+      expect(find.text('인터넷에 연결되면 올릴게요'), findsOneWidget);
+
+      // 인터넷이 돌아와 다시 올리면 새 제목이 서버에 들어간다.
+      remote.failWith = null;
+      await tester.tap(find.text('다시 올리기'));
+      await settleUploads(tester);
+      expect(remote.rows[id]!['title'], '승학산 노을 산행');
     });
   });
 

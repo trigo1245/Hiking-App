@@ -49,13 +49,59 @@ class ActivityDetailScreen extends ConsumerWidget {
         );
   }
 
+  /// 제목 바꾸기: 시트에서 새 제목을 받아 기기·서버에 저장한다.
+  Future<void> _rename(
+    BuildContext context,
+    WidgetRef ref,
+    ActivitySummary summary,
+  ) async {
+    final title = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: AppColors.background,
+      builder: (_) => _RenameSheet(initial: summary.title),
+    );
+    if (title == null || title == summary.title || !context.mounted) return;
+    final messenger = ScaffoldMessenger.of(context);
+    final synced = await ref
+        .read(uploadActionsProvider)
+        .rename(summary.id, title);
+    ref.invalidate(activityDetailProvider(activityId));
+    messenger
+      ..hideCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            synced || summary.uploadStatus != UploadStatus.done
+                ? '제목을 바꿨어요'
+                : '제목을 바꿨어요. 인터넷에 연결되면 서버에도 반영할게요',
+          ),
+        ),
+      );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final detail = ref.watch(activityDetailProvider(activityId));
     final premium = ref.watch(isPremiumProvider);
 
     return Scaffold(
-      appBar: AppBar(title: Text(detail.value?.summary.title ?? '기록')),
+      appBar: AppBar(
+        title: Text(detail.value?.summary.title ?? '기록'),
+        actions: [
+          if (detail.value case final value?)
+            Padding(
+              padding: const EdgeInsets.only(
+                right: AppSpacing.screenHorizontal - AppSpacing.md,
+              ),
+              child: IconButton(
+                tooltip: '제목 바꾸기',
+                icon: const Icon(Icons.edit_outlined),
+                onPressed: () => _rename(context, ref, value.summary),
+              ),
+            ),
+        ],
+      ),
       body: switch (detail) {
         AsyncData(:final value) => ListView(
           padding: const EdgeInsets.fromLTRB(
@@ -746,4 +792,65 @@ class _DeleteRowState extends ConsumerState<_DeleteRow> {
       ),
     );
   }
+}
+
+/// 기록 제목 바꾸기 시트. 입력칸 컨트롤러는 시트가 완전히 사라질 때 지운다.
+class _RenameSheet extends StatefulWidget {
+  const _RenameSheet({required this.initial});
+
+  final String initial;
+
+  @override
+  State<_RenameSheet> createState() => _RenameSheetState();
+}
+
+class _RenameSheetState extends State<_RenameSheet> {
+  late final _controller = TextEditingController(text: widget.initial);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final title = _controller.text.trim();
+    if (title.isEmpty) return;
+    Navigator.of(context).pop(title);
+  }
+
+  @override
+  Widget build(BuildContext context) => Padding(
+    padding: EdgeInsets.fromLTRB(
+      AppSpacing.screenHorizontal,
+      AppSpacing.xl,
+      AppSpacing.screenHorizontal,
+      MediaQuery.viewInsetsOf(context).bottom + AppSpacing.xl,
+    ),
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const Text('제목 바꾸기', style: AppTypography.subtitle),
+        const SizedBox(height: AppSpacing.md),
+        TextField(
+          controller: _controller,
+          autofocus: true,
+          maxLength: activityTitleMaxLength,
+          textInputAction: TextInputAction.done,
+          onSubmitted: (_) => _submit(),
+          style: AppTypography.body,
+          decoration: const InputDecoration(hintText: '예: 승학산 노을 산행'),
+        ),
+        const SizedBox(height: AppSpacing.md),
+        ValueListenableBuilder(
+          valueListenable: _controller,
+          builder: (context, value, _) => AppButton(
+            label: '저장하기',
+            onPressed: value.text.trim().isEmpty ? null : _submit,
+          ),
+        ),
+      ],
+    ),
+  );
 }

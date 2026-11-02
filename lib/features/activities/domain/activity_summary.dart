@@ -67,3 +67,6 @@ class MonthSummary {
   final double distanceM;
   final Duration elapsed;
 }
+
+/// 기록 제목 최대 글자 수 (기록 완료 화면·제목 바꾸기)
+const activityTitleMaxLength = 40;
