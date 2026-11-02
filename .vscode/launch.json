@@ -9,6 +9,15 @@
       "type": "dart",
       "program": "lib/main.dart",
       "args": ["--dart-define-from-file=env.json"]
+    },
+    {
+      // 시연용: 릴리스 빌드라 빠르다. 핫 리로드·리스타트는 안 되고, 시연용 메뉴는 버전 글자를 5번 눌러 연다.
+      "name": "hiking_app (시연용 release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "args": ["--dart-define-from-file=env.json"]
     }
   ]
 }
